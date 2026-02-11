@@ -15,6 +15,7 @@ Issue breakdown:
 - 0.3.x DTU completion report: [`docs/roadmap/0.3-dtu-validation-platform-completion.md`](./docs/roadmap/0.3-dtu-validation-platform-completion.md)
 - 0.3.x provider adapter completion report: [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
 - 0.3.x self-hosted dogfooding completion report: [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
+- 0.3.x judge/retry/governance completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
 
 ## Status Snapshot (2026-02-11)
 | Item | Milestone | Status | Notes |
@@ -25,9 +26,9 @@ Issue breakdown:
 | `RMD-030` | 0.3.x | Done | DTU validation platform completed; see completion report. |
 | `RMD-031` / `PKG-031A` | 0.3.x | Done | Batch 1-3 complete: adapter boundary + provenance, implemented stream events, restored green baseline, and added deterministic two-provider parity evidence; see completion report. |
 | `RMD-035` | 0.3.x | Done | Self-hosted factory dogfooding implemented with deterministic pass/fail lock enforcement report and tests; see completion report. |
-| `RMD-032` | 0.3.x | Planned | Judge/evaluator maturity and score explainability. |
-| `RMD-033` | 0.3.x | Planned | Targeted retry and failure taxonomy hardening. |
-| `RMD-034` | 0.3.x | Planned | Promotion and governance profile enforcement. |
+| `RMD-032` | 0.3.x | Done | Judge rubric maturity finalized with deterministic explainability evidence and regression coverage; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
+| `RMD-033` | 0.3.x | Done | Targeted retry/failure taxonomy hardening finalized with explicit class routing coverage and deterministic tests; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
+| `RMD-034` | 0.3.x | Done | Promotion and governance profile enforcement finalized via lint overlays and golden/regression evidence; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
 
 Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
@@ -61,14 +62,17 @@ Active execution artifacts:
 - `RMD-035` batch 1 plan: [`docs/plans/rmd-035-self-host-dogfooding-batch-1-plan.md`](./docs/plans/rmd-035-self-host-dogfooding-batch-1-plan.md)
 - `RMD-035` batch 1 review: [`docs/reviews/rmd-035-self-host-dogfooding-batch-1-review.md`](./docs/reviews/rmd-035-self-host-dogfooding-batch-1-review.md)
 - `RMD-035` batch 1 solution: [`docs/solutions/self-hosted-dogfood-loop-with-lock-enforcement.md`](./docs/solutions/self-hosted-dogfood-loop-with-lock-enforcement.md)
+- `RMD-032/033/034` finalization batch plan: [`docs/plans/rmd-032-034-finalization-batch-1-plan.md`](./docs/plans/rmd-032-034-finalization-batch-1-plan.md)
+- `RMD-032/033/034` finalization batch review: [`docs/reviews/rmd-032-034-finalization-batch-1-review.md`](./docs/reviews/rmd-032-034-finalization-batch-1-review.md)
+- `RMD-032/033/034` finalization batch solution: [`docs/solutions/judge-retry-governance-finalization-closeout.md`](./docs/solutions/judge-retry-governance-finalization-closeout.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
 
 Execution order (do not reorder unless blocked):
-1. `RMD-032`: Judge/evaluator maturity
-2. `RMD-033`: Targeted retry and failure taxonomy hardening
-3. `RMD-034`: Promotion and governance profiles
+1. `BK-001`: Replay/provenance UX improvements
+2. `BK-002`: Confidence-based human escalation tuning
+3. `BK-003`: Weekly compound metrics helper command
 
 ### PKG-020C: Attractor spec conformance hardening (0.2.x, completed)
 - Status:
@@ -162,6 +166,12 @@ Execution order (do not reorder unless blocked):
 - Completion artifact:
   - [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
 
+### RMD-032/RMD-033/RMD-034: Judge, Retry, and Governance (0.3.x, completed)
+- Status:
+  - Closed on 2026-02-11 with judge explainability, targeted retry taxonomy hardening, and promotion/profile governance enforcement evidence.
+- Completion artifact:
+  - [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
+
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
   - Create a plan artifact from `docs/templates/plan.md`.
@@ -198,6 +208,11 @@ Execution order (do not reorder unless blocked):
   - Produces reproducible report artifact with `resolved` pass and `reopen` fail expectations.
   - Added automated regression coverage for report schema and scenario outcomes.
   - Completion artifact: [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
+- [x] RMD-032 / RMD-033 / RMD-034: Judge maturity, targeted retry taxonomy, and promotion governance
+  - Hardened judge explainability evidence (`score_threshold`, rubric metadata, weights) in deterministic tests.
+  - Expanded targeted retry taxonomy regression coverage for `quality_gap` and `spec_mismatch` map routing.
+  - Converged promotion/profile governance status and evidence across lint + golden + roadmap artifacts.
+  - Completion artifact: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
 
 ## Roadmap Board (Single Source of Truth)
 ### Now
@@ -207,13 +222,14 @@ Execution order (do not reorder unless blocked):
 | `RMD-021` | Git worktree compatibility guarantees | Done | Parity check PASS captured; strict CI mode retained — see completion report. |
 | `RMD-022` | Compound loop enforcement in contribution flow | Done | Compliance gate + weekly reporting finalized — see completion report. |
 | `RMD-035` | Self-hosted factory dogfooding | Done | Closed via deterministic self-host loop command and lock enforcement report — see completion report. |
+| `RMD-032` | Judge/evaluator maturity | Done | Closed via judge rubric runtime + explainability evidence and regression coverage — see completion report. |
+| `RMD-033` | Targeted retry and failure taxonomy hardening | Done | Closed via explicit class routing + retry map regression coverage — see completion report. |
+| `RMD-034` | Promotion and governance profiles | Done | Closed via promotion/profile lint overlays and golden coverage — see completion report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| `RMD-032` | Judge/evaluator maturity | Planned | Rubric routing and explainability artifacts are deterministic and test-covered. |
-| `RMD-033` | Targeted retry and failure taxonomy hardening | Planned | Failure classes and retry routing are explicit, measurable, and regression-covered. |
-| `RMD-034` | Promotion and governance profiles | Planned | Promotion-stage policy checks are documented and enforced in CI. |
+| `—` | No active planned milestone items | `N/A` | Next execution focus is backlog grooming and selection. |
 
 ### Later
 | ID | Item | Status | Notes |

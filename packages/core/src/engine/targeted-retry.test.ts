@@ -112,6 +112,90 @@ describe('ExecutionEngine targeted retry routing', () => {
     expect(outcome.status).toBe('SUCCESS');
     expect(executed).toContain('repair');
   });
+
+  it('classifies quality gaps from failure_reason for targeted retries', async () => {
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-targeted-retry-quality-'));
+    const workNode = makeNode('work', 'mock', {
+      retry_policy: 'targeted',
+      retry_target_quality_gap: 'improve',
+    });
+    const improveNode = makeNode('improve', 'mock');
+    const graph = makeGraph(
+      [makeNode('start', 'start', {}, 'Mdiamond'), workNode, improveNode, makeNode('exit', 'exit', {}, 'Msquare')],
+      [
+        { from: 'start', to: 'work', weight: 0, attributes: {} },
+        { from: 'work', to: 'exit', weight: 0, attributes: {} },
+        { from: 'work', to: 'improve', weight: 0, attributes: {} },
+        { from: 'improve', to: 'exit', weight: 0, attributes: {} },
+      ]
+    );
+
+    const executed: string[] = [];
+    const handler = new RoutingMockHandler(
+      {
+        work: {
+          status: 'FAIL',
+          failure_reason: 'lint failed on changed files',
+          context_updates: {},
+        },
+        improve: { status: 'SUCCESS', context_updates: {} },
+      },
+      executed
+    );
+
+    const config: RunConfig = { logs_root: logsRoot };
+    const engine = new ExecutionEngine(graph, config);
+    const registry = engine.getHandlerRegistry();
+    registry.register('start', new StartHandler());
+    registry.register('mock', handler);
+    registry.register('exit', new ExitHandler());
+
+    const outcome = await engine.run();
+    expect(outcome.status).toBe('SUCCESS');
+    expect(executed).toContain('improve');
+  });
+
+  it('routes using retry_target_map for spec mismatches', async () => {
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-targeted-retry-spec-'));
+    const workNode = makeNode('work', 'mock', {
+      retry_policy: 'targeted',
+      retry_target_map: JSON.stringify({ spec_mismatch: 'align' }),
+    });
+    const alignNode = makeNode('align', 'mock');
+    const graph = makeGraph(
+      [makeNode('start', 'start', {}, 'Mdiamond'), workNode, alignNode, makeNode('exit', 'exit', {}, 'Msquare')],
+      [
+        { from: 'start', to: 'work', weight: 0, attributes: {} },
+        { from: 'work', to: 'exit', weight: 0, attributes: {} },
+        { from: 'work', to: 'align', weight: 0, attributes: {} },
+        { from: 'align', to: 'exit', weight: 0, attributes: {} },
+      ]
+    );
+
+    const executed: string[] = [];
+    const handler = new RoutingMockHandler(
+      {
+        work: {
+          status: 'FAIL',
+          failure_reason: 'schema mismatch in output contract',
+          context_updates: {},
+        },
+        align: { status: 'SUCCESS', context_updates: {} },
+      },
+      executed
+    );
+
+    const config: RunConfig = { logs_root: logsRoot };
+    const engine = new ExecutionEngine(graph, config);
+    const registry = engine.getHandlerRegistry();
+    registry.register('start', new StartHandler());
+    registry.register('mock', handler);
+    registry.register('exit', new ExitHandler());
+
+    const outcome = await engine.run();
+    expect(outcome.status).toBe('SUCCESS');
+    expect(executed).toContain('align');
+  });
 });
 
 function makeNode(

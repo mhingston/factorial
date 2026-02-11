@@ -591,6 +591,7 @@ describe('JudgeRubricHandler', () => {
         cli_command: `printf '{"overall_score":0.92,"sub_scores":{"accuracy":0.9},"rationale":"solid"}'`,
         judge_rubric_path: rubricPath,
         score_threshold: 0.85,
+        score_weights: '{"accuracy":1}',
       },
     };
 
@@ -600,7 +601,11 @@ describe('JudgeRubricHandler', () => {
     expect(outcome.status).toBe('SUCCESS');
     expect(outcome.preferred_label).toBe('pass');
     expect(outcome.context_updates['judge.judge.score']).toBe(0.92);
+    expect(outcome.context_updates['judge.judge.score_threshold']).toBe(0.85);
     expect(outcome.context_updates['judge.judge.passed']).toBe(true);
+    expect(outcome.context_updates['judge.judge.rubric_path']).toBe(rubricPath);
+    expect(outcome.context_updates['judge.judge.score_weights']).toEqual({ accuracy: 1 });
+    expect(outcome.notes).toContain('score 0.92 >= threshold 0.85');
   });
 
   it('fails when overall score is below threshold', async () => {
