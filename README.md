@@ -112,6 +112,7 @@ To subscribe to execution events, instantiate `ExecutionEngine` directly and att
 | `run` | Execute a workflow from DOT |
 | `resume` | Continue from latest or specified checkpoint |
 | `replay` | Re-run from a prior run manifest with fixed config |
+| `manifest` | Summarize replay/provenance metadata and optionally diff manifests |
 | `dtu-run` | Execute DTU scenario fixtures and emit a satisfaction report |
 | `validate` | Parse + lint workflow without execution |
 | `visualize` | Output parsed graph JSON |
@@ -127,6 +128,9 @@ npx factorial visualize --graph workflow.dot
 
 # Resume from a specific checkpoint
 npx factorial resume --graph workflow.dot --checkpoint ./logs/checkpoint.json
+
+# Summarize and compare replay/provenance fields across manifests
+npx factorial manifest --manifest ./logs/replay/run_manifest.json --compare ./logs/run_manifest.json --json
 
 # Run DTU scenarios and write report
 npx factorial dtu-run --fixtures ./tests/fixtures/dtu/scenarios --report ./reports/dtu_satisfaction_report.json
@@ -344,6 +348,11 @@ When any budget limits are configured, the engine writes:
 
 - `<logs_root>/budget_usage.json` (run-level cumulative usage, limits, breach/errors)
 - `<logs_root>/<node_id>/budget_result.json` (per-node usage + limit evaluation)
+
+To inspect replay/provenance ergonomics quickly:
+
+- `npx factorial manifest --manifest <path/to/run_manifest.json>`
+- `npx factorial manifest --manifest <replay_manifest> --compare <baseline_manifest> --json`
 
 ## Examples
 

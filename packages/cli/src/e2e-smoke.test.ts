@@ -189,6 +189,53 @@ describe('CLI e2e smoke tests', () => {
     expect((manifest.outcome as Record<string, unknown>).status).toBe('SUCCESS');
   });
 
+  it('manifest command emits replay/provenance summary and comparison JSON', async () => {
+    const replayLogsRoot = await mkdtemp(join(tmpdir(), 'attractor-cli-replay-manifest-e2e-'));
+    const replayResult = await runCommand(
+      [
+        process.execPath,
+        CLI_ENTRY,
+        'replay',
+        '--manifest',
+        join(logsRoot, 'run_manifest.json'),
+        '--logs-root',
+        replayLogsRoot,
+        '--env-file',
+        ENV_FILE,
+      ],
+      ROOT_DIR
+    );
+    expect(replayResult.code).toBe(0);
+
+    const inspectResult = await runCommand(
+      [
+        process.execPath,
+        CLI_ENTRY,
+        'manifest',
+        '--manifest',
+        join(replayLogsRoot, 'run_manifest.json'),
+        '--compare',
+        join(logsRoot, 'run_manifest.json'),
+        '--json',
+      ],
+      ROOT_DIR
+    );
+    expect(inspectResult.code).toBe(0);
+
+    const payload = JSON.parse(inspectResult.stdout) as Record<string, unknown>;
+    expect(payload.schema_version).toBe('manifest_inspect.v1');
+
+    const summary = payload.summary as Record<string, unknown>;
+    expect(summary.command).toBe('replay');
+    const outcome = (summary.outcome ?? {}) as Record<string, unknown>;
+    expect(outcome.status).toBe('SUCCESS');
+
+    const comparison = payload.comparison as Record<string, unknown>;
+    expect(comparison.equal).toBe(true);
+    expect(Array.isArray(comparison.diffs)).toBe(true);
+    expect((comparison.diffs as unknown[]).length).toBe(0);
+  });
+
   it('dtu-run command emits satisfaction report for scenario fixtures', async () => {
     const reportPath = join(await mkdtemp(join(tmpdir(), 'attractor-dtu-report-')), 'report.json');
     const result = await runCommand(

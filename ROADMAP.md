@@ -16,6 +16,7 @@ Issue breakdown:
 - 0.3.x provider adapter completion report: [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
 - 0.3.x self-hosted dogfooding completion report: [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
 - 0.3.x judge/retry/governance completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
+- Backlog `BK-001` replay/provenance UX completion report: [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md)
 
 ## Status Snapshot (2026-02-11)
 | Item | Milestone | Status | Notes |
@@ -29,6 +30,7 @@ Issue breakdown:
 | `RMD-032` | 0.3.x | Done | Judge rubric maturity finalized with deterministic explainability evidence and regression coverage; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
 | `RMD-033` | 0.3.x | Done | Targeted retry/failure taxonomy hardening finalized with explicit class routing coverage and deterministic tests; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
 | `RMD-034` | 0.3.x | Done | Promotion and governance profile enforcement finalized via lint overlays and golden/regression evidence; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
+| `BK-001` | backlog | Done | Replay/provenance UX improvements completed with `manifest` summary/diff command and e2e coverage; see completion report: [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md). |
 
 Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
@@ -65,14 +67,16 @@ Active execution artifacts:
 - `RMD-032/033/034` finalization batch plan: [`docs/plans/rmd-032-034-finalization-batch-1-plan.md`](./docs/plans/rmd-032-034-finalization-batch-1-plan.md)
 - `RMD-032/033/034` finalization batch review: [`docs/reviews/rmd-032-034-finalization-batch-1-review.md`](./docs/reviews/rmd-032-034-finalization-batch-1-review.md)
 - `RMD-032/033/034` finalization batch solution: [`docs/solutions/judge-retry-governance-finalization-closeout.md`](./docs/solutions/judge-retry-governance-finalization-closeout.md)
+- `BK-001` batch 1 plan: [`docs/plans/bk-001-replay-provenance-ux-batch-1-plan.md`](./docs/plans/bk-001-replay-provenance-ux-batch-1-plan.md)
+- `BK-001` batch 1 review: [`docs/reviews/bk-001-replay-provenance-ux-batch-1-review.md`](./docs/reviews/bk-001-replay-provenance-ux-batch-1-review.md)
+- `BK-001` batch 1 solution: [`docs/solutions/replay-manifest-summary-and-diff.md`](./docs/solutions/replay-manifest-summary-and-diff.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
 
 Execution order (do not reorder unless blocked):
-1. `BK-001`: Replay/provenance UX improvements
-2. `BK-002`: Confidence-based human escalation tuning
-3. `BK-003`: Weekly compound metrics helper command
+1. `BK-002`: Confidence-based human escalation tuning
+2. `BK-003`: Weekly compound metrics helper command
 
 ### PKG-020C: Attractor spec conformance hardening (0.2.x, completed)
 - Status:
@@ -172,6 +176,12 @@ Execution order (do not reorder unless blocked):
 - Completion artifact:
   - [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
 
+### BK-001: Replay/provenance UX improvements (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with deterministic manifest summary/diff CLI UX and replay parity test coverage.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md)
+
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
   - Create a plan artifact from `docs/templates/plan.md`.
@@ -213,6 +223,11 @@ Execution order (do not reorder unless blocked):
   - Expanded targeted retry taxonomy regression coverage for `quality_gap` and `spec_mismatch` map routing.
   - Converged promotion/profile governance status and evidence across lint + golden + roadmap artifacts.
   - Completion artifact: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
+- [x] BK-001: Replay/provenance UX improvements
+  - Added `manifest` CLI command for deterministic replay/provenance summary and optional manifest comparison.
+  - Added replay-focused diff output over normalized graph/config/status/provenance fields.
+  - Added e2e coverage for run-vs-replay manifest equivalence and updated README usage.
+  - Completion artifact: [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md)
 
 ## Roadmap Board (Single Source of Truth)
 ### Now
@@ -225,18 +240,18 @@ Execution order (do not reorder unless blocked):
 | `RMD-032` | Judge/evaluator maturity | Done | Closed via judge rubric runtime + explainability evidence and regression coverage — see completion report. |
 | `RMD-033` | Targeted retry and failure taxonomy hardening | Done | Closed via explicit class routing + retry map regression coverage — see completion report. |
 | `RMD-034` | Promotion and governance profiles | Done | Closed via promotion/profile lint overlays and golden coverage — see completion report. |
+| `BK-001` | Replay/provenance UX improvements | Done | Closed via manifest summary/diff command and replay parity coverage — see completion report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| `—` | No active planned milestone items | `N/A` | Next execution focus is backlog grooming and selection. |
+| `BK-002` | Confidence-based human escalation tuning | Backlog | Tune escalation thresholds and routes from observed run data with deterministic validation artifacts. |
+| `BK-003` | Weekly compound metrics helper command | Backlog | Add optional helper command to generate standardized weekly reports from repository artifacts. |
 
 ### Later
 | ID | Item | Status | Notes |
 | --- | --- | --- | --- |
-| `BK-001` | Replay/provenance UX improvements | Backlog | Focus on incident debugging ergonomics after `RMD-031`/`RMD-034`. |
-| `BK-002` | Confidence-based human escalation tuning | Backlog | Tune from production run data, not synthetic-only signals. |
-| `BK-003` | Weekly compound metrics helper command | Backlog | Optional CLI/report helper once `RMD-022` policy is live. |
+| `—` | No deferred items beyond active backlog queue | `N/A` | `BK-002` and `BK-003` are already prioritized in `Next`. |
 
 ## External References
 - DTU context: [factory.strongdm.ai](https://factory.strongdm.ai/)

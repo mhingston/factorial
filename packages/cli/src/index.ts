@@ -78,6 +78,12 @@ interface DtuRunCommandOptions {
   allowUnsatisfied?: boolean;
 }
 
+interface ManifestCommandOptions {
+  manifest: string;
+  compare?: string;
+  json?: boolean;
+}
+
 interface RunManifest {
   schema_version: 'run_manifest.v1';
   generated_at: string;
@@ -420,6 +426,66 @@ program
       process.exit(1);
     } finally {
       cancellation.dispose();
+    }
+  });
+
+program
+  .command('manifest')
+  .description('Summarize replay/provenance details from run_manifest.json and optionally diff two manifests')
+  .requiredOption('-m, --manifest <path>', 'Path to run_manifest.json')
+  .option('--compare <path>', 'Optional second run_manifest.json to compare against')
+  .option('--json', 'Emit machine-readable JSON output', false)
+  .action(async (options: ManifestCommandOptions) => {
+    try {
+      const manifestPath = resolve(options.manifest);
+      const manifest = await loadRunManifest(manifestPath);
+      const summary = summarizeManifest(manifest, manifestPath);
+
+      if (options.compare) {
+        const comparePath = resolve(options.compare);
+        const compareManifest = await loadRunManifest(comparePath);
+        const compareSummary = summarizeManifest(compareManifest, comparePath);
+        const comparison = compareManifestSummaries(summary, compareSummary);
+
+        if (options.json) {
+          console.log(
+            JSON.stringify(
+              {
+                schema_version: 'manifest_inspect.v1',
+                summary,
+                comparison,
+              },
+              null,
+              2
+            )
+          );
+          return;
+        }
+
+        console.log(renderManifestSummary(summary));
+        console.log('');
+        console.log(renderManifestComparison(comparison));
+        return;
+      }
+
+      if (options.json) {
+        console.log(
+          JSON.stringify(
+            {
+              schema_version: 'manifest_inspect.v1',
+              summary,
+            },
+            null,
+            2
+          )
+        );
+        return;
+      }
+
+      console.log(renderManifestSummary(summary));
+    } catch (error) {
+      console.error('Failed to inspect manifest:', error);
+      process.exit(1);
     }
   });
 
@@ -897,6 +963,260 @@ function normalizeScenarioSuites(rawSuites?: string[]): Array<'smoke' | 'regress
 
   const suites = rawSuites.map(suite => scenarioSuiteSchema.parse(suite));
   return Array.from(new Set(suites));
+}
+
+interface ManifestSummary {
+  manifest_path: string;
+  schema_version: string;
+  generated_at: string;
+  command: string;
+  graph: {
+    id: string;
+    promotion_stage: string;
+    quality_profile: string;
+    node_count: number;
+    edge_count: number;
+  };
+  outcome: {
+    status: string;
+    failure_reason: string;
+  };
+  replay_profile: {
+    llm_backend: string;
+    default_provider: string;
+    llm_provider: string;
+    llm_model: string;
+  };
+  execution: {
+    completed_nodes: string[];
+    failed_nodes: string[];
+    status_counts: Record<string, number>;
+    node_statuses: Record<string, string>;
+  };
+  provenance: {
+    total: number;
+    by_provider: Record<string, number>;
+    by_model: Record<string, number>;
+    by_backend: Record<string, number>;
+    by_operation: Record<string, number>;
+    by_node: Record<
+      string,
+      {
+        provider: string;
+        model: string;
+        backend: string;
+        operation: string;
+        output_mode: string;
+      }
+    >;
+  };
+}
+
+interface ManifestComparisonDiff {
+  field: string;
+  left: unknown;
+  right: unknown;
+}
+
+interface ManifestComparison {
+  left_manifest_path: string;
+  right_manifest_path: string;
+  equal: boolean;
+  diffs: ManifestComparisonDiff[];
+}
+
+function summarizeManifest(manifest: RunManifest, manifestPath: string): ManifestSummary {
+  const nodeOutcomes = manifest.execution.node_outcomes ?? {};
+  const statusCounts: Record<string, number> = {};
+  const failedNodes: string[] = [];
+  const nodeStatuses: Record<string, string> = {};
+
+  for (const [nodeId, outcome] of Object.entries(nodeOutcomes)) {
+    const status = normalizeBucketKey(outcome.status);
+    statusCounts[status] = (statusCounts[status] ?? 0) + 1;
+    nodeStatuses[nodeId] = outcome.status;
+    if (status === 'FAIL') {
+      failedNodes.push(nodeId);
+    }
+  }
+
+  const byProvider: Record<string, number> = {};
+  const byModel: Record<string, number> = {};
+  const byBackend: Record<string, number> = {};
+  const byOperation: Record<string, number> = {};
+  const byNode: ManifestSummary['provenance']['by_node'] = {};
+
+  for (const record of manifest.model_provenance ?? []) {
+    const provider = normalizeBucketKey(record.provider);
+    const model = normalizeBucketKey(record.model);
+    const backend = normalizeBucketKey(record.backend);
+    const operation = normalizeBucketKey(record.operation);
+    byProvider[provider] = (byProvider[provider] ?? 0) + 1;
+    byModel[model] = (byModel[model] ?? 0) + 1;
+    byBackend[backend] = (byBackend[backend] ?? 0) + 1;
+    byOperation[operation] = (byOperation[operation] ?? 0) + 1;
+
+    byNode[record.node_id] = {
+      provider: record.provider,
+      model: record.model,
+      backend: record.backend,
+      operation: record.operation,
+      output_mode: record.output_mode,
+    };
+  }
+
+  return {
+    manifest_path: manifestPath,
+    schema_version: manifest.schema_version,
+    generated_at: manifest.generated_at,
+    command: manifest.command,
+    graph: {
+      id: manifest.graph.id,
+      promotion_stage: manifest.graph.promotion_stage,
+      quality_profile: manifest.graph.quality_profile,
+      node_count: manifest.graph.node_count,
+      edge_count: manifest.graph.edge_count,
+    },
+    outcome: {
+      status: manifest.outcome.status,
+      failure_reason: manifest.outcome.failure_reason,
+    },
+    replay_profile: {
+      llm_backend: manifest.run_config.llm_backend,
+      default_provider: manifest.run_config.default_provider,
+      llm_provider: manifest.run_config.llm_provider,
+      llm_model: manifest.run_config.llm_model,
+    },
+    execution: {
+      completed_nodes: [...manifest.execution.completed_nodes].sort(),
+      failed_nodes: failedNodes.sort(),
+      status_counts: sortRecord(statusCounts),
+      node_statuses: sortRecord(nodeStatuses),
+    },
+    provenance: {
+      total: manifest.model_provenance.length,
+      by_provider: sortRecord(byProvider),
+      by_model: sortRecord(byModel),
+      by_backend: sortRecord(byBackend),
+      by_operation: sortRecord(byOperation),
+      by_node: sortRecord(byNode),
+    },
+  };
+}
+
+function compareManifestSummaries(left: ManifestSummary, right: ManifestSummary): ManifestComparison {
+  const diffs: ManifestComparisonDiff[] = [];
+  collectSummaryDiff(diffs, 'graph.id', left.graph.id, right.graph.id);
+  collectSummaryDiff(diffs, 'graph.promotion_stage', left.graph.promotion_stage, right.graph.promotion_stage);
+  collectSummaryDiff(diffs, 'graph.quality_profile', left.graph.quality_profile, right.graph.quality_profile);
+  collectSummaryDiff(diffs, 'outcome.status', left.outcome.status, right.outcome.status);
+  collectSummaryDiff(diffs, 'replay_profile', left.replay_profile, right.replay_profile);
+  collectSummaryDiff(diffs, 'execution.completed_nodes', left.execution.completed_nodes, right.execution.completed_nodes);
+  collectSummaryDiff(diffs, 'execution.node_statuses', left.execution.node_statuses, right.execution.node_statuses);
+  collectSummaryDiff(diffs, 'provenance.by_node', left.provenance.by_node, right.provenance.by_node);
+
+  return {
+    left_manifest_path: left.manifest_path,
+    right_manifest_path: right.manifest_path,
+    equal: diffs.length === 0,
+    diffs,
+  };
+}
+
+function collectSummaryDiff(
+  output: ManifestComparisonDiff[],
+  field: string,
+  left: unknown,
+  right: unknown
+): void {
+  if (stableStringify(left) === stableStringify(right)) {
+    return;
+  }
+  output.push({ field, left, right });
+}
+
+function renderManifestSummary(summary: ManifestSummary): string {
+  const lines: string[] = [];
+  lines.push(`Manifest: ${summary.manifest_path}`);
+  lines.push(`Schema: ${summary.schema_version}`);
+  lines.push(`Generated: ${summary.generated_at}`);
+  lines.push(`Command: ${summary.command}`);
+  lines.push(`Graph: ${summary.graph.id} (nodes=${summary.graph.node_count}, edges=${summary.graph.edge_count})`);
+  lines.push(
+    `Profile: stage=${summary.graph.promotion_stage || '(none)'} quality=${summary.graph.quality_profile || '(none)'}`
+  );
+  lines.push(
+    `Replay config: backend=${summary.replay_profile.llm_backend || '(none)'} provider=${summary.replay_profile.llm_provider || '(none)'} model=${summary.replay_profile.llm_model || '(none)'}`
+  );
+  lines.push(`Outcome: ${summary.outcome.status}${summary.outcome.failure_reason ? ` (${summary.outcome.failure_reason})` : ''}`);
+  lines.push(
+    `Execution: completed=${summary.execution.completed_nodes.length} failed=${summary.execution.failed_nodes.length}`
+  );
+  if (summary.execution.failed_nodes.length > 0) {
+    lines.push(`Failed nodes: ${summary.execution.failed_nodes.join(', ')}`);
+  }
+  lines.push(`Provenance records: ${summary.provenance.total}`);
+  lines.push(`Providers: ${renderCountMap(summary.provenance.by_provider)}`);
+  lines.push(`Backends: ${renderCountMap(summary.provenance.by_backend)}`);
+  lines.push(`Operations: ${renderCountMap(summary.provenance.by_operation)}`);
+  return lines.join('\n');
+}
+
+function renderManifestComparison(comparison: ManifestComparison): string {
+  const lines: string[] = [];
+  lines.push(`Compare left: ${comparison.left_manifest_path}`);
+  lines.push(`Compare right: ${comparison.right_manifest_path}`);
+  lines.push(`Replay/provenance equivalence: ${comparison.equal ? 'MATCH' : 'DIFF'}`);
+  if (comparison.diffs.length === 0) {
+    return lines.join('\n');
+  }
+  for (const diff of comparison.diffs) {
+    lines.push(`- ${diff.field}`);
+    lines.push(`  left: ${stableStringify(diff.left)}`);
+    lines.push(`  right: ${stableStringify(diff.right)}`);
+  }
+  return lines.join('\n');
+}
+
+function renderCountMap(values: Record<string, number>): string {
+  const entries = Object.entries(values);
+  if (entries.length === 0) {
+    return '(none)';
+  }
+  return entries.map(([key, count]) => `${key}=${count}`).join(', ');
+}
+
+function normalizeBucketKey(value: string): string {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : '(none)';
+}
+
+function sortRecord<T>(value: Record<string, T>): Record<string, T> {
+  return Object.keys(value)
+    .sort((left, right) => left.localeCompare(right))
+    .reduce<Record<string, T>>((acc, key) => {
+      acc[key] = value[key];
+      return acc;
+    }, {});
+}
+
+function stableStringify(value: unknown): string {
+  return JSON.stringify(sortValue(value));
+}
+
+function sortValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(item => sortValue(item));
+  }
+  if (isRecord(value)) {
+    return Object.keys(value)
+      .sort((left, right) => left.localeCompare(right))
+      .reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = sortValue(value[key]);
+        return acc;
+      }, {});
+  }
+  return value;
 }
 
 async function readBaselineReport(
