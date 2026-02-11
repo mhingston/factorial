@@ -10,18 +10,21 @@ Last updated: 2026-02-11
 
 Issue breakdown:
 - 0.2.x prioritized issues: [`docs/roadmap/0.2-prioritized-issues.md`](./docs/roadmap/0.2-prioritized-issues.md)
+- 0.2.x core convergence completion report: [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md)
 - 0.3.x DTU execution plan: [`docs/roadmap/0.3-digital-twin-universe-execution-plan.md`](./docs/roadmap/0.3-digital-twin-universe-execution-plan.md)
 - 0.3.x DTU completion report: [`docs/roadmap/0.3-dtu-validation-platform-completion.md`](./docs/roadmap/0.3-dtu-validation-platform-completion.md)
 - 0.3.x provider adapter completion report: [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
+- 0.3.x self-hosted dogfooding completion report: [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
 
 ## Status Snapshot (2026-02-11)
 | Item | Milestone | Status | Notes |
 | --- | --- | --- | --- |
-| `RMD-020` / `PKG-020C` | 0.2.x | In progress | Batch 1+2 implemented; `test:worktree` executed on 2026-02-11 and skipped in this checkout due no resolvable `HEAD` (merge-prep verification pending commit-backed checkout). |
-| `RMD-021` | 0.2.x | In progress | Worktree parity script now has strict CI no-skip mode, dependency bootstrap in detached worktree, and local clean-checkout guardrails. |
-| `RMD-022` / `PKG-022A` | 0.2.x | In progress | CI PR-body compliance gate, weekly report generator, and 4-week report set implemented in branch. |
+| `RMD-020` / `PKG-020C` | 0.2.x | Done | Finalization batch 1 completed on 2026-02-11; evidence recorded in this checkout. See completion report: [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md). |
+| `RMD-021` | 0.2.x | Done | Worktree parity PASS captured in this checkout and documented; strict CI gating remains in place. See completion report: [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md). |
+| `RMD-022` / `PKG-022A` | 0.2.x | Done | Compound PR-body compliance and weekly reporting finalized; verification evidence recorded. See completion report: [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md). |
 | `RMD-030` | 0.3.x | Done | DTU validation platform completed; see completion report. |
 | `RMD-031` / `PKG-031A` | 0.3.x | Done | Batch 1-3 complete: adapter boundary + provenance, implemented stream events, restored green baseline, and added deterministic two-provider parity evidence; see completion report. |
+| `RMD-035` | 0.3.x | Done | Self-hosted factory dogfooding implemented with deterministic pass/fail lock enforcement report and tests; see completion report. |
 | `RMD-032` | 0.3.x | Planned | Judge/evaluator maturity and score explainability. |
 | `RMD-033` | 0.3.x | Planned | Targeted retry and failure taxonomy hardening. |
 | `RMD-034` | 0.3.x | Planned | Promotion and governance profile enforcement. |
@@ -30,7 +33,7 @@ Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
 - Add formal spec-conformance matrix coverage: tracked under `RMD-020` (`PKG-020C`), no new item.
 - Implement `LlmAdapter.stream()` and prove >=2-provider parity: tracked under `RMD-031`, no new item.
-- Add repository dogfooding/self-host workflow: new item `RMD-035` (see `Next` table).
+- Add repository dogfooding/self-host workflow: tracked under `RMD-035` and completed, no new item.
 
 Active execution artifacts:
 - `PKG-020C` batch 1 plan: [`docs/plans/pkg-020c-spec-conformance-batch-1-plan.md`](./docs/plans/pkg-020c-spec-conformance-batch-1-plan.md)
@@ -52,16 +55,24 @@ Active execution artifacts:
 - `RMD-031` batch 3 plan: [`docs/plans/rmd-031-provider-adapter-batch-3-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-3-plan.md)
 - `RMD-031` batch 3 review: [`docs/reviews/rmd-031-provider-adapter-batch-3-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-3-review.md)
 - `RMD-031` batch 3 solution: [`docs/solutions/provider-parity-normalized-contract-tests.md`](./docs/solutions/provider-parity-normalized-contract-tests.md)
+- `RMD-020/021/022` finalization batch plan: [`docs/plans/rmd-020-022-finalization-batch-1-plan.md`](./docs/plans/rmd-020-022-finalization-batch-1-plan.md)
+- `RMD-020/021/022` finalization batch review: [`docs/reviews/rmd-020-022-finalization-batch-1-review.md`](./docs/reviews/rmd-020-022-finalization-batch-1-review.md)
+- `RMD-020/021/022` finalization batch solution: [`docs/solutions/finalization-evidence-and-roadmap-closeout.md`](./docs/solutions/finalization-evidence-and-roadmap-closeout.md)
+- `RMD-035` batch 1 plan: [`docs/plans/rmd-035-self-host-dogfooding-batch-1-plan.md`](./docs/plans/rmd-035-self-host-dogfooding-batch-1-plan.md)
+- `RMD-035` batch 1 review: [`docs/reviews/rmd-035-self-host-dogfooding-batch-1-review.md`](./docs/reviews/rmd-035-self-host-dogfooding-batch-1-review.md)
+- `RMD-035` batch 1 solution: [`docs/solutions/self-hosted-dogfood-loop-with-lock-enforcement.md`](./docs/solutions/self-hosted-dogfood-loop-with-lock-enforcement.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
 
 Execution order (do not reorder unless blocked):
-1. `PKG-020C` (`RMD-020`): Attractor spec conformance hardening
-2. `PKG-022A` (`RMD-022`): Compound loop enforcement automation
-3. `RMD-035`: Self-hosted factory dogfooding
+1. `RMD-032`: Judge/evaluator maturity
+2. `RMD-033`: Targeted retry and failure taxonomy hardening
+3. `RMD-034`: Promotion and governance profiles
 
-### PKG-020C: Attractor spec conformance hardening (0.2.x)
+### PKG-020C: Attractor spec conformance hardening (0.2.x, completed)
+- Status:
+  - Closed on 2026-02-11; see [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md).
 - Goal:
   - Close concrete spec deltas before adding new orchestration complexity.
 - Why now:
@@ -101,7 +112,9 @@ Execution order (do not reorder unless blocked):
   - Manager loop can optionally execute delegated child workflows via adapter hook.
   - Spec-conformance matrix is committed and referenced from roadmap/review artifacts.
 
-### PKG-022A: Compound loop enforcement automation (0.2.x)
+### PKG-022A: Compound loop enforcement automation (0.2.x, completed)
+- Status:
+  - Closed on 2026-02-11; see [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md).
 - Goal:
   - Convert process guidance into enforced CI policy.
 - Why now:
@@ -143,6 +156,12 @@ Execution order (do not reorder unless blocked):
 - Completion artifact:
   - [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
 
+### RMD-035: Self-hosted factory dogfooding (0.3.x, completed)
+- Status:
+  - Closed on 2026-02-11 with deterministic self-host loop evidence and lock decision enforcement.
+- Completion artifact:
+  - [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
+
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
   - Create a plan artifact from `docs/templates/plan.md`.
@@ -174,14 +193,20 @@ Execution order (do not reorder unless blocked):
   - Implemented `LlmAdapter.stream()` with deterministic stream event contract coverage.
   - Added deterministic API parity evidence for equivalent normalized outcomes across `openai` + `anthropic`.
   - Completion artifact: [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
+- [x] RMD-035: Self-hosted factory dogfooding
+  - Added deterministic self-host workflow command (`npm run dogfood:self-host`) executing Plan -> Work -> Review -> Compound plus lock enforcement.
+  - Produces reproducible report artifact with `resolved` pass and `reopen` fail expectations.
+  - Added automated regression coverage for report schema and scenario outcomes.
+  - Completion artifact: [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
 
 ## Roadmap Board (Single Source of Truth)
 ### Now
 | ID | Item | Status | Next execution focus |
 | --- | --- | --- | --- |
-| `RMD-020` | First-class subagent orchestration | In progress | `PKG-020C` deltas are implemented in branch; finalize in a checkout with resolvable `HEAD` so worktree parity can execute non-skip. |
-| `RMD-021` | Git worktree compatibility guarantees | In progress | Strict CI parity enforcement and docs are in place; collect full pass evidence in a commit-backed checkout and merge. |
-| `RMD-022` | Compound loop enforcement in contribution flow | In progress | CI artifact gate + weekly report generator + 4-week reports are in branch; verify in PR pipeline and merge. |
+| `RMD-020` | First-class subagent orchestration | Done | Closed via finalization batch 1 on 2026-02-11 — see completion report. |
+| `RMD-021` | Git worktree compatibility guarantees | Done | Parity check PASS captured; strict CI mode retained — see completion report. |
+| `RMD-022` | Compound loop enforcement in contribution flow | Done | Compliance gate + weekly reporting finalized — see completion report. |
+| `RMD-035` | Self-hosted factory dogfooding | Done | Closed via deterministic self-host loop command and lock enforcement report — see completion report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |
@@ -189,7 +214,6 @@ Execution order (do not reorder unless blocked):
 | `RMD-032` | Judge/evaluator maturity | Planned | Rubric routing and explainability artifacts are deterministic and test-covered. |
 | `RMD-033` | Targeted retry and failure taxonomy hardening | Planned | Failure classes and retry routing are explicit, measurable, and regression-covered. |
 | `RMD-034` | Promotion and governance profiles | Planned | Promotion-stage policy checks are documented and enforced in CI. |
-| `RMD-035` | Self-hosted factory dogfooding | Planned | A repository-native workflow uses this project to run Plan -> Work -> Review -> Compound on bounded repo tasks with lock decision enforcement and reproducible pass/fail evidence. |
 
 ### Later
 | ID | Item | Status | Notes |

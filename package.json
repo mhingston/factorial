@@ -39,7 +39,8 @@
     "metrics:compound-weekly": "node ./scripts/compound-weekly-report.js",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run lint && npm run typecheck && npm run test:run && npm run build"
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test:run && npm run build",
+    "dogfood:self-host": "node ./scripts/self-host-dogfood.js"
   },
   "keywords": [
     "ai",

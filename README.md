@@ -434,6 +434,9 @@ npm run check:pr-compound -- --body-file ./path/to/pr-body.md
 # Generate weekly compound metrics report
 npm run metrics:compound-weekly -- --start 2026-02-09 --end 2026-02-15
 
+# Run deterministic self-host dogfooding scenarios (resolved pass + reopen fail)
+npm run dogfood:self-host
+
 # Type check
 npm run typecheck
 ```
