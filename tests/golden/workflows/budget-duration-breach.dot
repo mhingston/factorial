@@ -1,0 +1,20 @@
+digraph GoldenBudgetDurationBreach {
+  graph [
+    goal="Golden regression for run duration budget breach",
+    rankdir=LR,
+    budget_max_duration_ms=10
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  work [
+    shape=parallelogram,
+    type="tool",
+    label="Work",
+    tool_command="sleep 0.05"
+  ]
+
+  start -> work
+  work -> exit
+}

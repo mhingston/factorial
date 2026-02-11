@@ -1,0 +1,23 @@
+digraph GoldenContractedCodergen {
+  graph [goal="Golden regression for contracted codergen", rankdir=LR]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  implement [
+    shape=box,
+    type="codergen",
+    label="Implement",
+    prompt="Return deterministic JSON output",
+    llm_provider="openai",
+    llm_model="gpt-test",
+    llm_backend="cli",
+    cli_command="printf '{\"result\":\"ok\",\"score\":1}'",
+    auto_status="true",
+    output_contract_required="true",
+    output_schema="{\"type\":\"object\",\"properties\":{\"result\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"result\",\"score\"],\"additionalProperties\":false}",
+    output_mode="json"
+  ]
+
+  start -> implement -> exit
+}

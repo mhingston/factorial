@@ -1,0 +1,51 @@
+{
+  "fixture_id": "jira-issue-create-auth-failed",
+  "description": "Reference jira.issue twin emits auth-class error for deterministic auth failure simulation.",
+  "request": {
+    "twin_id": "jira.issue",
+    "operation": "issues.create",
+    "scenario_id": "jira-create-auth-failed",
+    "seed": "phase-a-seed-002",
+    "input": {
+      "project_key": "FACT",
+      "summary": "Create issue should fail without valid auth",
+      "description": "Simulate authentication failure for DTU parity tests.",
+      "actor": "platform-bot",
+      "simulate": "auth_failed"
+    },
+    "timing": {
+      "requested_at_ms": 1739222401000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "create-auth-failed"
+    }
+  },
+  "expected": {
+    "twin_id": "jira.issue",
+    "twin_version": "0.1.0",
+    "operation": "issues.create",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "auth_failed",
+      "class": "auth",
+      "message": "Authentication failed for jira.issue twin.",
+      "retryable": false,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222401000,
+      "completed_at_ms": 1739222401003,
+      "latency_ms": 3,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "create-auth-failed",
+      "provider": "jira",
+      "parity_profile": "phase-a"
+    }
+  }
+}

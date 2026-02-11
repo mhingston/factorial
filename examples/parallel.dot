@@ -6,7 +6,13 @@ digraph ParallelExecution {
     exit  [shape=Msquare, label="Exit"]
     
     parallel [shape=component, label="Run Tests", type="parallel"]
-    fan_in [shape=tripleoctagon, label="Collect Results", type="parallel.fan_in"]
+    fan_in [
+      shape=tripleoctagon,
+      label="Collect Results",
+      type="parallel.fan_in",
+      merge_strategy="best_score",
+      merge_tiebreak="lexical"
+    ]
 
     start -> parallel
     parallel -> test_unit [label="Unit Tests"]

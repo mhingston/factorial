@@ -1,0 +1,49 @@
+digraph GoldenPromotionRegulated {
+  graph [
+    goal="Golden regression for promotion stage overlays",
+    rankdir=LR,
+    promotion_stage="prod",
+    quality_profile="regulated"
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  gate [
+    shape=diamond,
+    type="quality.gate",
+    label="Gate",
+    gate_type="lint",
+    gate_command="true",
+    pass_condition="outcome=success",
+    failure_target="fix"
+  ]
+
+  fix [
+    shape=parallelogram,
+    type="tool",
+    label="Fix",
+    tool_command="printf 'fix path'"
+  ]
+
+  judge [
+    shape=box,
+    type="judge.rubric",
+    label="Judge",
+    prompt="Evaluate implementation quality.",
+    llm_provider="openai",
+    llm_model="gpt-test",
+    llm_backend="cli",
+    cli_command="printf '{\"overall_score\":0.93,\"sub_scores\":{\"accuracy\":0.94,\"completeness\":0.92},\"rationale\":\"promotion-ready\"}'",
+    auto_status="true",
+    judge_rubric_path="./tests/golden/rubrics/judge-rubric.md",
+    score_threshold="0.85",
+    score_weights="{\"accuracy\":0.5,\"completeness\":0.5}"
+  ]
+
+  start -> gate
+  gate -> judge [condition="outcome=success", label="pass"]
+  gate -> fix [condition="outcome!=success", label="fail"]
+  judge -> exit
+  fix -> exit
+}

@@ -1,0 +1,53 @@
+{
+  "scenario_id": "scn-slack-rate-limit-holdout",
+  "suite": "holdout",
+  "description": "Holdout scenario: deterministically simulate Slack rate limiting.",
+  "request": {
+    "twin_id": "slack.channel",
+    "operation": "messages.post",
+    "scenario_id": "slack-rate-limit-holdout",
+    "seed": "phase-a-seed-104",
+    "input": {
+      "channel_id": "C123456",
+      "text": "Post update during rate limit holdout",
+      "actor": "qa-bot",
+      "simulate": "rate_limited"
+    },
+    "timing": {
+      "requested_at_ms": 1739222413000,
+      "timeout_ms": 3000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "slack-rate-limit-holdout"
+    }
+  },
+  "expected": {
+    "twin_id": "slack.channel",
+    "twin_version": "0.1.0",
+    "operation": "messages.post",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "rate_limited",
+      "class": "rate_limit",
+      "message": "Rate limited by slack.channel twin.",
+      "retryable": true,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222413000,
+      "completed_at_ms": 1739222413002,
+      "latency_ms": 2,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "slack-rate-limit-holdout",
+      "provider": "slack",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "expected_failure_mode": "rate_limit",
+  "tags": ["slack", "holdout", "failure"]
+}

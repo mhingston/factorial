@@ -1,0 +1,33 @@
+digraph GoldenManagerLockReopen {
+  graph [
+    goal="Golden regression for manager lock reopen path",
+    rankdir=LR,
+    golden_seed_context_path="./tests/golden/seed/manager-lock-reopen.json"
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  manager [
+    shape=house,
+    type="stack.manager_loop",
+    label="Manager",
+    stack_child_dotfile="./tests/fixtures/reference/simple_example.dot",
+    manager_actions="observe",
+    manager_poll_interval="0",
+    manager_max_cycles="2",
+    manager_require_lock="true"
+  ]
+
+  reopen [
+    shape=parallelogram,
+    type="tool",
+    label="Reopen",
+    tool_command="printf 'reopened-batch'"
+  ]
+
+  start -> manager
+  manager -> reopen [condition="context.stack.manager_loop.last_child_lock=reopen"]
+  manager -> exit   [condition="context.stack.manager_loop.last_child_lock=resolved"]
+  reopen -> exit
+}

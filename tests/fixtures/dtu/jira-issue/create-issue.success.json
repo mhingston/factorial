@@ -1,0 +1,52 @@
+{
+  "fixture_id": "jira-issue-create-success",
+  "description": "Reference jira.issue twin creates deterministic issue payload for issues.create.",
+  "request": {
+    "twin_id": "jira.issue",
+    "operation": "issues.create",
+    "scenario_id": "jira-create-success",
+    "seed": "phase-a-seed-001",
+    "input": {
+      "project_key": "FACT",
+      "summary": "Implement deterministic twin contract",
+      "description": "Add schema-backed DTU contracts and runtime boundary abstractions.",
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "create-success"
+    }
+  },
+  "expected": {
+    "twin_id": "jira.issue",
+    "twin_version": "0.1.0",
+    "operation": "issues.create",
+    "status": "success",
+    "output": {
+      "issue_key": "FACT-7055",
+      "summary": "Implement deterministic twin contract",
+      "description": "Add schema-backed DTU contracts and runtime boundary abstractions.",
+      "status": "OPEN",
+      "assignee": "platform-bot",
+      "link": "https://jira.twin.local/browse/FACT-7055"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400012,
+      "latency_ms": 12,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "create-success",
+      "provider": "jira",
+      "parity_profile": "phase-a"
+    }
+  }
+}

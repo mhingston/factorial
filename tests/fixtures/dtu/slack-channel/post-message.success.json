@@ -1,0 +1,50 @@
+{
+  "fixture_id": "slack-channel-post-success",
+  "description": "Reference slack.channel twin posts deterministic message payload.",
+  "request": {
+    "twin_id": "slack.channel",
+    "operation": "messages.post",
+    "scenario_id": "slack-post-success",
+    "seed": "phase-a-seed-101",
+    "input": {
+      "channel_id": "C123456",
+      "text": "Ship DTU harness status report to channel",
+      "actor": "qa-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222410000,
+      "timeout_ms": 3000
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "post-success"
+    }
+  },
+  "expected": {
+    "twin_id": "slack.channel",
+    "twin_version": "0.1.0",
+    "operation": "messages.post",
+    "status": "success",
+    "output": {
+      "channel_id": "C123456",
+      "message_id": "msg-968391",
+      "actor": "qa-bot",
+      "text": "Ship DTU harness status report to channel",
+      "permalink": "https://slack.twin.local/archives/C123456/p968391"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222410000,
+      "completed_at_ms": 1739222410008,
+      "latency_ms": 8,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "post-success",
+      "provider": "slack",
+      "parity_profile": "dtu-complete"
+    }
+  }
+}

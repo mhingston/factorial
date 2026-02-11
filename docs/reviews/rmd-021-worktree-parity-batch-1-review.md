@@ -30,7 +30,7 @@ Verifier must not introduce new issue IDs in this phase.
 
 | issue_id | status (`pass|fail`) | Evidence | Follow-up needed |
 | --- | --- | --- | --- |
-| `RMD-021A` | pass | `scripts/worktree-parity-check.js` now supports strict mode via `WORKTREE_PARITY_REQUIRE_HEAD=1`; `.github/workflows/ci.yml` sets strict mode in `worktree-parity` job; local strict run exits non-zero on no-`HEAD`. | run strict parity in a checkout with resolvable `HEAD` for full parity evidence |
+| `RMD-021A` | pass | `scripts/worktree-parity-check.js` now supports strict mode via `WORKTREE_PARITY_REQUIRE_HEAD=1`, installs dependencies in detached worktree before build, and skips non-strict local runs when tracked working-tree changes exist; `.github/workflows/ci.yml` sets strict mode in `worktree-parity` job. | run strict parity in a clean checkout with resolvable `HEAD` for full pass evidence |
 | `RMD-021B` | pass | README now documents no-`HEAD` local skip and CI strict behavior; roadmap/status docs updated with verification context. | none |
 
 ## Consensus Lock

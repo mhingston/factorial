@@ -1,0 +1,54 @@
+{
+  "scenario_id": "scn-jira-rate-limit",
+  "suite": "regression",
+  "description": "Deterministically simulate Jira rate limiting.",
+  "request": {
+    "twin_id": "jira.issue",
+    "operation": "issues.create",
+    "scenario_id": "jira-rate-limit",
+    "seed": "phase-a-seed-004",
+    "input": {
+      "project_key": "FACT",
+      "summary": "Create issue should be rate limited",
+      "description": "Simulate rate limiting behavior.",
+      "actor": "platform-bot",
+      "simulate": "rate_limited"
+    },
+    "timing": {
+      "requested_at_ms": 1739222401500,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "jira-rate-limit"
+    }
+  },
+  "expected": {
+    "twin_id": "jira.issue",
+    "twin_version": "0.1.0",
+    "operation": "issues.create",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "rate_limited",
+      "class": "rate_limit",
+      "message": "Rate limited by jira.issue twin.",
+      "retryable": true,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222401500,
+      "completed_at_ms": 1739222401502,
+      "latency_ms": 2,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "jira-rate-limit",
+      "provider": "jira",
+      "parity_profile": "phase-a"
+    }
+  },
+  "expected_failure_mode": "rate_limit",
+  "tags": ["jira", "regression", "failure"]
+}

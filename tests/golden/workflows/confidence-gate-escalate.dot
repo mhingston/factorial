@@ -1,0 +1,37 @@
+digraph GoldenConfidenceGateEscalate {
+  graph [
+    goal="Golden regression for confidence escalation",
+    rankdir=LR,
+    golden_seed_context_path="./tests/golden/seed/confidence-low.json"
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  route [
+    shape=diamond,
+    type="confidence.gate",
+    label="Confidence Route",
+    confidence_signal_path="confidence.signal",
+    escalation_threshold="0.8"
+  ]
+
+  autonomous [
+    shape=parallelogram,
+    type="tool",
+    label="Autonomous Path",
+    tool_command="printf 'autonomous'"
+  ]
+
+  human [
+    shape=hexagon,
+    type="wait.human",
+    label="Human Review"
+  ]
+
+  start -> route
+  route -> autonomous [label="autonomous"]
+  route -> human [label="escalate"]
+  autonomous -> exit
+  human -> exit [label="[A] Approve"]
+}

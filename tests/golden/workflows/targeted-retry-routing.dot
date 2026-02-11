@@ -1,0 +1,27 @@
+digraph GoldenTargetedRetryRouting {
+  graph [goal="Golden regression for targeted retry routing", rankdir=LR]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  work [
+    shape=parallelogram,
+    type="tool",
+    label="Work",
+    tool_command="printf 'ETIMEDOUT' >&2; exit 1",
+    retry_policy="targeted",
+    retry_target_transient="recover"
+  ]
+
+  recover [
+    shape=parallelogram,
+    type="tool",
+    label="Recover",
+    tool_command="printf 'recovered'"
+  ]
+
+  start -> work
+  work -> exit
+  work -> recover
+  recover -> exit
+}

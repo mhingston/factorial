@@ -1,0 +1,30 @@
+{
+  "executed_nodes": [
+    "start",
+    "manager",
+    "reopen"
+  ],
+  "nodes": {
+    "manager": {
+      "manager_loop": {
+        "actions": [
+          "observe"
+        ],
+        "child_dotfile": "./tests/fixtures/reference/simple_example.dot",
+        "cycle_count": 1,
+        "final_child_lock": "reopen",
+        "final_child_outcome": "success",
+        "final_child_status": "completed",
+        "final_status": "FAIL",
+        "max_cycles": 2,
+        "poll_interval_ms": 0,
+        "require_lock_decision": true
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "manager-lock-reopen.dot"
+}

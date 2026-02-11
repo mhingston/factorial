@@ -1,0 +1,20 @@
+digraph GoldenFailureAnalyze {
+  graph [goal="Golden regression for failure analyze", rankdir=LR]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  analyze [
+    shape=box,
+    type="failure.analyze",
+    label="Analyze Failure",
+    prompt="Classify failure",
+    llm_provider="openai",
+    llm_model="gpt-test",
+    llm_backend="cli",
+    cli_command="printf '{\"failure_class\":\"tool_error\",\"summary\":\"binary missing\",\"recommendation\":\"install tool\"}'",
+    auto_status="true"
+  ]
+
+  start -> analyze -> exit
+}

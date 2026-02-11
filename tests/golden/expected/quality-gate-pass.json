@@ -1,0 +1,24 @@
+{
+  "executed_nodes": [
+    "start",
+    "gate",
+    "done"
+  ],
+  "nodes": {
+    "gate": {
+      "gate_result": {
+        "exit_code": 0,
+        "failure_target": "fix",
+        "gate_type": "custom",
+        "normalized_outcome": "pass",
+        "normalized_passed": true,
+        "raw_outcome": "pass"
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "quality-gate-pass.dot"
+}

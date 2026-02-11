@@ -1,0 +1,37 @@
+{
+  "executed_nodes": [
+    "start",
+    "judge"
+  ],
+  "nodes": {
+    "judge": {
+      "output": {
+        "failure_reason": "",
+        "output": {
+          "overall_score": 0.91,
+          "rationale": "meets rubric",
+          "sub_scores": {
+            "accuracy": 0.9,
+            "completeness": 0.92
+          }
+        },
+        "output_mode": "object",
+        "status": "success",
+        "validation_errors": [],
+        "validation_result": "pass"
+      },
+      "validation": {
+        "checked": true,
+        "errors": [],
+        "output_contract_required": true,
+        "result": "pass",
+        "schema_configured": true
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "judge-rubric.dot"
+}

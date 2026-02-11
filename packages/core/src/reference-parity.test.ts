@@ -6,11 +6,15 @@ import { createDefaultLintEngine } from './lint/index.js';
 import { HandlerRegistry } from './handlers/registry.js';
 import {
   CodergenHandler,
+  ConfidenceGateHandler,
   ConditionalHandler,
   ExitHandler,
+  FailureAnalyzeHandler,
   FanInHandler,
+  JudgeRubricHandler,
   ManagerLoopHandler,
   ParallelHandler,
+  QualityGateHandler,
   StartHandler,
   ToolHandler,
   WaitForHumanHandler,
@@ -72,10 +76,14 @@ function createReferenceHandlerRegistry(): HandlerRegistry {
   registry.register('start', new StartHandler());
   registry.register('exit', new ExitHandler());
   registry.register('codergen', codergen);
+  registry.register('failure.analyze', new FailureAnalyzeHandler(codergen));
+  registry.register('judge.rubric', new JudgeRubricHandler(codergen));
   registry.register('tool', new ToolHandler());
   registry.register('conditional', new ConditionalHandler());
+  registry.register('confidence.gate', new ConfidenceGateHandler());
   registry.register('parallel', new ParallelHandler());
   registry.register('parallel.fan_in', new FanInHandler());
+  registry.register('quality.gate', new QualityGateHandler());
   registry.register('stack.manager_loop', new ManagerLoopHandler());
   registry.register('stack.observe', codergen);
   registry.register('stack.steer', codergen);

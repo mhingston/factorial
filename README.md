@@ -425,6 +425,12 @@ npm run lint
 # Audit local agent execution capabilities
 npm run agent:audit
 
+# Validate PR compound artifact requirements (local body file)
+npm run check:pr-compound -- --body-file ./path/to/pr-body.md
+
+# Generate weekly compound metrics report
+npm run metrics:compound-weekly -- --start 2026-02-09 --end 2026-02-15
+
 # Type check
 npm run typecheck
 ```
@@ -441,7 +447,8 @@ npm run test:worktree
 
 Caveat:
 - This command requires a resolvable `HEAD` commit to create a detached worktree.
-- In local pre-commit or scratch checkouts with no `HEAD`, the script exits as `SKIP`.
+- It also requires a clean tracked working tree by default (`WORKTREE_PARITY_ALLOW_DIRTY=1` overrides this for local debugging).
+- In local pre-commit or scratch checkouts with no `HEAD`, or with tracked uncommitted changes, the script exits as `SKIP`.
 - CI runs in strict mode (`WORKTREE_PARITY_REQUIRE_HEAD=1`) so no-`HEAD` becomes a hard failure.
 
 What this check verifies:

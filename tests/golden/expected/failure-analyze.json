@@ -1,0 +1,34 @@
+{
+  "executed_nodes": [
+    "start",
+    "analyze"
+  ],
+  "nodes": {
+    "analyze": {
+      "output": {
+        "failure_reason": "",
+        "output": {
+          "failure_class": "tool_error",
+          "recommendation": "install tool",
+          "summary": "binary missing"
+        },
+        "output_mode": "object",
+        "status": "success",
+        "validation_errors": [],
+        "validation_result": "pass"
+      },
+      "validation": {
+        "checked": true,
+        "errors": [],
+        "output_contract_required": true,
+        "result": "pass",
+        "schema_configured": true
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "failure-analyze.dot"
+}

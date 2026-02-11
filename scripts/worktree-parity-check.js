@@ -158,6 +158,7 @@ function main() {
   console.log("=== Worktree parity check ===");
   console.log(`Repository: ${repoRoot}`);
   const requireHead = process.env.WORKTREE_PARITY_REQUIRE_HEAD === "1";
+  const allowDirty = process.env.WORKTREE_PARITY_ALLOW_DIRTY === "1";
 
   const gitRepoCheck = run("git", ["rev-parse", "--is-inside-work-tree"], repoRoot);
   requireSuccess("Verify git repository", gitRepoCheck);
@@ -174,6 +175,21 @@ function main() {
     process.exit(0);
   }
 
+  if (!allowDirty) {
+    const dirtyCheck = run("git", ["status", "--porcelain", "--untracked-files=no"], repoRoot);
+    requireSuccess("Verify git status", dirtyCheck);
+    if (dirtyCheck.stdout.trim()) {
+      if (requireHead) {
+        console.error("Worktree parity check: FAIL (tracked working-tree changes detected in strict mode)");
+        cleanup();
+        process.exit(1);
+      }
+      console.log("Worktree parity check: SKIP (tracked working-tree changes detected; use a clean checkout)");
+      cleanup();
+      process.exit(0);
+    }
+  }
+
   const buildBase = run("npm", ["run", "build"], repoRoot);
   requireSuccess("Build in primary checkout", buildBase);
 
@@ -181,6 +197,9 @@ function main() {
 
   const addWorktree = run("git", ["worktree", "add", "--detach", worktreeDir, "HEAD"], repoRoot);
   requireSuccess("Create detached git worktree", addWorktree);
+
+  const installWorktreeDeps = run("npm", ["ci"], worktreeDir);
+  requireSuccess("Install dependencies in worktree checkout", installWorktreeDeps);
 
   const buildWorktree = run("npm", ["run", "build"], worktreeDir);
   requireSuccess("Build in worktree checkout", buildWorktree);

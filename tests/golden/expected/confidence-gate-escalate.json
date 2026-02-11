@@ -1,0 +1,23 @@
+{
+  "executed_nodes": [
+    "start",
+    "route",
+    "human"
+  ],
+  "nodes": {
+    "route": {
+      "confidence_result": {
+        "confidence_signal_path": "confidence.signal",
+        "decision": "escalate",
+        "escalation_target": "human",
+        "escalation_threshold": 0.8,
+        "observed_confidence": 0.42
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "confidence-gate-escalate.dot"
+}

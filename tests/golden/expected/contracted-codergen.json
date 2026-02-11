@@ -1,0 +1,33 @@
+{
+  "executed_nodes": [
+    "start",
+    "implement"
+  ],
+  "nodes": {
+    "implement": {
+      "output": {
+        "failure_reason": "",
+        "output": {
+          "result": "ok",
+          "score": 1
+        },
+        "output_mode": "object",
+        "status": "success",
+        "validation_errors": [],
+        "validation_result": "pass"
+      },
+      "validation": {
+        "checked": true,
+        "errors": [],
+        "output_contract_required": true,
+        "result": "pass",
+        "schema_configured": true
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "contracted-codergen.dot"
+}

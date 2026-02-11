@@ -17,8 +17,8 @@ Issue breakdown:
 | Item | Milestone | Status | Notes |
 | --- | --- | --- | --- |
 | `RMD-020` / `PKG-020C` | 0.2.x | In progress | Batch 1+2 implemented; `test:worktree` executed on 2026-02-11 and skipped in this checkout due no resolvable `HEAD` (merge-prep verification pending commit-backed checkout). |
-| `RMD-021` | 0.2.x | In progress | Worktree parity script now has strict CI no-skip mode; local no-`HEAD` skip caveat documented. |
-| `RMD-022` / `PKG-022A` | 0.2.x | Planned | PR artifact-link enforcement + weekly compound metric reporting. |
+| `RMD-021` | 0.2.x | In progress | Worktree parity script now has strict CI no-skip mode, dependency bootstrap in detached worktree, and local clean-checkout guardrails. |
+| `RMD-022` / `PKG-022A` | 0.2.x | In progress | CI PR-body compliance gate, weekly report generator, and 4-week report set implemented in branch. |
 | `RMD-030` | 0.3.x | Done | DTU validation platform completed; see completion report. |
 | `RMD-031` / `PKG-031A` | 0.3.x | Planned | Unified LLM adapter foundation for provider-aligned codergen convergence. |
 | `RMD-032` | 0.3.x | Planned | Judge/evaluator maturity and score explainability. |
@@ -33,6 +33,9 @@ Active execution artifacts:
 - `RMD-021` batch 1 plan: [`docs/plans/rmd-021-worktree-parity-batch-1-plan.md`](./docs/plans/rmd-021-worktree-parity-batch-1-plan.md)
 - `RMD-021` batch 1 review: [`docs/reviews/rmd-021-worktree-parity-batch-1-review.md`](./docs/reviews/rmd-021-worktree-parity-batch-1-review.md)
 - `RMD-021` handoff seed: [`docs/plans/rmd-021-subagent-handoff-batch-1.md`](./docs/plans/rmd-021-subagent-handoff-batch-1.md)
+- `RMD-022` batch 1 plan: [`docs/plans/rmd-022-compound-enforcement-batch-1-plan.md`](./docs/plans/rmd-022-compound-enforcement-batch-1-plan.md)
+- `RMD-022` batch 1 review: [`docs/reviews/rmd-022-compound-enforcement-batch-1-review.md`](./docs/reviews/rmd-022-compound-enforcement-batch-1-review.md)
+- `RMD-031` handoff seed: [`docs/plans/rmd-031-subagent-handoff-batch-1.md`](./docs/plans/rmd-031-subagent-handoff-batch-1.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
@@ -189,7 +192,7 @@ Execution order (do not reorder unless blocked):
 | --- | --- | --- | --- |
 | `RMD-020` | First-class subagent orchestration | In progress | `PKG-020C` deltas are implemented in branch; finalize in a checkout with resolvable `HEAD` so worktree parity can execute non-skip. |
 | `RMD-021` | Git worktree compatibility guarantees | In progress | Strict CI parity enforcement and docs are in place; collect full pass evidence in a commit-backed checkout and merge. |
-| `RMD-022` | Compound loop enforcement in contribution flow | Planned | Add PR artifact-link gate + weekly metrics reporting routine for 4 weeks. |
+| `RMD-022` | Compound loop enforcement in contribution flow | In progress | CI artifact gate + weekly report generator + 4-week reports are in branch; verify in PR pipeline and merge. |
 
 ### Next
 | ID | Item | Status | Exit criteria |

@@ -1,0 +1,23 @@
+digraph GoldenJudgeRubric {
+  graph [goal="Golden regression for judge rubric", rankdir=LR]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  judge [
+    shape=box,
+    type="judge.rubric",
+    label="Judge",
+    prompt="Evaluate implementation quality.",
+    llm_provider="openai",
+    llm_model="gpt-test",
+    llm_backend="cli",
+    cli_command="printf '{\"overall_score\":0.91,\"sub_scores\":{\"accuracy\":0.9,\"completeness\":0.92},\"rationale\":\"meets rubric\"}'",
+    auto_status="true",
+    judge_rubric_path="./tests/golden/rubrics/judge-rubric.md",
+    score_threshold="0.85",
+    score_weights="{\"accuracy\":0.5,\"completeness\":0.5}"
+  ]
+
+  start -> judge -> exit
+}

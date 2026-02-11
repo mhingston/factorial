@@ -10,7 +10,7 @@ Use Semantic Versioning:
 
 ## Pre-release Checklist
 
-1. Update `/Users/markhingston/Downloads/strange-attractor/CHANGELOG.md` under `Unreleased`.
+1. Update `CHANGELOG.md` under `Unreleased`.
 2. Run quality gates locally:
    - `npm run lint`
    - `npm run typecheck`
@@ -24,7 +24,7 @@ Use Semantic Versioning:
 
 ## Automated Publish
 
-Pushing a `v*` tag triggers `/Users/markhingston/Downloads/strange-attractor/.github/workflows/release.yml`, which:
+Pushing a `v*` tag triggers `.github/workflows/release.yml`, which:
 
 1. Installs dependencies with `npm ci`.
 2. Runs lint/typecheck/tests.

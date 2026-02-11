@@ -41,5 +41,28 @@ describe('Types', () => {
     it('should have standard policy with 5 attempts', () => {
       expect(DEFAULT_RETRY_POLICIES.standard.max_attempts).toBe(5);
     });
+
+    it('should classify retryable and non-retryable errors', () => {
+      const retryable = [
+        new Error('429 rate limit'),
+        new Error('gateway 5 error'),
+        new Error('request timeout'),
+        new Error('ECONNRESET'),
+        new Error('ETIMEDOUT'),
+      ];
+      const nonRetryable = [new Error('401 unauthorized'), new Error('403 forbidden'), new Error('400 bad request')];
+
+      for (const error of retryable) {
+        expect(DEFAULT_RETRY_POLICIES.standard.should_retry(error)).toBe(true);
+        expect(DEFAULT_RETRY_POLICIES.aggressive.should_retry(error)).toBe(true);
+        expect(DEFAULT_RETRY_POLICIES.linear.should_retry(error)).toBe(true);
+        expect(DEFAULT_RETRY_POLICIES.patient.should_retry(error)).toBe(true);
+      }
+
+      for (const error of nonRetryable) {
+        expect(DEFAULT_RETRY_POLICIES.standard.should_retry(error)).toBe(false);
+      }
+      expect(DEFAULT_RETRY_POLICIES.none.should_retry(new Error('429'))).toBe(false);
+    });
   });
 });

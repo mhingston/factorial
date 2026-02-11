@@ -1,5 +1,5 @@
 {
-  "name": "strange-attractor",
+  "name": "@mhingston5/factorial",
   "version": "0.1.0",
   "description": "A DOT-based pipeline runner for orchestrating multi-stage AI workflows",
   "type": "module",
@@ -20,17 +20,23 @@
     }
   },
   "bin": {
-    "strange-attractor": "./dist/packages/cli/src/index.js"
+    "factorial": "./dist/packages/cli/src/index.js"
   },
   "scripts": {
     "build": "tsc && cp ./packages/dot-parser/src/parser.js ./dist/packages/dot-parser/src/parser.js",
     "dev": "tsc --watch",
     "test": "vitest",
     "test:run": "vitest --run",
+    "test:golden": "vitest --run tests/golden/golden-regression.test.ts",
+    "dtu:run": "npm run build && node ./dist/packages/cli/src/index.js dtu-run --fixtures ./tests/fixtures/dtu/scenarios --report ./reports/dtu_satisfaction_report.json",
     "test:coverage": "vitest --run --coverage",
     "lint": "biome lint .",
     "lint:biome": "biome lint .",
     "format": "biome format --write .",
+    "agent:audit": "node ./scripts/agent-capability-audit.js",
+    "test:worktree": "node ./scripts/worktree-parity-check.js",
+    "check:pr-compound": "node ./scripts/check-pr-compound-artifacts.js",
+    "metrics:compound-weekly": "node ./scripts/compound-weekly-report.js",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run lint && npm run typecheck && npm run test:run && npm run build"
@@ -46,6 +52,14 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhingston/factorial.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mhingston/factorial/issues"
+  },
+  "homepage": "https://github.com/mhingston/factorial#readme",
   "files": [
     "dist",
     "README.md",

@@ -1,0 +1,52 @@
+{
+  "fixture_id": "slack-channel-partial-outage",
+  "description": "Reference slack.channel twin emits deterministic partial outage error.",
+  "request": {
+    "twin_id": "slack.channel",
+    "operation": "messages.post",
+    "scenario_id": "slack-post-partial-outage",
+    "seed": "phase-a-seed-103",
+    "input": {
+      "channel_id": "C123456",
+      "text": "Post update during partial outage simulation",
+      "actor": "qa-bot",
+      "simulate": "partial_outage"
+    },
+    "timing": {
+      "requested_at_ms": 1739222412000,
+      "timeout_ms": 3000
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "post-partial-outage"
+    }
+  },
+  "expected": {
+    "twin_id": "slack.channel",
+    "twin_version": "0.1.0",
+    "operation": "messages.post",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "partial_outage",
+      "class": "transient",
+      "message": "Partial outage in slack.channel twin.",
+      "retryable": true,
+      "details": {
+        "outage_scope": "messages_api"
+      }
+    },
+    "timing": {
+      "started_at_ms": 1739222412000,
+      "completed_at_ms": 1739222412005,
+      "latency_ms": 5,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "post-partial-outage",
+      "provider": "slack",
+      "parity_profile": "dtu-complete"
+    }
+  }
+}

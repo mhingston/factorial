@@ -1,0 +1,36 @@
+digraph GoldenQualityGateFail {
+  graph [goal="Golden regression for quality gate fail path", rankdir=LR]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  gate [
+    shape=diamond,
+    type="quality.gate",
+    label="Quality Gate",
+    gate_type="custom",
+    gate_command="printf 'gate-fail' >&2; exit 1",
+    pass_condition="outcome=success",
+    failure_target="fix"
+  ]
+
+  done [
+    shape=parallelogram,
+    type="tool",
+    label="Done",
+    tool_command="printf 'done'"
+  ]
+
+  fix [
+    shape=parallelogram,
+    type="tool",
+    label="Fix",
+    tool_command="printf 'fix'"
+  ]
+
+  start -> gate
+  gate -> done [condition="outcome=success", label="pass"]
+  gate -> fix [condition="outcome=fail", label="fail"]
+  done -> exit
+  fix -> exit
+}

@@ -69,16 +69,33 @@ describe('CodergenHandler artifacts', () => {
     const output = await readJson(join(stageDir, 'output.json'));
     const apiRequest = await readJson(join(stageDir, 'api_request.json'));
     const apiResponse = await readJson(join(stageDir, 'api_response.json'));
+    const validation = await readJson(join(stageDir, 'validation.json'));
     const events = await readJson(join(stageDir, 'events.json'));
     const ndjson = await readFile(join(stageDir, 'events.ndjson'), 'utf-8');
 
     expect(output.output_mode).toBe('text');
     expect(output.output).toBe('hello world');
+    expect(output.usage).toEqual({
+      input_tokens: 10,
+      output_tokens: 2,
+      total_tokens: 12,
+    });
+    expect(output.validation_result).toBe('skipped');
+    expect(output.validation_errors).toEqual([]);
+    expect(outcome.context_updates['codergen.text_node.usage.total_tokens']).toBe(12);
+    expect(outcome.context_updates['budget.text_node.tokens_used']).toBe(12);
     expect(apiRequest.operation).toBe('generateText');
     expect(apiRequest.provider).toBe('openai');
     expect(apiResponse.operation).toBe('generateText');
     expect(apiResponse.output_mode).toBe('text');
     expect(apiResponse.output).toBe('hello world');
+    expect(validation).toMatchObject({
+      output_contract_required: false,
+      schema_configured: false,
+      result: 'skipped',
+      checked: false,
+      errors: [],
+    });
     expect(Array.isArray(events)).toBe(true);
     expect(events).toHaveLength(2);
     expect(String(ndjson).trim().split('\n')).toHaveLength(2);
@@ -128,13 +145,23 @@ describe('CodergenHandler artifacts', () => {
     const output = await readJson(join(stageDir, 'output.json'));
     const apiRequest = await readJson(join(stageDir, 'api_request.json'));
     const responseMd = await readFile(join(stageDir, 'response.md'), 'utf-8');
+    const validation = await readJson(join(stageDir, 'validation.json'));
 
     expect(outputSchema.schema).toEqual(schema);
     expect(outputSchema.mode).toBe('json');
     expect(outputSchema.schema_name).toBe('SummaryOutput');
     expect(output.output_mode).toBe('object');
     expect(output.output).toEqual({ summary: 'structured result' });
+    expect(output.validation_result).toBe('pass');
+    expect(output.validation_errors).toEqual([]);
     expect(apiRequest.operation).toBe('generateObject');
+    expect(validation).toMatchObject({
+      output_contract_required: false,
+      schema_configured: true,
+      result: 'pass',
+      checked: true,
+      errors: [],
+    });
     expect(responseMd).toContain('"summary": "structured result"');
   });
 
@@ -368,8 +395,74 @@ describe('CodergenHandler artifacts', () => {
 
     const stageDir = join(logsRoot, node.id);
     const output = await readJson(join(stageDir, 'output.json')) as Record<string, unknown>;
+    const validation = await readJson(join(stageDir, 'validation.json')) as Record<string, unknown>;
     expect(output.status).toBe('fail');
     expect(output.failure_reason).toContain('schema validation');
+    expect(output.validation_result).toBe('fail');
+    expect(output.validation_errors).toEqual([
+      '$.summary: missing required property',
+      '$.wrong: additional properties are not allowed',
+    ]);
+    expect(validation.result).toBe('fail');
+    expect(validation.checked).toBe(true);
+  });
+
+  it.each([
+    {
+      name: 'api backend',
+      attributes: {
+        output_contract_required: 'true',
+      },
+    },
+    {
+      name: 'cli backend',
+      attributes: {
+        llm_backend: 'cli',
+        cli_command: `printf '{"summary":"from cli"}'`,
+        output_contract_required: 'true',
+      },
+    },
+  ])('fails deterministically when output contract is required without schema ($name)', async ({ attributes }) => {
+    generateTextMock.mockResolvedValue({
+      text: 'should not be used',
+      request: { id: 'req-contract' },
+      response: { id: 'resp-contract' },
+      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      finishReason: 'stop',
+      warnings: [],
+      providerMetadata: { provider: 'openai' },
+    });
+
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-codergen-contract-required-'));
+    const handler = new CodergenHandler();
+    const context = new Context();
+    const node = makeNode('contract_required_node', {
+      auto_status: true,
+      attributes,
+    });
+
+    const outcome = await handler.execute(node, context, makeGraph(), logsRoot);
+    expect(outcome.status).toBe('FAIL');
+    expect(outcome.failure_reason).toContain('output_contract_required=true');
+    expect(generateTextMock).not.toHaveBeenCalled();
+    expect(generateObjectMock).not.toHaveBeenCalled();
+
+    const stageDir = join(logsRoot, node.id);
+    const output = await readJson(join(stageDir, 'output.json')) as Record<string, unknown>;
+    const validation = await readJson(join(stageDir, 'validation.json')) as Record<string, unknown>;
+
+    expect(output.status).toBe('fail');
+    expect(output.validation_result).toBe('fail');
+    expect(output.validation_errors).toEqual([
+      'output_contract_required=true requires output_schema or output_schema_path',
+    ]);
+    expect(validation).toMatchObject({
+      output_contract_required: true,
+      schema_configured: false,
+      result: 'fail',
+      checked: true,
+      errors: ['output_contract_required=true requires output_schema or output_schema_path'],
+    });
   });
 });
 

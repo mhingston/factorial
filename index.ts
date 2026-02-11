@@ -1,11 +1,11 @@
 /**
- * Strange Attractor - A DOT-based pipeline runner for orchestrating multi-stage AI workflows
+ * Factorial - A DOT-based pipeline runner for orchestrating multi-stage AI workflows
  * 
- * This is the main entry point for the strange-attractor package.
+ * This is the main entry point for the @mhingston5/factorial package.
  * 
  * @example
  * ```typescript
- * import { Attractor } from 'strange-attractor';
+ * import { Attractor } from '@mhingston5/factorial';
  * 
  * const attractor = new Attractor({
  *   dotFile: './workflow.dot',
@@ -45,6 +45,7 @@ export {
   FanInHandler,
   ManagerLoopHandler,
 } from './packages/core/src/index.js';
+export * from './packages/core/src/dtu/index.js';
 
 export type {
   Graph,

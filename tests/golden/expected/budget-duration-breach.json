@@ -1,0 +1,73 @@
+{
+  "executed_nodes": [
+    "start",
+    "work"
+  ],
+  "nodes": {
+    "start": {
+      "budget_result": {
+        "breached": false,
+        "errors": [],
+        "limits": {
+          "max_cost_usd": null,
+          "max_duration_ms": null,
+          "max_tokens": null
+        },
+        "run_totals": {
+          "cost_usd": 0,
+          "duration_ms": 0,
+          "tokens_used": 0
+        },
+        "usage": {
+          "cost_usd": 0,
+          "duration_ms": 0,
+          "tokens_used": 0
+        }
+      }
+    },
+    "work": {
+      "budget_result": {
+        "breached": true,
+        "errors": [
+          "graph.budget_max_duration_ms exceeded (<actual> > <limit>)"
+        ],
+        "limits": {
+          "max_cost_usd": null,
+          "max_duration_ms": null,
+          "max_tokens": null
+        },
+        "run_totals": {
+          "cost_usd": 0,
+          "duration_ms": 0,
+          "tokens_used": 0
+        },
+        "usage": {
+          "cost_usd": 0,
+          "duration_ms": 0,
+          "tokens_used": 0
+        }
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "Budget limits exceeded at node \"work\": graph.budget_max_duration_ms exceeded (<actual> > <limit>)",
+    "status": "FAIL"
+  },
+  "run_budget": {
+    "breached": true,
+    "errors": [
+      "graph.budget_max_duration_ms exceeded (<actual> > <limit>)"
+    ],
+    "limits": {
+      "max_cost_usd": null,
+      "max_duration_ms": 10,
+      "max_tokens": null
+    },
+    "totals": {
+      "cost_usd": 0,
+      "duration_ms": 0,
+      "tokens_used": 0
+    }
+  },
+  "workflow": "budget-duration-breach.dot"
+}

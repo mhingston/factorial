@@ -1,0 +1,53 @@
+{
+  "scenario_id": "scn-jira-malformed-payload",
+  "suite": "regression",
+  "description": "Deterministically simulate malformed Jira payload handling.",
+  "request": {
+    "twin_id": "jira.issue",
+    "operation": "issues.create",
+    "scenario_id": "jira-malformed-payload",
+    "seed": "phase-a-seed-005",
+    "input": {
+      "project_key": "FACT",
+      "description": "Missing summary field should fail validation.",
+      "actor": "platform-bot"
+    },
+    "timing": {
+      "requested_at_ms": 1739222401800,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "jira-malformed"
+    }
+  },
+  "expected": {
+    "twin_id": "jira.issue",
+    "twin_version": "0.1.0",
+    "operation": "issues.create",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "malformed_request",
+      "class": "spec_mismatch",
+      "message": "Invalid issues.create input for jira.issue twin.",
+      "retryable": false,
+      "details": {
+        "validation_error": "Required"
+      }
+    },
+    "timing": {
+      "started_at_ms": 1739222401800,
+      "completed_at_ms": 1739222401801,
+      "latency_ms": 1,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "jira-malformed",
+      "provider": "jira"
+    }
+  },
+  "expected_failure_mode": "malformed_payload",
+  "tags": ["jira", "regression", "failure"]
+}

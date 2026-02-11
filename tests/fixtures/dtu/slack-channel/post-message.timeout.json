@@ -1,0 +1,50 @@
+{
+  "fixture_id": "slack-channel-post-timeout",
+  "description": "Reference slack.channel twin emits deterministic timeout error.",
+  "request": {
+    "twin_id": "slack.channel",
+    "operation": "messages.post",
+    "scenario_id": "slack-post-timeout",
+    "seed": "phase-a-seed-102",
+    "input": {
+      "channel_id": "C123456",
+      "text": "Post update during timeout simulation",
+      "actor": "qa-bot",
+      "simulate": "timeout"
+    },
+    "timing": {
+      "requested_at_ms": 1739222411000,
+      "timeout_ms": 1500
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "post-timeout"
+    }
+  },
+  "expected": {
+    "twin_id": "slack.channel",
+    "twin_version": "0.1.0",
+    "operation": "messages.post",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "timeout",
+      "class": "transient",
+      "message": "Timeout reached while posting message in slack.channel twin.",
+      "retryable": true,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222411000,
+      "completed_at_ms": 1739222412500,
+      "latency_ms": 1500,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "post-timeout",
+      "provider": "slack",
+      "parity_profile": "dtu-complete"
+    }
+  }
+}

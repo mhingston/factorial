@@ -9,6 +9,7 @@ export { HandlerRegistry } from './handlers/registry.js';
 export * from './lint/index.js';
 export * from './stylesheet/index.js';
 export * from './handlers/builtin.js';
+export * from './dtu/index.js';
 
 // Re-export commonly used types
 export type { 

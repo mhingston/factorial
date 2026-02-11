@@ -1,0 +1,13 @@
+{
+  "executed_nodes": [
+    "start",
+    "work",
+    "recover"
+  ],
+  "nodes": {},
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "targeted-retry-routing.dot"
+}

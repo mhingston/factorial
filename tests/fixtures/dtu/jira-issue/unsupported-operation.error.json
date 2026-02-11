@@ -1,0 +1,47 @@
+{
+  "fixture_id": "jira-issue-unsupported-operation",
+  "description": "Reference jira.issue twin returns a spec-mismatch error for unsupported operations.",
+  "request": {
+    "twin_id": "jira.issue",
+    "operation": "issues.transition",
+    "scenario_id": "jira-unsupported-operation",
+    "seed": "phase-a-seed-003",
+    "input": {
+      "issue_key": "FACT-7055",
+      "target_status": "IN_PROGRESS"
+    },
+    "timing": {
+      "requested_at_ms": 1739222402000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "unsupported-operation"
+    }
+  },
+  "expected": {
+    "twin_id": "jira.issue",
+    "twin_version": "0.1.0",
+    "operation": "issues.transition",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "operation_not_supported",
+      "class": "spec_mismatch",
+      "message": "Unsupported operation for jira.issue twin: issues.transition",
+      "retryable": false,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222402000,
+      "completed_at_ms": 1739222402001,
+      "latency_ms": 1,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "phase-a",
+      "fixture": "unsupported-operation",
+      "supported_operations": ["issues.create"]
+    }
+  }
+}

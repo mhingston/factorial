@@ -1,0 +1,46 @@
+{
+  "executed_nodes": [
+    "start",
+    "fan_in"
+  ],
+  "nodes": {
+    "fan_in": {
+      "fan_in_decision": {
+        "branch_scores": [
+          {
+            "branch_id": "alpha",
+            "result_index": 0,
+            "score": 1,
+            "status": "SUCCESS",
+            "weight": 1
+          },
+          {
+            "branch_id": "beta",
+            "result_index": 1,
+            "score": 1,
+            "status": "SUCCESS",
+            "weight": 3
+          }
+        ],
+        "consensus_count": 0,
+        "merge_strategy": "best_score",
+        "merge_tiebreak": "weight",
+        "selected": {
+          "branch_id": "beta",
+          "index": 1,
+          "score": 1,
+          "status": "SUCCESS"
+        },
+        "selected_output": {
+          "candidate": "beta",
+          "confidence": 0.82
+        }
+      }
+    }
+  },
+  "run": {
+    "failure_reason": "",
+    "status": "SUCCESS"
+  },
+  "workflow": "fan-in-best-score.dot"
+}

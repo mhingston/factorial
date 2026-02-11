@@ -1,0 +1,20 @@
+digraph GoldenFanInBestScore {
+  graph [
+    goal="Golden regression for fan-in best score",
+    rankdir=LR,
+    golden_seed_context_path="./tests/golden/seed/fan_in_best_score.json"
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  fan_in [
+    shape=tripleoctagon,
+    type="parallel.fan_in",
+    label="Fan In",
+    merge_strategy="best_score",
+    merge_tiebreak="weight"
+  ]
+
+  start -> fan_in -> exit
+}
