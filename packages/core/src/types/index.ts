@@ -84,6 +84,73 @@ export interface ProviderConfig {
   package?: string;
 }
 
+export type LlmBackend = 'api' | 'cli';
+export type LlmOperation = 'generateText' | 'generateObject' | 'cli';
+export type LlmOutputMode = 'text' | 'object';
+export type LlmStructuredOutputMode = 'auto' | 'json' | 'tool';
+
+export interface LlmCompleteRequest {
+  backend: LlmBackend;
+  nodeId: string;
+  provider: string;
+  model: string;
+  prompt: string;
+  providerApiKeyEnv?: string;
+  outputSchema?: Record<string, unknown> | null;
+  outputSchemaName?: string;
+  outputSchemaDescription?: string;
+  outputMode?: LlmStructuredOutputMode;
+  cli?: {
+    command?: unknown;
+    executable?: unknown;
+    args?: unknown;
+    env?: unknown;
+    cwd?: unknown;
+    timeoutMs?: unknown;
+    logsRoot: string;
+    stageDir: string;
+  };
+  signal?: AbortSignal;
+}
+
+export interface LlmCompleteResult {
+  adapter: string;
+  backend: LlmBackend;
+  operation: LlmOperation;
+  mode: LlmOutputMode;
+  output: unknown;
+  textOutput: string;
+  callError?: string;
+  request?: unknown;
+  response?: unknown;
+  usage?: unknown;
+  finishReason?: unknown;
+  warnings?: unknown;
+  providerMetadata?: unknown;
+  cliInvocation?: Record<string, unknown>;
+  stdout?: string;
+  stderr?: string;
+}
+
+export interface LlmStreamRequest {
+  backend: LlmBackend;
+  nodeId: string;
+  provider: string;
+  model: string;
+  prompt: string;
+  signal?: AbortSignal;
+}
+
+export interface LlmStreamEvent {
+  type: string;
+  data?: unknown;
+}
+
+export interface LlmAdapter {
+  complete(request: LlmCompleteRequest): Promise<LlmCompleteResult>;
+  stream(request: LlmStreamRequest): AsyncGenerator<LlmStreamEvent>;
+}
+
 export interface RetryPolicy {
   max_attempts: number;
   backoff: BackoffConfig;

@@ -40,6 +40,7 @@ Ratchet rule: no new critique is added until the active batch reaches `resolved`
 - For PR-bound feature work, ensure the PR body passes `npm run check:pr-compound` (plan/review/compound links + lock decision + ratchet reference).
 - Publish one weekly compound metrics report under `docs/metrics/reports/` using `npm run metrics:compound-weekly`.
 - For new runtime adapters (including DTU work), define contract schema + in-memory boundary + fixture parity checks before adding external integration layers.
+- For codergen/provider work, keep handler orchestration backend-agnostic by routing provider execution through `packages/core/src/llm/` adapter contracts (`complete`/`stream`).
 - Use file and line references for review findings.
 - Prioritize reliability, security, correctness, and major performance issues over style.
 

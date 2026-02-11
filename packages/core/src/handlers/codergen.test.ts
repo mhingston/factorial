@@ -3,7 +3,7 @@ import { chmod, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Context } from '../context/index.js';
-import type { Graph, Node } from '../types/index.js';
+import type { Graph, LlmAdapter, Node } from '../types/index.js';
 
 const { generateTextMock, generateObjectMock, jsonSchemaMock, openaiMock, anthropicMock, googleMock } = vi.hoisted(() => ({
   generateTextMock: vi.fn(),
@@ -42,6 +42,44 @@ describe('CodergenHandler artifacts', () => {
     openaiMock.mockClear();
     anthropicMock.mockClear();
     googleMock.mockClear();
+  });
+
+  it('routes codergen execution through adapter boundary', async () => {
+    const completeMock = vi.fn().mockResolvedValue({
+      adapter: 'test-adapter',
+      backend: 'api',
+      operation: 'generateText',
+      mode: 'text',
+      output: 'adapter-output',
+      textOutput: 'adapter-output',
+      usage: { totalTokens: 7 },
+    });
+    const adapter: LlmAdapter = {
+      complete: completeMock,
+      async *stream() {
+        throw new Error('stream not implemented in test');
+      },
+    };
+
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-codergen-adapter-'));
+    const handler = new CodergenHandler(adapter);
+    const context = new Context();
+    const node = makeNode('adapter_node', { auto_status: true });
+
+    const outcome = await handler.execute(node, context, makeGraph(), logsRoot);
+    expect(outcome.status).toBe('SUCCESS');
+    expect(completeMock).toHaveBeenCalledTimes(1);
+    expect(completeMock.mock.calls[0]?.[0]).toMatchObject({
+      backend: 'api',
+      nodeId: 'adapter_node',
+      provider: 'openai',
+      model: 'gpt-test',
+    });
+    expect(generateTextMock).not.toHaveBeenCalled();
+    expect(generateObjectMock).not.toHaveBeenCalled();
+    expect(outcome.context_updates['codergen.adapter_node.adapter']).toBe('test-adapter');
+    expect(outcome.context_updates['codergen.adapter_node.output']).toBe('adapter-output');
+    expect(outcome.context_updates['codergen.adapter_node.usage.total_tokens']).toBe(7);
   });
 
   it('writes API artifacts for text generation', async () => {

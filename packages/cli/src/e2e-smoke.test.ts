@@ -93,6 +93,20 @@ describe('CLI e2e smoke tests', () => {
     expect(manifest.schema_version).toBe('run_manifest.v1');
     expect((manifest.outcome as Record<string, unknown>).status).toBe('SUCCESS');
     expect(Array.isArray((manifest.model_provenance as unknown[]))).toBe(true);
+    const provenance = ((manifest.model_provenance as unknown[])[0] ?? {}) as Record<string, unknown>;
+    expect(provenance.adapter).toBe('subprocess-cli');
+    expect(provenance.backend).toBe('cli');
+    expect(provenance.operation).toBe('cli');
+    expect(provenance.output_mode).toBe('text');
+    const usage = (provenance.usage ?? {}) as Record<string, unknown>;
+    expect(usage.input_tokens).toBeNull();
+    expect(usage.output_tokens).toBeNull();
+    expect(usage.total_tokens).toBeNull();
+    expect(usage.cost_usd).toBeNull();
+    const tooling = (provenance.tooling ?? {}) as Record<string, unknown>;
+    expect((tooling.cli_invocation_path as string) || '').toContain('cli_invocation.json');
+    expect((tooling.stdout_path as string) || '').toContain('stdout.log');
+    expect((tooling.stderr_path as string) || '').toContain('stderr.log');
   });
 
   it('resume command succeeds from latest checkpoint', async () => {

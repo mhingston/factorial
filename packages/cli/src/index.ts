@@ -134,13 +134,25 @@ interface RunManifest {
   model_provenance: Array<{
     node_id: string;
     node_type: string;
+    adapter: string;
     backend: string;
+    operation: string;
+    output_mode: string;
     provider: string;
     model: string;
     reasoning_effort: string;
     usage: {
+      input_tokens: number | null;
+      output_tokens: number | null;
       total_tokens: number | null;
       cost_usd: number | null;
+    };
+    tooling: {
+      api_request_path: string;
+      api_response_path: string;
+      cli_invocation_path: string;
+      stdout_path: string;
+      stderr_path: string;
     };
   }>;
   artifacts: {
@@ -776,6 +788,7 @@ function collectModelProvenance(
     }
 
     const prefix = `codergen.${nodeId}.`;
+    const adapter = asNonEmptyString(contextValues[`${prefix}adapter`]) ?? '';
     const provider = asNonEmptyString(contextValues[`${prefix}provider`])
       ?? node.llm_provider
       ?? config.llm_provider
@@ -789,6 +802,8 @@ function collectModelProvenance(
       ?? asNonEmptyString(node.attributes.llm_backend)
       ?? config.llm_backend
       ?? '';
+    const operation = asNonEmptyString(contextValues[`${prefix}operation`]) ?? '';
+    const outputMode = asNonEmptyString(contextValues[`${prefix}output_mode`]) ?? '';
     const reasoningEffort = asNonEmptyString(contextValues[`${prefix}reasoning_effort`])
       ?? node.reasoning_effort
       ?? '';
@@ -796,13 +811,25 @@ function collectModelProvenance(
     records.push({
       node_id: nodeId,
       node_type: modelNodeType,
+      adapter,
       backend,
+      operation,
+      output_mode: outputMode,
       provider,
       model,
       reasoning_effort: reasoningEffort,
       usage: {
+        input_tokens: asFiniteNumber(contextValues[`${prefix}usage.input_tokens`]) ?? null,
+        output_tokens: asFiniteNumber(contextValues[`${prefix}usage.output_tokens`]) ?? null,
         total_tokens: asFiniteNumber(contextValues[`${prefix}usage.total_tokens`]) ?? null,
         cost_usd: asFiniteNumber(contextValues[`${prefix}usage.cost_usd`]) ?? null,
+      },
+      tooling: {
+        api_request_path: asNonEmptyString(contextValues[`${prefix}api_request_path`]) ?? '',
+        api_response_path: asNonEmptyString(contextValues[`${prefix}api_response_path`]) ?? '',
+        cli_invocation_path: asNonEmptyString(contextValues[`${prefix}cli_invocation_path`]) ?? '',
+        stdout_path: asNonEmptyString(contextValues[`${prefix}stdout_path`]) ?? '',
+        stderr_path: asNonEmptyString(contextValues[`${prefix}stderr_path`]) ?? '',
       },
     });
   }

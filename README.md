@@ -335,7 +335,10 @@ Each execution (run/resume/replay) writes `<logs_root>/run_manifest.json` with:
 - runtime metadata (`strange_attractor_version`, Node/platform info)
 - fixed run config used for execution
 - normalized outcome + checkpoint/node outcome summary
-- model/provider provenance per executed model-backed node
+- model/provider provenance per executed model-backed node, including:
+  - adapter/backend/operation/output mode
+  - usage (`input_tokens`, `output_tokens`, `total_tokens`, `cost_usd`)
+  - tooling artifact paths (`api_request_path`, `api_response_path`, `cli_invocation_path`, `stdout_path`, `stderr_path`)
 
 When any budget limits are configured, the engine writes:
 

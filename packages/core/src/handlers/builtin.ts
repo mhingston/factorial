@@ -1,11 +1,11 @@
-import { generateObject, generateText, jsonSchema } from 'ai';
 import { spawn } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { evaluateCondition } from '../conditions/index.js';
 import { ExecutionCancelledError } from '../engine/index.js';
 import type { ExecutionEngine } from '../engine/index.js';
-import type { Node, Graph, Outcome, Context, Handler } from '../types/index.js';
+import { createDefaultLlmAdapter } from '../llm/index.js';
+import type { Node, Graph, Outcome, Context, Handler, LlmAdapter } from '../types/index.js';
 
 /**
  * Start handler - no-op entry point
@@ -47,37 +47,6 @@ export class ConditionalHandler implements Handler {
   }
 }
 
-async function resolveModel(provider: string, model: string, providerSettings?: ProviderSettings) {
-  const normalized = provider.toLowerCase();
-  switch (normalized) {
-    case 'openai': {
-      const { openai } = await import('@ai-sdk/openai');
-      return openai(model);
-    }
-    case 'anthropic': {
-      const { anthropic } = await import('@ai-sdk/anthropic');
-      return anthropic(model);
-    }
-    case 'google': {
-      const { google } = await import('@ai-sdk/google');
-      return google(model);
-    }
-    case 'github':
-    case 'copilot': {
-      const { createCopilot } = await import('ai-sdk-provider-github');
-      const oauthToken = providerSettings?.apiKeyEnv
-        ? asNonEmptyString(process.env[providerSettings.apiKeyEnv])
-        : undefined;
-      const providerFactory = oauthToken
-        ? createCopilot({ oauthToken })
-        : createCopilot();
-      return providerFactory(model);
-    }
-    default:
-      throw new Error(`Unsupported provider: ${provider}`);
-  }
-}
-
 /**
  * Codergen handler - executes LLM tasks
  */
@@ -86,7 +55,6 @@ type OutputMode = 'text' | 'object';
 type StructuredOutputMode = 'auto' | 'json' | 'tool';
 type CodergenBackend = 'api' | 'cli';
 type CodergenOperation = 'generateText' | 'generateObject' | 'cli';
-type ProviderEnvKey = 'OPENAI_API_KEY' | 'ANTHROPIC_API_KEY' | 'GOOGLE_GENERATIVE_AI_API_KEY';
 type ValidationResult = 'pass' | 'fail' | 'skipped';
 type FanInMergeStrategy = 'best_score' | 'consensus' | 'arbiter';
 type FanInMergeTiebreak = 'weight' | 'lexical' | 'latest';
@@ -105,6 +73,7 @@ interface OutputSchemaConfig {
 }
 
 interface CodergenCallResult {
+  adapter: string;
   backend: CodergenBackend;
   operation: CodergenOperation;
   mode: OutputMode;
@@ -186,6 +155,12 @@ const DEFAULT_FAILURE_ANALYZE_SCHEMA: Record<string, unknown> = {
 };
 
 export class CodergenHandler implements Handler {
+  private llmAdapter: LlmAdapter;
+
+  constructor(llmAdapter?: LlmAdapter) {
+    this.llmAdapter = llmAdapter ?? createDefaultLlmAdapter();
+  }
+
   async execute(
     node: Node,
     context: Context,
@@ -280,6 +255,7 @@ export class CodergenHandler implements Handler {
       }
 
       let callResult: CodergenCallResult = {
+        adapter: backend === 'api' ? 'vercel-ai-sdk' : 'subprocess-cli',
         backend,
         operation: backend === 'api' ? (schemaConfig ? 'generateObject' : 'generateText') : 'cli',
         mode: schemaConfig ? 'object' : 'text',
@@ -288,11 +264,11 @@ export class CodergenHandler implements Handler {
       };
 
       if (validation.result !== 'fail' && backend === 'api') {
-        applyProviderEnvOverrides(provider, providerSettings.apiKeyEnv);
         const operation: CodergenOperation = schemaConfig ? 'generateObject' : 'generateText';
         const apiRequestPath = join(stageDir, 'api_request.json');
         await writeJsonFile(apiRequestPath, {
-          backend: 'vercel-ai-sdk',
+          adapter: 'vercel-ai-sdk',
+          backend: 'api',
           operation,
           node_id: node.id,
           provider,
@@ -316,12 +292,24 @@ export class CodergenHandler implements Handler {
           status: 'started',
         });
 
-        const model = await resolveModel(provider, modelName, providerSettings);
         const callStart = Date.now();
         try {
-          callResult = await runCodergenApiCall(model, fullPrompt, schemaConfig, signal);
+          callResult = await this.llmAdapter.complete({
+            backend: 'api',
+            nodeId: node.id,
+            provider,
+            model: modelName,
+            prompt: fullPrompt,
+            providerApiKeyEnv: providerSettings.apiKeyEnv,
+            outputSchema: schemaConfig?.schema ?? null,
+            outputSchemaName: schemaConfig?.schemaName,
+            outputSchemaDescription: schemaConfig?.schemaDescription,
+            outputMode: schemaConfig?.mode,
+            signal,
+          });
         } catch (error) {
           callResult = {
+            adapter: 'vercel-ai-sdk',
             backend: 'api',
             operation,
             mode: schemaConfig ? 'object' : 'text',
@@ -334,7 +322,8 @@ export class CodergenHandler implements Handler {
 
         const apiResponsePath = join(stageDir, 'api_response.json');
         await writeJsonFile(apiResponsePath, {
-          backend: 'vercel-ai-sdk',
+          adapter: callResult.adapter,
+          backend: 'api',
           operation,
           node_id: node.id,
           provider,
@@ -364,18 +353,29 @@ export class CodergenHandler implements Handler {
       } else if (validation.result !== 'fail') {
         const callStart = Date.now();
         try {
-          callResult = await runCodergenCliCall({
-            node,
+          callResult = await this.llmAdapter.complete({
+            backend: 'cli',
+            nodeId: node.id,
             provider,
-            modelName,
+            model: modelName,
             prompt: fullPrompt,
-            logsRoot,
-            stageDir,
-            schemaConfig,
+            outputSchema: schemaConfig?.schema ?? null,
+            outputMode: schemaConfig?.mode,
+            cli: {
+              command: node.attributes.cli_command,
+              executable: node.attributes.cli_executable,
+              args: node.attributes.cli_args,
+              env: node.attributes.cli_env,
+              cwd: node.attributes.cli_cwd,
+              timeoutMs: node.attributes.cli_timeout_ms ?? node.timeout ?? 120000,
+              logsRoot,
+              stageDir,
+            },
             signal,
           });
         } catch (error) {
           callResult = {
+            adapter: 'subprocess-cli',
             backend: 'cli',
             operation: 'cli',
             mode: schemaConfig ? 'object' : 'text',
@@ -406,6 +406,17 @@ export class CodergenHandler implements Handler {
           failed: Boolean(callResult.callError),
           error: callResult.callError,
         });
+      }
+
+      artifactUpdates[`codergen.${node.id}.adapter`] = callResult.adapter;
+      artifactUpdates[`codergen.${node.id}.backend`] = callResult.backend;
+      artifactUpdates[`codergen.${node.id}.operation`] = callResult.operation;
+      artifactUpdates[`codergen.${node.id}.provider`] = provider;
+      artifactUpdates[`codergen.${node.id}.model`] = modelName;
+      artifactUpdates[`codergen.${node.id}.reasoning_effort`] = node.reasoning_effort;
+      artifactUpdates[`codergen.${node.id}.output_mode`] = callResult.mode;
+      if (callResult.finishReason !== undefined) {
+        artifactUpdates[`codergen.${node.id}.finish_reason`] = callResult.finishReason;
       }
 
       const structuredValidation = validateStructuredOutput(callResult, schemaConfig);
@@ -519,11 +530,13 @@ export class CodergenHandler implements Handler {
         [`codergen.${node.id}.output`]: callResult.mode === 'text' ? callResult.textOutput : callResult.output,
         [`codergen.${node.id}.prompt`]: fullPrompt,
         [`codergen.${node.id}.status`]: statusOutcome.status,
+        [`codergen.${node.id}.adapter`]: callResult.adapter,
         [`codergen.${node.id}.backend`]: callResult.backend,
         [`codergen.${node.id}.operation`]: callResult.operation,
         [`codergen.${node.id}.provider`]: provider,
         [`codergen.${node.id}.model`]: modelName,
         [`codergen.${node.id}.reasoning_effort`]: node.reasoning_effort,
+        [`codergen.${node.id}.output_mode`]: callResult.mode,
         [`codergen.${node.id}.prompt_path`]: promptPath,
         [`codergen.${node.id}.response_path`]: responsePath,
         [`codergen.${node.id}.status_path`]: join(stageDir, 'status.json'),
@@ -787,343 +800,6 @@ async function resolveProviderSettings(context: Context, provider: string): Prom
   return {
     apiKeyEnv: asNonEmptyString(providerValue.api_key_env),
     defaultModel: asNonEmptyString(providerValue.default_model),
-  };
-}
-
-function applyProviderEnvOverrides(provider: string, apiKeyEnv?: string): void {
-  if (!provider || !apiKeyEnv) {
-    return;
-  }
-
-  const envValue = process.env[apiKeyEnv];
-  if (!envValue) {
-    return;
-  }
-
-  const providerEnvKey = mapProviderApiKeyEnv(provider);
-  if (!providerEnvKey) {
-    return;
-  }
-
-  if (!process.env[providerEnvKey]) {
-    process.env[providerEnvKey] = envValue;
-  }
-}
-
-function mapProviderApiKeyEnv(provider: string): ProviderEnvKey | undefined {
-  const normalized = provider.trim().toLowerCase();
-  if (normalized === 'openai') {
-    return 'OPENAI_API_KEY';
-  }
-  if (normalized === 'anthropic') {
-    return 'ANTHROPIC_API_KEY';
-  }
-  if (normalized === 'google' || normalized === 'gemini') {
-    return 'GOOGLE_GENERATIVE_AI_API_KEY';
-  }
-  return undefined;
-}
-
-async function runCodergenApiCall(
-  model: unknown,
-  prompt: string,
-  schemaConfig: OutputSchemaConfig | null,
-  signal?: AbortSignal
-): Promise<CodergenCallResult> {
-  if (schemaConfig) {
-    const result = await generateObject({
-      model: model as Parameters<typeof generateObject>[0]['model'],
-      prompt,
-      schema: jsonSchema(schemaConfig.schema),
-      output: 'object',
-      schemaName: schemaConfig.schemaName,
-      schemaDescription: schemaConfig.schemaDescription,
-      abortSignal: signal,
-    });
-    return {
-      backend: 'api',
-      operation: 'generateObject',
-      mode: 'object',
-      output: result.object,
-      textOutput: serializeForMarkdown(result.object),
-      request: result.request,
-      response: result.response,
-      usage: result.usage,
-      finishReason: result.finishReason,
-      warnings: result.warnings,
-      providerMetadata: result.providerMetadata,
-    };
-  }
-
-  const result = await generateText({
-    model: model as Parameters<typeof generateText>[0]['model'],
-    prompt,
-    abortSignal: signal,
-  });
-  return {
-    backend: 'api',
-    operation: 'generateText',
-    mode: 'text',
-    output: result.text,
-    textOutput: result.text,
-    request: result.request,
-    response: result.response,
-    usage: result.usage,
-    finishReason: result.finishReason,
-    warnings: result.warnings,
-    providerMetadata: result.providerMetadata,
-  };
-}
-
-async function runCodergenCliCall(options: {
-  node: Node;
-  provider: string;
-  modelName: string;
-  prompt: string;
-  logsRoot: string;
-  stageDir: string;
-  schemaConfig: OutputSchemaConfig | null;
-  signal?: AbortSignal;
-}): Promise<CodergenCallResult> {
-  const cliConfig = resolveCliInvocation(options);
-  const stdoutChunks: string[] = [];
-  const stderrChunks: string[] = [];
-
-  let exitCode: number | null = null;
-  let exitSignal: NodeJS.Signals | null = null;
-
-  await new Promise<void>((resolvePromise, rejectPromise) => {
-    const child = spawn(cliConfig.executable, cliConfig.args, {
-      cwd: cliConfig.cwd,
-      env: cliConfig.env,
-      signal: options.signal,
-      timeout: cliConfig.timeoutMs,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    child.stdout?.on('data', chunk => {
-      stdoutChunks.push(chunk.toString());
-    });
-
-    child.stderr?.on('data', chunk => {
-      stderrChunks.push(chunk.toString());
-    });
-
-    child.on('error', rejectPromise);
-    child.on('close', (code, sig) => {
-      exitCode = code;
-      exitSignal = sig;
-      resolvePromise();
-    });
-  });
-
-  const stdout = stdoutChunks.join('');
-  const stderr = stderrChunks.join('');
-  const invocation = {
-    backend: 'cli',
-    node_id: options.node.id,
-    provider: options.provider,
-    model: options.modelName,
-    executable: cliConfig.executable,
-    args: cliConfig.args,
-    cwd: cliConfig.cwd,
-    timeout_ms: cliConfig.timeoutMs,
-    env_keys: cliConfig.envKeys,
-  };
-
-  const callError = buildCliFailure(exitCode, exitSignal, stderr);
-  const structured = extractCliStructuredOutput(stdout, options.schemaConfig);
-  return {
-    backend: 'cli',
-    operation: 'cli',
-    mode: structured.mode,
-    output: structured.output,
-    textOutput: structured.textOutput,
-    callError,
-    cliInvocation: invocation,
-    stdout,
-    stderr,
-    response: {
-      exit_code: exitCode,
-      exit_signal: exitSignal,
-    },
-  };
-}
-
-function resolveCliInvocation(options: {
-  node: Node;
-  provider: string;
-  modelName: string;
-  prompt: string;
-  logsRoot: string;
-  stageDir: string;
-}): {
-  executable: string;
-  args: string[];
-  cwd: string;
-  env: NodeJS.ProcessEnv;
-  envKeys: string[];
-  timeoutMs: number;
-} {
-  const envVars = {
-    prompt: options.prompt,
-    provider: options.provider,
-    model: options.modelName,
-    logs_root: options.logsRoot,
-    stage_dir: options.stageDir,
-    node_id: options.node.id,
-  };
-  const timeoutMs = normalizePositiveInteger(options.node.attributes.cli_timeout_ms) ?? options.node.timeout ?? 120000;
-  const cwd = asNonEmptyString(options.node.attributes.cli_cwd) ?? process.cwd();
-  const env = { ...process.env };
-  const envOverrides = parseCliEnv(options.node.attributes.cli_env, envVars);
-  Object.assign(env, envOverrides);
-
-  const rawCommand = asNonEmptyString(options.node.attributes.cli_command);
-  if (rawCommand) {
-    const command = interpolateTemplate(rawCommand, envVars);
-    const shell = process.env.SHELL || '/bin/sh';
-    return {
-      executable: shell,
-      args: ['-lc', command],
-      cwd,
-      env,
-      envKeys: Object.keys(envOverrides),
-      timeoutMs,
-    };
-  }
-
-  const explicitExecutable = asNonEmptyString(options.node.attributes.cli_executable);
-  const providerDefaults = defaultProviderCLI(options.provider, options.modelName, options.prompt);
-  const executable = explicitExecutable || providerDefaults.executable;
-  const explicitArgs = parseCliArgs(options.node.attributes.cli_args, envVars);
-  const args = explicitArgs ?? providerDefaults.args;
-  return {
-    executable,
-    args,
-    cwd,
-    env,
-    envKeys: Object.keys(envOverrides),
-    timeoutMs,
-  };
-}
-
-function parseCliEnv(
-  value: unknown,
-  vars: Record<string, string>
-): Record<string, string> {
-  if (value === undefined || value === null) {
-    return {};
-  }
-
-  const parsed = typeof value === 'string' ? parseOutputSchemaInput(value, 'cli_env') : value;
-  if (!isRecord(parsed)) {
-    throw new Error('cli_env must be a JSON object');
-  }
-
-  const env: Record<string, string> = {};
-  for (const [key, rawValue] of Object.entries(parsed)) {
-    env[key] = interpolateTemplate(String(rawValue), vars);
-  }
-  return env;
-}
-
-function parseCliArgs(value: unknown, vars: Record<string, string>): string[] | null {
-  if (value === undefined || value === null) {
-    return null;
-  }
-
-  const parsed = typeof value === 'string' ? parseOutputSchemaInput(value, 'cli_args') : value;
-  if (!Array.isArray(parsed)) {
-    throw new Error('cli_args must be a JSON array');
-  }
-  return parsed.map(arg => interpolateTemplate(String(arg), vars));
-}
-
-function interpolateTemplate(input: string, vars: Record<string, string>): string {
-  return input.replace(/\{([a-z_]+)\}/gi, (_match, key: string) => {
-    const normalized = key.toLowerCase();
-    return vars[normalized] ?? '';
-  });
-}
-
-function defaultProviderCLI(provider: string, model: string, prompt: string): {
-  executable: string;
-  args: string[];
-} {
-  const normalized = provider.trim().toLowerCase();
-  if (normalized === 'openai') {
-    return {
-      executable: 'codex',
-      args: ['exec', '--json', '--sandbox', 'workspace-write', '--model', model, prompt],
-    };
-  }
-  if (normalized === 'anthropic') {
-    return {
-      executable: 'claude',
-      args: ['-p', '--output-format', 'stream-json', '--model', model, prompt],
-    };
-  }
-  if (normalized === 'google' || normalized === 'gemini') {
-    return {
-      executable: 'gemini',
-      args: ['-p', '--output-format', 'stream-json', '--model', model, '--yolo', prompt],
-    };
-  }
-
-  throw new Error(`No default CLI mapping for provider "${provider}"`);
-}
-
-function normalizePositiveInteger(value: unknown): number | undefined {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return undefined;
-  }
-  return Math.floor(parsed);
-}
-
-function buildCliFailure(
-  exitCode: number | null,
-  exitSignal: NodeJS.Signals | null,
-  stderr: string
-): string | undefined {
-  if (exitCode === 0 && !exitSignal) {
-    return undefined;
-  }
-  const reason = exitSignal ? `signal ${exitSignal}` : `exit code ${exitCode ?? 'unknown'}`;
-  const stderrTail = stderr.trim().slice(-400);
-  return stderrTail
-    ? `CLI codergen failed (${reason}): ${stderrTail}`
-    : `CLI codergen failed (${reason})`;
-}
-
-function extractCliStructuredOutput(
-  stdout: string,
-  schemaConfig: OutputSchemaConfig | null
-): { mode: OutputMode; output: unknown; textOutput: string } {
-  const trimmed = stdout.trim();
-  if (schemaConfig) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (isRecord(parsed) || Array.isArray(parsed)) {
-        return {
-          mode: 'object',
-          output: parsed,
-          textOutput: serializeForMarkdown(parsed),
-        };
-      }
-    } catch {
-      // keep text fallback below
-    }
-  }
-
-  return {
-    mode: 'text',
-    output: trimmed,
-    textOutput: trimmed,
   };
 }
 
@@ -1476,17 +1152,6 @@ function buildCliEvents(options: {
     error: options.error ?? '',
   });
   return events;
-}
-
-function serializeForMarkdown(value: unknown): string {
-  if (typeof value === 'string') {
-    return value;
-  }
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
 }
 
 function asNonEmptyString(value: unknown): string | undefined {

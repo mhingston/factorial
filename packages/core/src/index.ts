@@ -8,6 +8,7 @@ export { ExecutionEngine, ExecutionCancelledError } from './engine/index.js';
 export { HandlerRegistry } from './handlers/registry.js';
 export * from './lint/index.js';
 export * from './stylesheet/index.js';
+export * from './llm/index.js';
 export * from './handlers/builtin.js';
 export * from './dtu/index.js';
 

@@ -20,10 +20,16 @@ Issue breakdown:
 | `RMD-021` | 0.2.x | In progress | Worktree parity script now has strict CI no-skip mode, dependency bootstrap in detached worktree, and local clean-checkout guardrails. |
 | `RMD-022` / `PKG-022A` | 0.2.x | In progress | CI PR-body compliance gate, weekly report generator, and 4-week report set implemented in branch. |
 | `RMD-030` | 0.3.x | Done | DTU validation platform completed; see completion report. |
-| `RMD-031` / `PKG-031A` | 0.3.x | Planned | Unified LLM adapter foundation for provider-aligned codergen convergence. |
+| `RMD-031` / `PKG-031A` | 0.3.x | In progress | Batch 1 routes codergen through a new LLM adapter boundary and extends manifest provenance with adapter/usage/tool metadata fields. |
 | `RMD-032` | 0.3.x | Planned | Judge/evaluator maturity and score explainability. |
 | `RMD-033` | 0.3.x | Planned | Targeted retry and failure taxonomy hardening. |
 | `RMD-034` | 0.3.x | Planned | Promotion and governance profile enforcement. |
+
+Design-review follow-up mapping (to avoid duplicate roadmap items):
+- Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
+- Add formal spec-conformance matrix coverage: tracked under `RMD-020` (`PKG-020C`), no new item.
+- Implement `LlmAdapter.stream()` and prove >=2-provider parity: tracked under `RMD-031`, no new item.
+- Add repository dogfooding/self-host workflow: new item `RMD-035` (see `Next` table).
 
 Active execution artifacts:
 - `PKG-020C` batch 1 plan: [`docs/plans/pkg-020c-spec-conformance-batch-1-plan.md`](./docs/plans/pkg-020c-spec-conformance-batch-1-plan.md)
@@ -36,6 +42,9 @@ Active execution artifacts:
 - `RMD-022` batch 1 plan: [`docs/plans/rmd-022-compound-enforcement-batch-1-plan.md`](./docs/plans/rmd-022-compound-enforcement-batch-1-plan.md)
 - `RMD-022` batch 1 review: [`docs/reviews/rmd-022-compound-enforcement-batch-1-review.md`](./docs/reviews/rmd-022-compound-enforcement-batch-1-review.md)
 - `RMD-031` handoff seed: [`docs/plans/rmd-031-subagent-handoff-batch-1.md`](./docs/plans/rmd-031-subagent-handoff-batch-1.md)
+- `RMD-031` batch 1 plan: [`docs/plans/rmd-031-provider-adapter-batch-1-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-1-plan.md)
+- `RMD-031` batch 1 review: [`docs/reviews/rmd-031-provider-adapter-batch-1-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-1-review.md)
+- `RMD-031` batch 1 solution: [`docs/solutions/llm-adapter-boundary-and-provenance-normalization.md`](./docs/solutions/llm-adapter-boundary-and-provenance-normalization.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
@@ -55,6 +64,7 @@ Execution order (do not reorder unless blocked):
   - Enforce exactly one exit node in lint (not "at least one").
   - Implement true `loop_restart` run boundary semantics (fresh run context/log root segment), not in-run continuation.
   - Complete `stack.manager_loop` Phase C by adding optional local child execution adapter hook.
+  - Add an explicit spec-conformance matrix artifact (Attractor + coding-agent-loop + unified-llm deltas) with test coverage mapped to each active delta.
 - Implementation guidance:
   - Parser:
     - `packages/dot-parser/src/dot.pegjs`
@@ -82,6 +92,7 @@ Execution order (do not reorder unless blocked):
   - Spec-delta tests pass and are merged into golden/engine suites.
   - `loop_restart` behavior is deterministic and documented.
   - Manager loop can optionally execute delegated child workflows via adapter hook.
+  - Spec-conformance matrix is committed and referenced from roadmap/review artifacts.
 
 ### PKG-022A: Compound loop enforcement automation (0.2.x)
 - Goal:
@@ -127,9 +138,11 @@ Execution order (do not reorder unless blocked):
 - Required scope:
   - Add a minimal adapter interface modeled on unified spec concepts:
     - `complete()`
-    - `stream()` (can start as stub/unimplemented with explicit error)
+    - `stream()` (must be implemented before package close-out)
   - Route codergen calls through this adapter boundary.
   - Preserve existing `api` and `cli` behavior while normalizing outputs.
+  - Remove/retire superseded inline provider invocation helpers once adapter routing is active.
+  - Restore green baseline for `npm run build`, `npm run typecheck`, and `npm run test:run` in this branch before closure.
   - Extend manifest/provenance fields for:
     - usage
     - cost
@@ -157,7 +170,9 @@ Execution order (do not reorder unless blocked):
 - Exit criteria:
   - Codergen execution path no longer depends on direct provider calls in handler logic.
   - Manifest includes stable provider-aligned provenance fields and tests assert shape.
+  - `stream()` path is implemented (not stub-only) and covered by tests.
   - At least one representative workflow passes with equivalent normalized outcome across 2 providers/backends.
+  - `npm run build`, `npm run typecheck`, and `npm run test:run` pass in the same checkout used for closure evidence.
 
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
@@ -197,10 +212,11 @@ Execution order (do not reorder unless blocked):
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| `RMD-031` | Provider-aligned coding agent loop backend convergence | Planned | One representative workflow runs across >=2 providers with normalized manifest/provenance parity. |
+| `RMD-031` | Provider-aligned coding agent loop backend convergence | In progress | Batch 1 adapter boundary/provenance landed; complete stream implementation, resolve integration regressions, and produce >=2-provider parity evidence before closure. |
 | `RMD-032` | Judge/evaluator maturity | Planned | Rubric routing and explainability artifacts are deterministic and test-covered. |
 | `RMD-033` | Targeted retry and failure taxonomy hardening | Planned | Failure classes and retry routing are explicit, measurable, and regression-covered. |
 | `RMD-034` | Promotion and governance profiles | Planned | Promotion-stage policy checks are documented and enforced in CI. |
+| `RMD-035` | Self-hosted factory dogfooding | Planned | A repository-native workflow uses this project to run Plan -> Work -> Review -> Compound on bounded repo tasks with lock decision enforcement and reproducible pass/fail evidence. |
 
 ### Later
 | ID | Item | Status | Notes |
