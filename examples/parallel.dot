@@ -1,0 +1,20 @@
+digraph ParallelExecution {
+    graph [goal="Run tests in parallel across different environments"]
+    rankdir=TB
+
+    start [shape=Mdiamond, label="Start"]
+    exit  [shape=Msquare, label="Exit"]
+    
+    parallel [shape=component, label="Run Tests", type="parallel"]
+    fan_in [shape=tripleoctagon, label="Collect Results", type="parallel.fan_in"]
+
+    start -> parallel
+    parallel -> test_unit [label="Unit Tests"]
+    parallel -> test_integration [label="Integration"]
+    parallel -> test_e2e [label="E2E Tests"]
+    
+    test_unit -> fan_in
+    test_integration -> fan_in
+    test_e2e -> fan_in
+    fan_in -> exit
+}

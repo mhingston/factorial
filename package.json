@@ -1,0 +1,92 @@
+{
+  "name": "strange-attractor",
+  "version": "0.1.0",
+  "description": "A DOT-based pipeline runner for orchestrating multi-stage AI workflows",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./core": {
+      "import": "./dist/packages/core/src/index.js",
+      "types": "./dist/packages/core/src/index.d.ts"
+    },
+    "./dot-parser": {
+      "import": "./dist/packages/dot-parser/src/index.js",
+      "types": "./dist/packages/dot-parser/src/index.d.ts"
+    }
+  },
+  "bin": {
+    "strange-attractor": "./dist/packages/cli/src/index.js"
+  },
+  "scripts": {
+    "build": "tsc && cp ./packages/dot-parser/src/parser.js ./dist/packages/dot-parser/src/parser.js",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "lint": "biome lint .",
+    "lint:biome": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test:run && npm run build"
+  },
+  "keywords": [
+    "ai",
+    "workflow",
+    "pipeline",
+    "dot",
+    "graphviz",
+    "agent",
+    "orchestration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "RELEASE.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "ai": "^6.0.79",
+    "ai-sdk-provider-github": "^0.2.1",
+    "async-lock": "^1.4.1",
+    "commander": "^12.0.0",
+    "dotenv": "^17.2.4",
+    "p-limit": "^6.0.0",
+    "peggy": "^5.0.6",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/async-lock": "^1.4.2",
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@ai-sdk/anthropic": ">=1.0.0",
+    "@ai-sdk/google": ">=1.0.0",
+    "@ai-sdk/openai": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@ai-sdk/openai": {
+      "optional": true
+    },
+    "@ai-sdk/anthropic": {
+      "optional": true
+    },
+    "@ai-sdk/google": {
+      "optional": true
+    }
+  }
+}
