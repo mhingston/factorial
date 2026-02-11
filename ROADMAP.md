@@ -12,6 +12,7 @@ Issue breakdown:
 - 0.2.x prioritized issues: [`docs/roadmap/0.2-prioritized-issues.md`](./docs/roadmap/0.2-prioritized-issues.md)
 - 0.3.x DTU execution plan: [`docs/roadmap/0.3-digital-twin-universe-execution-plan.md`](./docs/roadmap/0.3-digital-twin-universe-execution-plan.md)
 - 0.3.x DTU completion report: [`docs/roadmap/0.3-dtu-validation-platform-completion.md`](./docs/roadmap/0.3-dtu-validation-platform-completion.md)
+- 0.3.x provider adapter completion report: [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
 
 ## Status Snapshot (2026-02-11)
 | Item | Milestone | Status | Notes |
@@ -20,7 +21,7 @@ Issue breakdown:
 | `RMD-021` | 0.2.x | In progress | Worktree parity script now has strict CI no-skip mode, dependency bootstrap in detached worktree, and local clean-checkout guardrails. |
 | `RMD-022` / `PKG-022A` | 0.2.x | In progress | CI PR-body compliance gate, weekly report generator, and 4-week report set implemented in branch. |
 | `RMD-030` | 0.3.x | Done | DTU validation platform completed; see completion report. |
-| `RMD-031` / `PKG-031A` | 0.3.x | In progress | Batch 1 routes codergen through a new LLM adapter boundary and extends manifest provenance with adapter/usage/tool metadata fields. |
+| `RMD-031` / `PKG-031A` | 0.3.x | Done | Batch 1-3 complete: adapter boundary + provenance, implemented stream events, restored green baseline, and added deterministic two-provider parity evidence; see completion report. |
 | `RMD-032` | 0.3.x | Planned | Judge/evaluator maturity and score explainability. |
 | `RMD-033` | 0.3.x | Planned | Targeted retry and failure taxonomy hardening. |
 | `RMD-034` | 0.3.x | Planned | Promotion and governance profile enforcement. |
@@ -45,6 +46,12 @@ Active execution artifacts:
 - `RMD-031` batch 1 plan: [`docs/plans/rmd-031-provider-adapter-batch-1-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-1-plan.md)
 - `RMD-031` batch 1 review: [`docs/reviews/rmd-031-provider-adapter-batch-1-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-1-review.md)
 - `RMD-031` batch 1 solution: [`docs/solutions/llm-adapter-boundary-and-provenance-normalization.md`](./docs/solutions/llm-adapter-boundary-and-provenance-normalization.md)
+- `RMD-031` batch 2 plan: [`docs/plans/rmd-031-provider-adapter-batch-2-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-2-plan.md)
+- `RMD-031` batch 2 review: [`docs/reviews/rmd-031-provider-adapter-batch-2-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-2-review.md)
+- `RMD-031` batch 2 solution: [`docs/solutions/llm-stream-and-golden-duration-stability.md`](./docs/solutions/llm-stream-and-golden-duration-stability.md)
+- `RMD-031` batch 3 plan: [`docs/plans/rmd-031-provider-adapter-batch-3-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-3-plan.md)
+- `RMD-031` batch 3 review: [`docs/reviews/rmd-031-provider-adapter-batch-3-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-3-review.md)
+- `RMD-031` batch 3 solution: [`docs/solutions/provider-parity-normalized-contract-tests.md`](./docs/solutions/provider-parity-normalized-contract-tests.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
@@ -52,7 +59,7 @@ Use this section as the default starting point for a new coding agent session.
 Execution order (do not reorder unless blocked):
 1. `PKG-020C` (`RMD-020`): Attractor spec conformance hardening
 2. `PKG-022A` (`RMD-022`): Compound loop enforcement automation
-3. `PKG-031A` (`RMD-031`): Unified LLM adapter foundation
+3. `RMD-035`: Self-hosted factory dogfooding
 
 ### PKG-020C: Attractor spec conformance hardening (0.2.x)
 - Goal:
@@ -130,49 +137,11 @@ Execution order (do not reorder unless blocked):
   - Weekly metric report format is standardized and reproducible from repository artifacts.
   - 4 weekly reports are linked from roadmap/status updates.
 
-### PKG-031A: Unified LLM adapter foundation (0.3.x)
-- Goal:
-  - Introduce provider-aligned abstraction that keeps orchestration backend-agnostic.
-- Why now:
-  - Existing codergen path is functional but tightly coupled; multi-provider parity and richer telemetry need a formal adapter contract.
-- Required scope:
-  - Add a minimal adapter interface modeled on unified spec concepts:
-    - `complete()`
-    - `stream()` (must be implemented before package close-out)
-  - Route codergen calls through this adapter boundary.
-  - Preserve existing `api` and `cli` behavior while normalizing outputs.
-  - Remove/retire superseded inline provider invocation helpers once adapter routing is active.
-  - Restore green baseline for `npm run build`, `npm run typecheck`, and `npm run test:run` in this branch before closure.
-  - Extend manifest/provenance fields for:
-    - usage
-    - cost
-    - reasoning/tool metadata where available
-- Implementation guidance:
-  - Core contract and adapter registry:
-    - `packages/core/src/types/index.ts`
-    - add new module under `packages/core/src/llm/`
-  - Codergen integration:
-    - `packages/core/src/handlers/builtin.ts`
-    - `packages/core/src/handlers/codergen.test.ts`
-  - Manifest/provenance:
-    - `packages/cli/src/index.ts`
-    - `packages/cli/src/e2e-smoke.test.ts`
-  - Golden/regression:
-    - `tests/golden/workflows/*` and `tests/golden/expected/*` as needed
-  - Documentation:
-    - `README.md`
-    - `docs/roadmap/0.3-digital-twin-universe-execution-plan.md` (phase status)
-- Validation checklist:
-  - `npm run lint`
-  - `npm run typecheck`
-  - `npm run test:run`
-  - `npm run test:golden`
-- Exit criteria:
-  - Codergen execution path no longer depends on direct provider calls in handler logic.
-  - Manifest includes stable provider-aligned provenance fields and tests assert shape.
-  - `stream()` path is implemented (not stub-only) and covered by tests.
-  - At least one representative workflow passes with equivalent normalized outcome across 2 providers/backends.
-  - `npm run build`, `npm run typecheck`, and `npm run test:run` pass in the same checkout used for closure evidence.
+### PKG-031A: Unified LLM adapter foundation (0.3.x, completed)
+- Status:
+  - Closed on 2026-02-11 with adapter boundary routing, stream implementation, and deterministic two-provider parity evidence.
+- Completion artifact:
+  - [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
 
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
@@ -200,6 +169,11 @@ Execution order (do not reorder unless blocked):
   - Added non-interactive scenario harness with smoke/regression/holdout suites and satisfaction reporting.
   - Added deterministic failure simulation coverage (rate limit, auth failure, timeout, malformed payload, partial outage).
   - Completion artifact: [`docs/roadmap/0.3-dtu-validation-platform-completion.md`](./docs/roadmap/0.3-dtu-validation-platform-completion.md)
+- [x] RMD-031 / PKG-031A: Provider-aligned coding agent loop backend convergence
+  - Routed codergen through adapter boundary and normalized provenance/usage metadata.
+  - Implemented `LlmAdapter.stream()` with deterministic stream event contract coverage.
+  - Added deterministic API parity evidence for equivalent normalized outcomes across `openai` + `anthropic`.
+  - Completion artifact: [`docs/roadmap/0.3-provider-adapter-convergence-completion.md`](./docs/roadmap/0.3-provider-adapter-convergence-completion.md)
 
 ## Roadmap Board (Single Source of Truth)
 ### Now
@@ -212,7 +186,6 @@ Execution order (do not reorder unless blocked):
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| `RMD-031` | Provider-aligned coding agent loop backend convergence | In progress | Batch 1 adapter boundary/provenance landed; complete stream implementation, resolve integration regressions, and produce >=2-provider parity evidence before closure. |
 | `RMD-032` | Judge/evaluator maturity | Planned | Rubric routing and explainability artifacts are deterministic and test-covered. |
 | `RMD-033` | Targeted retry and failure taxonomy hardening | Planned | Failure classes and retry routing are explicit, measurable, and regression-covered. |
 | `RMD-034` | Promotion and governance profiles | Planned | Promotion-stage policy checks are documented and enforced in CI. |

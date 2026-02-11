@@ -364,6 +364,70 @@ describe('CodergenHandler artifacts', () => {
     }
   });
 
+  it('normalizes equivalent API outcomes across openai and anthropic providers', async () => {
+    generateTextMock.mockResolvedValue({
+      text: 'provider-parity-output',
+      request: { id: 'req-provider-parity' },
+      response: { id: 'resp-provider-parity' },
+      usage: { inputTokens: 4, outputTokens: 5, totalTokens: 9 },
+      finishReason: 'stop',
+      warnings: [],
+      providerMetadata: {},
+    });
+
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-codergen-provider-parity-'));
+    const handler = new CodergenHandler();
+    const context = new Context();
+    const scenarios = [
+      { id: 'provider_parity_openai', provider: 'openai', model: 'gpt-4o-mini' },
+      { id: 'provider_parity_anthropic', provider: 'anthropic', model: 'claude-3-5-sonnet-latest' },
+    ] as const;
+
+    const normalizedResults: Array<Record<string, unknown>> = [];
+
+    for (const scenario of scenarios) {
+      const node = makeNode(scenario.id, {
+        auto_status: true,
+        llm_provider: scenario.provider,
+        llm_model: scenario.model,
+      });
+
+      const outcome = await handler.execute(node, context, makeGraph(), logsRoot);
+      expect(outcome.status).toBe('SUCCESS');
+
+      const stageDir = join(logsRoot, node.id);
+      const output = await readJson(join(stageDir, 'output.json')) as Record<string, unknown>;
+      const usage = output.usage as Record<string, unknown>;
+
+      normalizedResults.push({
+        status: outcome.status,
+        output_mode: output.output_mode,
+        output: output.output,
+        usage,
+        adapter: (outcome.context_updates as Record<string, unknown>)[`codergen.${node.id}.adapter`],
+        backend: (outcome.context_updates as Record<string, unknown>)[`codergen.${node.id}.backend`],
+        operation: (outcome.context_updates as Record<string, unknown>)[`codergen.${node.id}.operation`],
+      });
+    }
+
+    expect(openaiMock).toHaveBeenCalledWith('gpt-4o-mini');
+    expect(anthropicMock).toHaveBeenCalledWith('claude-3-5-sonnet-latest');
+    expect(normalizedResults[0]).toEqual(normalizedResults[1]);
+    expect(normalizedResults[0]).toEqual({
+      status: 'SUCCESS',
+      output_mode: 'text',
+      output: 'provider-parity-output',
+      usage: {
+        input_tokens: 4,
+        output_tokens: 5,
+        total_tokens: 9,
+      },
+      adapter: 'vercel-ai-sdk',
+      backend: 'api',
+      operation: 'generateText',
+    });
+  });
+
   it('parses structured CLI output when output_schema is provided', async () => {
     const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-codergen-cli-obj-'));
     const handler = new CodergenHandler();
