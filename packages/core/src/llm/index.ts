@@ -22,8 +22,78 @@ export class DefaultLlmAdapter implements LlmAdapter {
     return completeCli(request);
   }
 
-  async *stream(_request: LlmStreamRequest): AsyncGenerator<LlmStreamEvent> {
-    throw new Error('DefaultLlmAdapter.stream is not implemented. Use complete() for this batch.');
+  async *stream(request: LlmStreamRequest): AsyncGenerator<LlmStreamEvent> {
+    const startedAt = new Date().toISOString();
+    yield {
+      type: 'llm.stream.start',
+      data: {
+        node_id: request.nodeId,
+        backend: request.backend,
+        provider: request.provider,
+        model: request.model,
+        timestamp: startedAt,
+      },
+    };
+
+    try {
+      const result = await this.complete({
+        backend: request.backend,
+        nodeId: request.nodeId,
+        provider: request.provider,
+        model: request.model,
+        prompt: request.prompt,
+        providerApiKeyEnv: request.providerApiKeyEnv,
+        outputSchema: request.outputSchema,
+        outputSchemaName: request.outputSchemaName,
+        outputSchemaDescription: request.outputSchemaDescription,
+        outputMode: request.outputMode,
+        cli: request.cli,
+        signal: request.signal,
+      });
+
+      if (result.mode === 'object') {
+        yield {
+          type: 'llm.stream.object',
+          data: {
+            output: result.output,
+            text_output: result.textOutput,
+          },
+        };
+      } else {
+        yield {
+          type: 'llm.stream.text',
+          data: {
+            text: result.textOutput,
+          },
+        };
+      }
+
+      yield {
+        type: 'llm.stream.end',
+        data: {
+          node_id: request.nodeId,
+          adapter: result.adapter,
+          backend: result.backend,
+          operation: result.operation,
+          mode: result.mode,
+          finish_reason: result.finishReason,
+          usage: result.usage,
+          warnings: result.warnings,
+          provider_metadata: result.providerMetadata,
+          error: result.callError,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      yield {
+        type: 'llm.stream.error',
+        data: {
+          node_id: request.nodeId,
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+      };
+    }
   }
 }
 

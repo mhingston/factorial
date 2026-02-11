@@ -60,7 +60,7 @@
     ],
     "limits": {
       "max_cost_usd": null,
-      "max_duration_ms": 10,
+      "max_duration_ms": 200,
       "max_tokens": null
     },
     "totals": {

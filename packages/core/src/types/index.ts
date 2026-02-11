@@ -138,6 +138,21 @@ export interface LlmStreamRequest {
   provider: string;
   model: string;
   prompt: string;
+  providerApiKeyEnv?: string;
+  outputSchema?: Record<string, unknown> | null;
+  outputSchemaName?: string;
+  outputSchemaDescription?: string;
+  outputMode?: LlmStructuredOutputMode;
+  cli?: {
+    command?: unknown;
+    executable?: unknown;
+    args?: unknown;
+    env?: unknown;
+    cwd?: unknown;
+    timeoutMs?: unknown;
+    logsRoot: string;
+    stageDir: string;
+  };
   signal?: AbortSignal;
 }
 
