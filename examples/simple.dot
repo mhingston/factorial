@@ -2,6 +2,8 @@ digraph SimpleWorkflow {
     graph [goal="Run a simple greeting workflow"]
     rankdir=LR
 
+    node [shape=box, auto_status="true"]
+
     start [shape=Mdiamond, label="Start"]
     exit  [shape=Msquare, label="Exit"]
 

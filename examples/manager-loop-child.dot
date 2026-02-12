@@ -1,0 +1,14 @@
+digraph ManagerLoopChild {
+    graph [goal="Execute a small child workflow for manager loop", rankdir=TB]
+
+    node [shape=box, auto_status="true"]
+
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+
+    analyze [label="Analyze", prompt="Summarize the goal in two bullets."]
+    recommend [label="Recommend", prompt="Provide one recommendation based on the analysis."]
+    report [label="Report", prompt="Set child status in context: context_updates={'stack.child.status':'completed','stack.child.outcome':'success'}."]
+
+    start -> analyze -> recommend -> report -> exit
+}

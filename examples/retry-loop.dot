@@ -1,14 +1,13 @@
-# Retry with Failure Analysis
-# Smart retry routing based on failure classification
-
 digraph RetryWithFailure {
     graph [goal="Smart retry with targeted failure handling",
-           rankdir=TB]
+           rankdir=TB,
+           default_max_retry=1]
     
+    node [shape=box, auto_status="true"]
+
     start [shape=Mdiamond, label="Start"]
     exit [shape=Msquare, label="Exit"]
     
-    # Initial attempt
     attempt [prompt="Attempt to deploy the application:
     1. Build the Docker image
     2. Run database migrations
@@ -18,16 +17,16 @@ digraph RetryWithFailure {
     If any step fails, report the specific failure.",
              label="Deploy Attempt"]
     
-    # Analyze the failure
     analyze [type="failure.analyze",
              retry_policy="targeted",
+             output_contract_required="false",
+             output_mode="text",
              retry_target_transient="retry_transient",
              retry_target_quality_gap="improve_deployment",
              retry_target_tool_error="fix_tool",
              retry_target_spec_mismatch="clarify_spec",
              label="Analyze Failure"]
     
-    # Retry paths based on failure classification
     retry_transient [prompt="Retry the deployment operation. This is a transient failure (network issue, temporary service unavailable).
     
     Actions:
@@ -65,12 +64,10 @@ digraph RetryWithFailure {
     5. If spec is still unclear, escalate to human",
                   label="Clarify & Retry"]
     
-    # Human escalation
     human_escalate [shape=hexagon,
                     type="wait.human",
                     label="Human Intervention"]
     
-    # Success after retry
     success [prompt="Deployment succeeded after retry!
     
     Generate summary:
@@ -80,30 +77,25 @@ digraph RetryWithFailure {
     4. Lessons learned",
              label="Success"]
     
-    # Main flow
     start -> attempt
-    attempt -> success [label="Success"]
-    attempt -> analyze [label="Failure"]
-    
-    # Analyze routes to appropriate retry path
+    attempt -> success [label="Success", condition="outcome=success"]
+    attempt -> analyze [label="Failure", condition="outcome=fail"]
+
     analyze -> retry_transient [label="Transient"]
     analyze -> improve_deployment [label="Quality Gap"]
     analyze -> fix_tool [label="Tool Error"]
     analyze -> clarify_spec [label="Spec Mismatch"]
-    
-    # Retry paths loop back to attempt
+
     retry_transient -> attempt
     improve_deployment -> attempt
     fix_tool -> attempt
     clarify_spec -> attempt
-    
-    # Human escalation (if retries exhausted)
+
     retry_transient -> human_escalate [label="Max Retries", style=dashed]
     improve_deployment -> human_escalate [label="Max Retries", style=dashed]
     fix_tool -> human_escalate [label="Max Retries", style=dashed]
     clarify_spec -> human_escalate [label="Max Retries", style=dashed]
     
-    # Final paths to exit
     success -> exit
     human_escalate -> exit
 }

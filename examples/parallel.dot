@@ -2,25 +2,28 @@ digraph ParallelExecution {
     graph [goal="Run tests in parallel across different environments"]
     rankdir=TB
 
+    node [shape=box, auto_status="true"]
+
     start [shape=Mdiamond, label="Start"]
     exit  [shape=Msquare, label="Exit"]
     
     parallel [shape=component, label="Run Tests", type="parallel"]
+    test_unit [label="Unit Tests", prompt="Run unit tests and summarize results."]
+    test_integration [label="Integration", prompt="Run integration tests and summarize results."]
+    test_e2e [label="E2E Tests", prompt="Run E2E tests and summarize results."]
     fan_in [
       shape=tripleoctagon,
       label="Collect Results",
       type="parallel.fan_in",
       merge_strategy="best_score",
-      merge_tiebreak="lexical"
+      merge_tiebreak="lexical",
+      auto_status="true"
     ]
 
     start -> parallel
     parallel -> test_unit [label="Unit Tests"]
     parallel -> test_integration [label="Integration"]
     parallel -> test_e2e [label="E2E Tests"]
-    
-    test_unit -> fan_in
-    test_integration -> fan_in
-    test_e2e -> fan_in
+    parallel -> fan_in
     fan_in -> exit
 }
