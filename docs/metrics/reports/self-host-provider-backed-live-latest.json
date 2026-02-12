@@ -1,0 +1,91 @@
+{
+  "schema_version": "self_host_provider_backed_live_report.v1",
+  "generated_at": "2026-02-12T02:23:26.020Z",
+  "report_path": "docs/metrics/reports/self-host-provider-backed-live-latest.json",
+  "publication": {
+    "command": "npm run self-host:provider-backed-live",
+    "policy_mode": "advisory",
+    "required_providers": [
+      "openai",
+      "anthropic"
+    ],
+    "probe_mode": "live",
+    "bounds": {
+      "timeout_ms": 20000,
+      "max_output_tokens": 64,
+      "max_total_tokens": 600
+    },
+    "freshness_sla_hours": 168
+  },
+  "summary": {
+    "overall_status": "pass",
+    "probe_overall_status": "skip",
+    "policy_mode": "advisory",
+    "require_pass": false,
+    "required_providers": [
+      "openai",
+      "anthropic"
+    ],
+    "providers": {
+      "openai": "skip",
+      "anthropic": "skip"
+    },
+    "attempted_provider_count": 0,
+    "failed_provider_count": 0,
+    "skipped_provider_count": 2,
+    "advisory_probe_failures": [],
+    "freshness_sla_hours": 168
+  },
+  "checks": [
+    {
+      "id": "PBL-001",
+      "level": "provider-backed-live",
+      "name": "OpenAI minimal bounded live probe",
+      "command": "live provider probe (openai)",
+      "status": "skip",
+      "summary": "openai live probe skipped because OPENAI_API_KEY is not set.",
+      "evidence": [],
+      "details": {
+        "provider": "openai",
+        "mode": "live",
+        "model": "gpt-4o-mini",
+        "reason": "missing_provider_api_key",
+        "required_env_key": "OPENAI_API_KEY"
+      }
+    },
+    {
+      "id": "PBL-002",
+      "level": "provider-backed-live",
+      "name": "Anthropic minimal bounded live probe",
+      "command": "live provider probe (anthropic)",
+      "status": "skip",
+      "summary": "anthropic live probe skipped because ANTHROPIC_API_KEY is not set.",
+      "evidence": [],
+      "details": {
+        "provider": "anthropic",
+        "mode": "live",
+        "model": "claude-3-5-haiku-latest",
+        "reason": "missing_provider_api_key",
+        "required_env_key": "ANTHROPIC_API_KEY"
+      }
+    },
+    {
+      "id": "PBL-900",
+      "level": "provider-backed-live",
+      "name": "Provider-backed live canary policy decision",
+      "command": "policy evaluation",
+      "status": "pass",
+      "summary": "Advisory mode active; non-pass probe outcomes are recorded without fail-closing.",
+      "evidence": [],
+      "details": {
+        "policy_mode": "advisory",
+        "probe_overall_status": "skip",
+        "advisory_probe_failures": [],
+        "provider_statuses": {
+          "openai": "skip",
+          "anthropic": "skip"
+        }
+      }
+    }
+  ]
+}

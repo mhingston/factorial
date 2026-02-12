@@ -1,10 +1,13 @@
 # Factorial
 
-A TypeScript implementation of the **Attractor pattern** - a DOT-based pipeline runner for orchestrating multi-stage AI workflows.
+A TypeScript implementation aligned to the **Attractor core execution model** for DOT-based multi-stage AI workflow orchestration.
 
 ## Overview
 
 Factorial lets you define complex AI workflows as directed graphs using Graphviz DOT syntax. Each node represents a task (LLM call, human review, conditional logic, parallel execution), and edges define the flow between them.
+
+Companion specs (`coding-agent-loop`, `unified-llm`) are adopted in bounded scope; see [`docs/companion-spec-scope-contract.md`](./docs/companion-spec-scope-contract.md) for explicit `implemented|partial|out-of-scope` declarations and evidence links.
+Self-hosting maturity is declared via staged objective gates; see [`docs/self-hosting-maturity-ladder.md`](./docs/self-hosting-maturity-ladder.md) for current level and promotion criteria.
 
 ## Features
 
@@ -113,6 +116,8 @@ To subscribe to execution events, instantiate `ExecutionEngine` directly and att
 | `resume` | Continue from latest or specified checkpoint |
 | `replay` | Re-run from a prior run manifest with fixed config |
 | `manifest` | Summarize replay/provenance metadata and optionally diff manifests |
+| `confidence-tune` | Analyze confidence artifacts and recommend threshold/escalation target tuning |
+| `compound-weekly` | Generate standardized weekly compound metrics reports from repository artifacts |
 | `dtu-run` | Execute DTU scenario fixtures and emit a satisfaction report |
 | `validate` | Parse + lint workflow without execution |
 | `visualize` | Output parsed graph JSON |
@@ -131,6 +136,12 @@ npx factorial resume --graph workflow.dot --checkpoint ./logs/checkpoint.json
 
 # Summarize and compare replay/provenance fields across manifests
 npx factorial manifest --manifest ./logs/replay/run_manifest.json --compare ./logs/run_manifest.json --json
+
+# Tune confidence.gate thresholds/routes from prior run artifacts
+npx factorial confidence-tune --logs-root ./logs ./logs/replay --target-escalation-rate 0.25 --min-samples 5 --json
+
+# Generate standardized weekly compound metrics report
+npx factorial compound-weekly --start 2026-02-09 --end 2026-02-15 --json
 
 # Run DTU scenarios and write report
 npx factorial dtu-run --fixtures ./tests/fixtures/dtu/scenarios --report ./reports/dtu_satisfaction_report.json
@@ -157,10 +168,21 @@ npx factorial dtu-run --fixtures ./tests/fixtures/dtu/scenarios --report ./repor
 
 Reference compatibility notes:
 
+- Graph mode policy:
+  - accepted: `digraph` and `strict digraph`,
+  - rejected: undirected `graph` mode.
 - `shape=circle` is treated as `start`
 - `shape=doublecircle` is treated as `exit`
 - `node_type` is accepted as an alias for `type`
 - `stack.observe` and `stack.steer` are handled by the codergen handler in CLI runs
+
+See conformance and delta evidence: [`docs/spec-conformance-matrix.md`](./docs/spec-conformance-matrix.md)
+
+Companion spec scope contract (coding-agent-loop + unified-llm):
+- [`docs/companion-spec-scope-contract.md`](./docs/companion-spec-scope-contract.md)
+
+Self-hosting maturity ladder:
+- [`docs/self-hosting-maturity-ladder.md`](./docs/self-hosting-maturity-ladder.md)
 
 ## Configuration
 
@@ -317,6 +339,10 @@ Confidence gate nodes (`confidence.gate`) also write:
 
 - `confidence_result.json` (observed confidence, threshold, decision, escalation target)
 
+To produce deterministic tuning recommendations from historical confidence artifacts:
+
+- `npx factorial confidence-tune --logs-root <logsRoot...> --json`
+
 Judge nodes (`judge.rubric`) run through codergen with strict structured output validation and set:
 
 - `judge.<node_id>.score`
@@ -403,6 +429,7 @@ npm run dtu:run
 References:
 
 - Roadmap: [`ROADMAP.md`](./ROADMAP.md)
+- Active handoff: [`docs/roadmap/active-handoff.md`](./docs/roadmap/active-handoff.md)
 - 0.3 execution plan: [`docs/roadmap/0.3-digital-twin-universe-execution-plan.md`](./docs/roadmap/0.3-digital-twin-universe-execution-plan.md)
 - Phase A implementation slice: [`docs/roadmap/0.3-phase-a-dtu-foundations-vertical-slice.md`](./docs/roadmap/0.3-phase-a-dtu-foundations-vertical-slice.md)
 - DTU completion report: [`docs/roadmap/0.3-dtu-validation-platform-completion.md`](./docs/roadmap/0.3-dtu-validation-platform-completion.md)
@@ -440,11 +467,50 @@ npm run agent:audit
 # Validate PR compound artifact requirements (local body file)
 npm run check:pr-compound -- --body-file ./path/to/pr-body.md
 
+# Validate cross-document claim consistency (roadmap/spec/companion/maturity)
+npm run claims:audit -- --report ./logs/claims_consistency/report.json
+
+# Validate docs freshness consistency (README/AGENTS/ROADMAP command + backlog declarations)
+npm run docs:freshness -- --report ./logs/docs_freshness/report.json
+
 # Generate weekly compound metrics report
 npm run metrics:compound-weekly -- --start 2026-02-09 --end 2026-02-15
 
+# Or via CLI helper command
+npx factorial compound-weekly --start 2026-02-09 --end 2026-02-15
+
+# Evaluate reliability SLO thresholds and emit deterministic lock decision (`resolved|reopen`)
+npm run reliability:slo -- --report ./docs/metrics/reports/compound-reliability-slo-latest.json
+
 # Run deterministic self-host dogfooding scenarios (resolved pass + reopen fail)
 npm run dogfood:self-host
+
+# Evaluate staged self-host maturity gates and emit report artifacts
+npm run self-host:maturity -- --require-level deterministic-local
+
+# Replay required deterministic suites and emit flake gate evidence (`self_host_flake_report.v1`)
+npm run self-host:flake -- --replay-count 2 --min-pass-rate 1 --report ./docs/metrics/reports/self-host-flake-latest.json
+
+# Generate/publish provider-backed evidence report
+npm run self-host:provider-backed
+
+# Generate/publish provider-backed live-canary evidence report (advisory by default)
+npm run self-host:provider-backed-live -- --report ./docs/metrics/reports/self-host-provider-backed-live-latest.json
+
+# Fail-closed provider-backed live canary (for configured nightly/release evidence lanes)
+npm run self-host:provider-backed-live -- --require-pass --report ./docs/metrics/reports/self-host-provider-backed-live-latest.json
+
+# Generate/publish autonomous evidence report (`self_host_autonomous_report.v1`)
+npm run self-host:autonomous
+
+# Generate/publish agent-audit evidence report (`self_host_agent_audit_report.v1`)
+npm run self-host:agent-audit
+
+# Generate/publish unattended outcome/economics telemetry report (`self_host_unattended_telemetry_report.v1`)
+npm run self-host:unattended-telemetry -- --source ./docs/metrics/reports/self-host-unattended-telemetry-source-latest.json --report ./docs/metrics/reports/self-host-unattended-telemetry-latest.json
+
+# Evaluate release hardening gates (SBOM/signing/provenance)
+npm run release:hardening -- --strict-signing --signing-key-env RELEASE_SIGNING_KEY
 
 # Type check
 npm run typecheck
@@ -505,4 +571,4 @@ MIT
 
 ## Acknowledgments
 
-This implementation is based on the [Attractor Specification](https://factory.strongdm.ai/) from StrongDM's Software Factory research.
+This implementation follows the [Attractor Specification](https://factory.strongdm.ai/) core model, publishes companion-spec adoption boundaries in [`docs/companion-spec-scope-contract.md`](./docs/companion-spec-scope-contract.md), and declares self-host maturity policy in [`docs/self-hosting-maturity-ladder.md`](./docs/self-hosting-maturity-ladder.md).

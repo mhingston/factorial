@@ -86,6 +86,213 @@ jobs:
       - name: Golden Regression
         run: npm run test:golden
 
+  self-host-maturity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Self-host Maturity (deterministic-local gate)
+        run: |
+          npm run self-host:maturity -- \
+            --logs-root ./logs/self_host_maturity_ci \
+            --report ./logs/self_host_maturity_ci/report.json \
+            --markdown ./logs/self_host_maturity_ci/report.md \
+            --require-level deterministic-local
+
+      - name: Upload Self-host Maturity Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-host-maturity-report
+          path: |
+            logs/self_host_maturity_ci/report.json
+            logs/self_host_maturity_ci/report.md
+
+  claims-consistency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Claims Consistency Gate
+        run: |
+          npm run claims:audit -- \
+            --report ./logs/claims_consistency_ci/report.json
+
+      - name: Upload Claims Consistency Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claims-consistency-report
+          path: logs/claims_consistency_ci/report.json
+
+  docs-freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Docs Freshness Gate
+        run: |
+          npm run docs:freshness -- \
+            --report ./logs/docs_freshness_ci/report.json
+
+      - name: Upload Docs Freshness Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-freshness-report
+          path: logs/docs_freshness_ci/report.json
+
+  self-host-flake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Deterministic Flake Replay Gate
+        run: |
+          npm run self-host:flake -- \
+            --replay-count 2 \
+            --min-pass-rate 1 \
+            --report ./logs/self_host_flake_ci/report.json
+
+      - name: Upload Self-host Flake Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-host-flake-report
+          path: logs/self_host_flake_ci/report.json
+
+  release-hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Release Hardening Gates
+        env:
+          RELEASE_SIGNING_KEY: ci-deterministic-signing-key
+        run: |
+          npm run release:hardening -- \
+            --strict-signing \
+            --signing-key-env RELEASE_SIGNING_KEY \
+            --report ./logs/release_hardening_ci/report.json \
+            --sbom ./logs/release_hardening_ci/sbom.json \
+            --signature ./logs/release_hardening_ci/signature.json \
+            --release-workflow ./.github/workflows/release.yml
+
+      - name: Upload Release Hardening Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-hardening-report
+          path: |
+            logs/release_hardening_ci/report.json
+            logs/release_hardening_ci/sbom.json
+            logs/release_hardening_ci/signature.json
+
+  reliability-slo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Reliability SLO Gate
+        run: |
+          npm run reliability:slo -- \
+            --report ./logs/reliability_slo_ci/report.json
+
+      - name: Upload Reliability SLO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reliability-slo-report
+          path: logs/reliability_slo_ci/report.json
+
+  self-host-unattended-telemetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Unattended Telemetry Contract
+        run: |
+          npm run self-host:unattended-telemetry -- \
+            --source ./docs/metrics/reports/self-host-unattended-telemetry-source-latest.json \
+            --report ./logs/self_host_unattended_telemetry_ci/report.json
+
+      - name: Upload Unattended Telemetry Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-host-unattended-telemetry-report
+          path: logs/self_host_unattended_telemetry_ci/report.json
+
   worktree-parity:
     runs-on: ubuntu-latest
     timeout-minutes: 15

@@ -36,11 +36,22 @@
     "agent:audit": "node ./scripts/agent-capability-audit.js",
     "test:worktree": "node ./scripts/worktree-parity-check.js",
     "check:pr-compound": "node ./scripts/check-pr-compound-artifacts.js",
+    "claims:audit": "node ./scripts/claims-consistency-audit.js",
+    "docs:freshness": "node ./scripts/docs-freshness-audit.js",
     "metrics:compound-weekly": "node ./scripts/compound-weekly-report.js",
+    "reliability:slo": "node ./scripts/reliability-slo-gate.js",
+    "release:hardening": "node ./scripts/release-hardening.js",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run lint && npm run typecheck && npm run test:run && npm run build",
-    "dogfood:self-host": "node ./scripts/self-host-dogfood.js"
+    "dogfood:self-host": "node ./scripts/self-host-dogfood.js",
+    "self-host:maturity": "node ./scripts/self-host-maturity.js",
+    "self-host:provider-backed": "node ./scripts/self-host-provider-backed-report.js",
+    "self-host:provider-backed-live": "node ./scripts/self-host-provider-backed-live-report.js",
+    "self-host:flake": "node ./scripts/self-host-flake-replay.js",
+    "self-host:autonomous": "node ./scripts/self-host-autonomous-report.js",
+    "self-host:agent-audit": "node ./scripts/self-host-agent-audit-report.js",
+    "self-host:unattended-telemetry": "node ./scripts/self-host-unattended-telemetry-report.js"
   },
   "keywords": [
     "ai",

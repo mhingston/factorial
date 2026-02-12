@@ -1,0 +1,39 @@
+name: Provider-backed Live Canary
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  provider-backed-live-canary:
+    if: ${{ secrets.OPENAI_API_KEY != '' && secrets.ANTHROPIC_API_KEY != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Evaluate Provider-backed Live Canary (fail-closed)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          npm run self-host:provider-backed-live -- \
+            --require-pass \
+            --report ./docs/metrics/reports/self-host-provider-backed-live-latest.json
+
+      - name: Upload Provider-backed Live Canary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-backed-live-canary-report
+          path: docs/metrics/reports/self-host-provider-backed-live-latest.json

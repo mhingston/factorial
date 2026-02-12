@@ -432,6 +432,23 @@ export class CodergenHandler implements Handler {
         callResult.callError = validation.errors.join('; ');
       }
 
+      const streamTranscript = buildCodergenStreamTranscript({
+        nodeId: node.id,
+        backend: callResult.backend,
+        provider,
+        model: modelName,
+        callResult,
+      });
+      const streamTranscriptPath = join(stageDir, 'stream_transcript.json');
+      const streamTranscriptNdjsonPath = join(stageDir, 'stream_transcript.ndjson');
+      await writeStreamTranscriptArtifacts(
+        streamTranscriptPath,
+        streamTranscriptNdjsonPath,
+        streamTranscript
+      );
+      artifactUpdates[`codergen.${node.id}.stream_transcript_path`] = streamTranscriptPath;
+      artifactUpdates[`codergen.${node.id}.stream_transcript_ndjson_path`] = streamTranscriptNdjsonPath;
+
       const usageSummary = extractCodergenUsageSummary(callResult);
       if (usageSummary) {
         const usagePath = join(stageDir, 'usage.json');
@@ -1154,6 +1171,94 @@ function buildCliEvents(options: {
   return events;
 }
 
+function buildCodergenStreamTranscript(options: {
+  nodeId: string;
+  backend: CodergenBackend;
+  provider: string;
+  model: string;
+  callResult: CodergenCallResult;
+}): CodergenEvent[] {
+  const startedAt = new Date().toISOString();
+  const finishedAt = new Date().toISOString();
+  const transcript: CodergenEvent[] = [
+    {
+      type: 'llm.stream.start',
+      timestamp: startedAt,
+      node_id: options.nodeId,
+      backend: options.backend,
+      provider: options.provider,
+      model: options.model,
+    },
+  ];
+
+  if (options.callResult.mode === 'object') {
+    transcript.push({
+      type: 'llm.stream.object',
+      timestamp: finishedAt,
+      node_id: options.nodeId,
+      output: options.callResult.output,
+      text_output: options.callResult.textOutput,
+    });
+  } else {
+    const deltas = splitDeterministicTranscriptDeltas(options.callResult.textOutput);
+    for (const delta of deltas) {
+      transcript.push({
+        type: 'llm.stream.delta',
+        timestamp: finishedAt,
+        node_id: options.nodeId,
+        backend: options.backend,
+        provider: options.provider,
+        model: options.model,
+        delta,
+      });
+    }
+  }
+
+  transcript.push({
+    type: 'llm.stream.end',
+    timestamp: finishedAt,
+    node_id: options.nodeId,
+    adapter: options.callResult.adapter,
+    backend: options.callResult.backend,
+    operation: options.callResult.operation,
+    mode: options.callResult.mode,
+    output: options.callResult.output,
+    text_output: options.callResult.textOutput,
+    finish_reason: options.callResult.finishReason,
+    usage: options.callResult.usage,
+    warnings: options.callResult.warnings,
+    provider_metadata: options.callResult.providerMetadata,
+    request: options.callResult.request,
+    response: options.callResult.response,
+    cli_invocation: options.callResult.cliInvocation,
+    stdout: options.callResult.stdout,
+    stderr: options.callResult.stderr,
+    error: options.callResult.callError,
+  });
+
+  return transcript;
+}
+
+function splitDeterministicTranscriptDeltas(text: string): string[] {
+  if (!text) {
+    return [];
+  }
+
+  const deltas: string[] = [];
+  let remaining = text;
+  let newlineIndex = remaining.indexOf('\n');
+  while (newlineIndex >= 0) {
+    deltas.push(remaining.slice(0, newlineIndex + 1));
+    remaining = remaining.slice(newlineIndex + 1);
+    newlineIndex = remaining.indexOf('\n');
+  }
+  if (remaining.length > 0) {
+    deltas.push(remaining);
+  }
+
+  return deltas;
+}
+
 function asNonEmptyString(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
@@ -1200,6 +1305,16 @@ async function writeEventArtifacts(stageDir: string, events: CodergenEvent[]): P
   await writeJsonFile(join(stageDir, 'events.json'), events);
   const ndjson = events.map(event => JSON.stringify(toSerializable(event))).join('\n');
   await writeFile(join(stageDir, 'events.ndjson'), `${ndjson}\n`);
+}
+
+async function writeStreamTranscriptArtifacts(
+  transcriptPath: string,
+  transcriptNdjsonPath: string,
+  events: CodergenEvent[]
+): Promise<void> {
+  await writeJsonFile(transcriptPath, events);
+  const ndjson = events.map(event => JSON.stringify(toSerializable(event))).join('\n');
+  await writeFile(transcriptNdjsonPath, `${ndjson}\n`);
 }
 
 async function writeStatusFile(stageDir: string, outcome: Outcome): Promise<void> {

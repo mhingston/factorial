@@ -1,0 +1,117 @@
+{
+  "schema_version": "claims_consistency_report.v1",
+  "generated_at": "2026-02-12T02:24:33.082Z",
+  "report_path": "docs/metrics/reports/claims-consistency-latest.json",
+  "publication": {
+    "command": "npm run claims:audit",
+    "deterministic_inputs": [
+      "ROADMAP.md",
+      "docs/spec-conformance-matrix.md",
+      "docs/companion-spec-scope-contract.md",
+      "docs/self-hosting-maturity-ladder.md"
+    ]
+  },
+  "summary": {
+    "overall_status": "pass",
+    "failed_check_ids": [],
+    "declared_current_level": "provider-backed",
+    "declared_next_level": "autonomous",
+    "cal_delta_02_status": "closed",
+    "ullm_delta_02_status": "closed",
+    "companion_unattended_scope": "out-of-scope"
+  },
+  "checks": [
+    {
+      "id": "CLM-001",
+      "level": "claims-consistency",
+      "name": "Required claim source documents are readable",
+      "status": "pass",
+      "summary": "All required claim source documents are present and readable.",
+      "evidence": [
+        "ROADMAP.md",
+        "docs/spec-conformance-matrix.md",
+        "docs/companion-spec-scope-contract.md",
+        "docs/self-hosting-maturity-ladder.md"
+      ],
+      "details": {
+        "roadmap_exists": true,
+        "roadmap_read_error": "",
+        "matrix_exists": true,
+        "matrix_read_error": "",
+        "companion_exists": true,
+        "companion_read_error": "",
+        "maturity_exists": true,
+        "maturity_read_error": ""
+      }
+    },
+    {
+      "id": "CLM-002",
+      "level": "claims-consistency",
+      "name": "Declared current maturity level consistency",
+      "status": "pass",
+      "summary": "Current maturity level claim is synchronized across roadmap, maturity, companion, and CAL-DELTA-02.",
+      "evidence": [
+        "ROADMAP.md",
+        "docs/self-hosting-maturity-ladder.md",
+        "docs/companion-spec-scope-contract.md",
+        "docs/spec-conformance-matrix.md"
+      ],
+      "details": {
+        "roadmap_declared_current_level": "provider-backed",
+        "maturity_declared_current_level": "provider-backed",
+        "companion_declared_current_level": "provider-backed",
+        "matrix_cal_delta_02_current_level": "provider-backed"
+      }
+    },
+    {
+      "id": "CLM-003",
+      "level": "claims-consistency",
+      "name": "Declared next-level target consistency",
+      "status": "pass",
+      "summary": "Next-level target declaration matches between roadmap and maturity ladder.",
+      "evidence": [
+        "ROADMAP.md",
+        "docs/self-hosting-maturity-ladder.md"
+      ],
+      "details": {
+        "roadmap_declared_next_level": "autonomous",
+        "maturity_declared_next_level": "autonomous"
+      }
+    },
+    {
+      "id": "CLM-004",
+      "level": "claims-consistency",
+      "name": "Conformance delta status consistency (CAL-DELTA-02 / ULLM-DELTA-02)",
+      "status": "pass",
+      "summary": "Roadmap and spec matrix agree on claim-critical delta statuses.",
+      "evidence": [
+        "ROADMAP.md",
+        "docs/spec-conformance-matrix.md"
+      ],
+      "details": {
+        "roadmap_cal_delta_02_status": "closed",
+        "matrix_cal_delta_02_status": "closed",
+        "roadmap_ullm_delta_02_status": "closed",
+        "matrix_ullm_delta_02_status": "closed"
+      }
+    },
+    {
+      "id": "CLM-005",
+      "level": "claims-consistency",
+      "name": "Companion unattended-autonomy boundary consistency",
+      "status": "pass",
+      "summary": "Unattended autonomy boundary remains explicitly out-of-scope and synchronized across claim docs.",
+      "evidence": [
+        "ROADMAP.md",
+        "docs/companion-spec-scope-contract.md",
+        "docs/spec-conformance-matrix.md"
+      ],
+      "details": {
+        "roadmap_companion_unattended_scope": "out-of-scope",
+        "companion_unattended_scope_status": "out-of-scope",
+        "companion_explicit_boundary_present": true,
+        "matrix_mentions_unattended_out_of_scope": true
+      }
+    }
+  ]
+}

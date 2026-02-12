@@ -1,0 +1,65 @@
+{
+  "schema_version": "self_host_provider_backed_report.v1",
+  "generated_at": "2026-02-11T20:58:46.822Z",
+  "report_path": "docs/metrics/reports/self-host-provider-backed-latest.json",
+  "publication": {
+    "command": "npm run self-host:provider-backed",
+    "deterministic_inputs": [
+      "packages/core/src/llm/index.test.ts",
+      "packages/core/src/handlers/codergen.test.ts"
+    ]
+  },
+  "summary": {
+    "pb001_status": "pass",
+    "pb002_status": "pass",
+    "provider_parity_contract_tests_pass": true,
+    "providers": {
+      "openai": "pass",
+      "anthropic": "pass"
+    },
+    "required_providers": [
+      "openai",
+      "anthropic"
+    ],
+    "overall_status": "pass"
+  },
+  "checks": [
+    {
+      "id": "PB-001",
+      "level": "provider-backed",
+      "name": "Provider adapter parity contract tests",
+      "command": "npm run test:run -- packages/core/src/llm/index.test.ts packages/core/src/handlers/codergen.test.ts",
+      "status": "pass",
+      "summary": "Targeted provider parity contract tests passed for openai + anthropic normalized behavior.",
+      "evidence": [
+        "packages/core/src/llm/index.test.ts",
+        "packages/core/src/handlers/codergen.test.ts"
+      ],
+      "details": {
+        "exit_code": 0
+      }
+    },
+    {
+      "id": "PB-002",
+      "level": "provider-backed",
+      "name": "Published provider-backed report schema + provider pass checks",
+      "command": "node scripts/self-host-provider-backed-report.js --report docs/metrics/reports/self-host-provider-backed-latest.json",
+      "status": "pass",
+      "summary": "Provider-backed report schema is published and required providers are pass.",
+      "evidence": [
+        "docs/metrics/reports/self-host-provider-backed-latest.json"
+      ],
+      "details": {
+        "schema_version": "self_host_provider_backed_report.v1",
+        "required_provider_statuses": {
+          "openai": "pass",
+          "anthropic": "pass"
+        },
+        "providers": {
+          "openai": "pass",
+          "anthropic": "pass"
+        }
+      }
+    }
+  ]
+}

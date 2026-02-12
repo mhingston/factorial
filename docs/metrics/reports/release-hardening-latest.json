@@ -1,0 +1,63 @@
+{
+  "schema_version": "release_hardening_report.v1",
+  "generated_at": "2026-02-12T00:21:55.892Z",
+  "report_path": "docs/metrics/reports/release-hardening-latest.json",
+  "sbom_path": "docs/metrics/reports/release-sbom-latest.json",
+  "signature_path": "docs/metrics/reports/release-signature-latest.json",
+  "release_workflow_path": ".github/workflows/release.yml",
+  "strict_signing": true,
+  "signing_key_env": "RELEASE_SIGNING_KEY",
+  "summary": {
+    "sbom_status": "pass",
+    "signing_status": "pass",
+    "provenance_status": "pass",
+    "overall_status": "pass"
+  },
+  "checks": [
+    {
+      "id": "RH-001",
+      "name": "SBOM generation",
+      "status": "pass",
+      "summary": "Generated deterministic SBOM with 187 components.",
+      "evidence": [
+        "docs/metrics/reports/release-sbom-latest.json",
+        "package-lock.json"
+      ],
+      "details": {
+        "sbom_schema_version": "release_sbom.v1",
+        "component_count": 187
+      }
+    },
+    {
+      "id": "RH-002",
+      "name": "Artifact signing",
+      "status": "pass",
+      "summary": "Release package artifact signed via env:RELEASE_SIGNING_KEY.",
+      "evidence": [
+        "docs/metrics/reports/release-signature-latest.json",
+        "npm pack --json"
+      ],
+      "details": {
+        "signature_schema_version": "release_signature.v1",
+        "key_source": "env:RELEASE_SIGNING_KEY",
+        "strict_signing": true
+      }
+    },
+    {
+      "id": "RH-003",
+      "name": "Provenance policy verification",
+      "status": "pass",
+      "summary": "Release workflow enforces release hardening and npm provenance policy.",
+      "evidence": [
+        ".github/workflows/release.yml"
+      ],
+      "details": {
+        "has_id_token_write": true,
+        "has_contents_write": true,
+        "has_publish_provenance_flag": true,
+        "has_release_hardening_command": true,
+        "hardening_runs_before_publish": true
+      }
+    }
+  ]
+}

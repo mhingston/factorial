@@ -1,0 +1,12 @@
+{
+  "schema_version": "release_signature.v1",
+  "generated_at": "2026-02-12T00:21:55.887Z",
+  "algorithm": "hmac-sha256",
+  "key_source": "env:RELEASE_SIGNING_KEY",
+  "artifact": {
+    "path": "mhingston5-factorial-0.1.0.tgz",
+    "size_bytes": 135175,
+    "sha256": "4a2055b6b9670c5e7865217ae8f60a477f6484953bc1e40a2e26d8db9e9f1306"
+  },
+  "signature": "357b6ded524f97fce24d687143b9cc56fecc5faf9bb9df36932cb499d1639489"
+}

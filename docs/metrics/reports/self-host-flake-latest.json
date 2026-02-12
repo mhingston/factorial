@@ -1,0 +1,132 @@
+{
+  "schema_version": "self_host_flake_report.v1",
+  "generated_at": "2026-02-12T00:47:27.274Z",
+  "report_path": "docs/metrics/reports/self-host-flake-latest.json",
+  "thresholds": {
+    "replay_count": 2,
+    "min_pass_rate": 1
+  },
+  "publication": {
+    "command": "npm run self-host:flake -- --report docs/metrics/reports/self-host-flake-latest.json --replay-count 2 --min-pass-rate 1",
+    "suite_ids": [
+      "FLAKE-001",
+      "FLAKE-002",
+      "FLAKE-003"
+    ]
+  },
+  "suites": [
+    {
+      "id": "FLAKE-001",
+      "name": "CLI e2e smoke suite",
+      "required": true,
+      "command": "npm run test:run -- packages/cli/src/e2e-smoke.test.ts",
+      "cwd": ".",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "exit_code": 0,
+          "duration_ms": 2371,
+          "stdout_tail": "10 tests) 1665ms\n\n Test Files  1 passed (1)\n      Tests  10 passed (10)\n   Start at  00:47:14\n   Duration  1.97s (transform 28ms, setup 0ms, collect 51ms, tests 1.67s, environment 0ms, prepare 47ms)\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "attempt": 2,
+          "status": "pass",
+          "exit_code": 0,
+          "duration_ms": 2428,
+          "stdout_tail": "rison JSON 305ms\n\n Test Files  1 passed (1)\n      Tests  10 passed (10)\n   Start at  00:47:16\n   Duration  1.97s (transform 30ms, setup 0ms, collect 60ms, tests 1.68s, environment 0ms, prepare 45ms)\n\n",
+          "stderr_tail": ""
+        }
+      ],
+      "metrics": {
+        "pass_count": 2,
+        "fail_count": 0,
+        "pass_rate": 1
+      },
+      "status": "pass",
+      "threshold": {
+        "min_pass_rate": 1,
+        "met": true
+      }
+    },
+    {
+      "id": "FLAKE-002",
+      "name": "Self-host dogfood suite",
+      "required": true,
+      "command": "npm run test:run -- packages/cli/src/self-host-dogfood.test.ts",
+      "cwd": ".",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "exit_code": 0,
+          "duration_ms": 1818,
+          "stdout_tail": "ck decision 1088ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  00:47:19\n   Duration  1.36s (transform 21ms, setup 0ms, collect 33ms, tests 1.09s, environment 0ms, prepare 40ms)\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "attempt": 2,
+          "status": "pass",
+          "exit_code": 0,
+          "duration_ms": 1896,
+          "stdout_tail": "ck decision 1158ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  00:47:21\n   Duration  1.46s (transform 23ms, setup 0ms, collect 41ms, tests 1.16s, environment 0ms, prepare 45ms)\n\n",
+          "stderr_tail": ""
+        }
+      ],
+      "metrics": {
+        "pass_count": 2,
+        "fail_count": 0,
+        "pass_rate": 1
+      },
+      "status": "pass",
+      "threshold": {
+        "min_pass_rate": 1,
+        "met": true
+      }
+    },
+    {
+      "id": "FLAKE-003",
+      "name": "Self-host maturity suite",
+      "required": true,
+      "command": "npm run test:run -- packages/cli/src/self-host-maturity.test.ts",
+      "cwd": ".",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "exit_code": 0,
+          "duration_ms": 2434,
+          "stdout_tail": "local level 1662ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  00:47:22\n   Duration  1.97s (transform 23ms, setup 0ms, collect 44ms, tests 1.66s, environment 0ms, prepare 46ms)\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "attempt": 2,
+          "status": "pass",
+          "exit_code": 0,
+          "duration_ms": 2324,
+          "stdout_tail": "local level 1558ms\n\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Start at  00:47:25\n   Duration  1.85s (transform 23ms, setup 0ms, collect 47ms, tests 1.56s, environment 0ms, prepare 44ms)\n\n",
+          "stderr_tail": ""
+        }
+      ],
+      "metrics": {
+        "pass_count": 2,
+        "fail_count": 0,
+        "pass_rate": 1
+      },
+      "status": "pass",
+      "threshold": {
+        "min_pass_rate": 1,
+        "met": true
+      }
+    }
+  ],
+  "summary": {
+    "required_suite_count": 3,
+    "required_suites_passing": 3,
+    "failed_required_suite_ids": [],
+    "overall_status": "pass",
+    "replay_count": 2,
+    "min_pass_rate": 1
+  }
+}

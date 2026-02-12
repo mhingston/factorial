@@ -16,6 +16,7 @@ Use Semantic Versioning:
    - `npm run typecheck`
    - `npm run test:run`
    - `npm run test:coverage`
+   - `npm run release:hardening -- --strict-signing --signing-key-env RELEASE_SIGNING_KEY`
 3. Bump version:
    - `npm version patch` (or `minor` / `major` as appropriate)
 4. Push commit and tag:
@@ -36,3 +37,4 @@ Pushing a `v*` tag triggers `.github/workflows/release.yml`, which:
 Required secret:
 
 - `NPM_TOKEN` with publish permissions for the target npm package.
+- `RELEASE_SIGNING_KEY` for strict release artifact signing gate verification.

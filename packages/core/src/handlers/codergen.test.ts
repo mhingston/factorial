@@ -110,6 +110,8 @@ describe('CodergenHandler artifacts', () => {
     const validation = await readJson(join(stageDir, 'validation.json'));
     const events = await readJson(join(stageDir, 'events.json'));
     const ndjson = await readFile(join(stageDir, 'events.ndjson'), 'utf-8');
+    const streamTranscript = await readJson(join(stageDir, 'stream_transcript.json'));
+    const streamTranscriptNdjson = await readFile(join(stageDir, 'stream_transcript.ndjson'), 'utf-8');
 
     expect(output.output_mode).toBe('text');
     expect(output.output).toBe('hello world');
@@ -137,6 +139,19 @@ describe('CodergenHandler artifacts', () => {
     expect(Array.isArray(events)).toBe(true);
     expect(events).toHaveLength(2);
     expect(String(ndjson).trim().split('\n')).toHaveLength(2);
+    expect(Array.isArray(streamTranscript)).toBe(true);
+    expect((streamTranscript as Array<Record<string, unknown>>).map(entry => entry.type)).toEqual([
+      'llm.stream.start',
+      'llm.stream.delta',
+      'llm.stream.end',
+    ]);
+    expect(String(streamTranscriptNdjson).trim().split('\n')).toHaveLength(3);
+    expect(outcome.context_updates['codergen.text_node.stream_transcript_path']).toBe(
+      join(stageDir, 'stream_transcript.json')
+    );
+    expect(outcome.context_updates['codergen.text_node.stream_transcript_ndjson_path']).toBe(
+      join(stageDir, 'stream_transcript.ndjson')
+    );
   });
 
   it('writes output_schema.json and structured output artifacts', async () => {
@@ -226,6 +241,7 @@ describe('CodergenHandler artifacts', () => {
     const stderr = await readFile(join(stageDir, 'stderr.log'), 'utf-8');
     const output = await readJson(join(stageDir, 'output.json'));
     const events = await readJson(join(stageDir, 'events.json'));
+    const streamTranscript = await readJson(join(stageDir, 'stream_transcript.json'));
 
     expect(invocation.backend).toBe('cli');
     expect(stdout).toBe('cli backend output');
@@ -234,6 +250,18 @@ describe('CodergenHandler artifacts', () => {
     expect(output.output).toBe('cli backend output');
     expect(Array.isArray(events)).toBe(true);
     expect((events as unknown[]).length).toBeGreaterThanOrEqual(2);
+    expect(Array.isArray(streamTranscript)).toBe(true);
+    expect((streamTranscript as Array<Record<string, unknown>>).map(entry => entry.type)).toEqual([
+      'llm.stream.start',
+      'llm.stream.delta',
+      'llm.stream.end',
+    ]);
+    expect(outcome.context_updates['codergen.cli_node.stream_transcript_path']).toBe(
+      join(stageDir, 'stream_transcript.json')
+    );
+    expect(outcome.context_updates['codergen.cli_node.stream_transcript_ndjson_path']).toBe(
+      join(stageDir, 'stream_transcript.ndjson')
+    );
   });
 
   it('uses provider default CLI mappings and avoids SDK providers in cli mode', async () => {

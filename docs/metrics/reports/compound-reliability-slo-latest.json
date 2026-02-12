@@ -1,0 +1,97 @@
+{
+  "schema_version": "compound_reliability_slo_report.v1",
+  "generated_at": "2026-02-12T02:24:07.393Z",
+  "report_path": "docs/metrics/reports/compound-reliability-slo-latest.json",
+  "publication": {
+    "command": "npm run reliability:slo",
+    "weekly_report_source": "docs/metrics/reports/week-2026-02-09_to_2026-02-15.md"
+  },
+  "inputs": {
+    "today": "2026-02-12",
+    "week": {
+      "start": "2026-02-09",
+      "end": "2026-02-15"
+    }
+  },
+  "thresholds": {
+    "min_lock_resolution_rate": 0.8,
+    "max_reopen_ratio": 0.2,
+    "max_cadence_age_days": 7
+  },
+  "metrics": {
+    "lock_resolution_rate": 1,
+    "reopen_ratio": 0,
+    "reopen_count": 0,
+    "lock_decisions_total": 3,
+    "review_artifacts_counted": 3,
+    "cadence_age_days": 0
+  },
+  "summary": {
+    "threshold_status": "pass",
+    "consensus_lock_decision": "resolved",
+    "overall_status": "pass",
+    "failed_check_ids": []
+  },
+  "checks": [
+    {
+      "id": "SLO-001",
+      "status": "pass",
+      "name": "Lock resolution rate minimum",
+      "summary": "Lock resolution rate meets minimum threshold.",
+      "evidence": [
+        "docs/metrics/reports/week-2026-02-09_to_2026-02-15.md"
+      ],
+      "details": {
+        "observed_lock_resolution_rate": 1,
+        "threshold_min_lock_resolution_rate": 0.8,
+        "lock_decisions_total": 3,
+        "reopen_count": 0,
+        "unavailable_reason": ""
+      }
+    },
+    {
+      "id": "SLO-002",
+      "status": "pass",
+      "name": "Reopen ratio maximum",
+      "summary": "Reopen ratio is within allowed ceiling.",
+      "evidence": [
+        "docs/metrics/reports/week-2026-02-09_to_2026-02-15.md"
+      ],
+      "details": {
+        "observed_reopen_ratio": 0,
+        "threshold_max_reopen_ratio": 0.2,
+        "lock_decisions_total": 3,
+        "reopen_count": 0,
+        "unavailable_reason": ""
+      }
+    },
+    {
+      "id": "SLO-003",
+      "status": "pass",
+      "name": "Cadence freshness",
+      "summary": "Weekly metrics artifact freshness is within the allowed window.",
+      "evidence": [
+        "docs/metrics/reports/week-2026-02-09_to_2026-02-15.md"
+      ],
+      "details": {
+        "observed_cadence_age_days": 0,
+        "threshold_max_cadence_age_days": 7,
+        "week_end": "2026-02-15",
+        "today": "2026-02-12"
+      }
+    },
+    {
+      "id": "SLO-004",
+      "status": "pass",
+      "name": "Auto-reopen policy decision hook",
+      "summary": "All SLO checks passed; policy hook sets consensus lock to resolved.",
+      "evidence": [
+        "docs/metrics/reports/week-2026-02-09_to_2026-02-15.md"
+      ],
+      "details": {
+        "failed_threshold_checks": [],
+        "consensus_lock_decision": "resolved"
+      }
+    }
+  ]
+}

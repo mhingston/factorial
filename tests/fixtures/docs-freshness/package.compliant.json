@@ -1,0 +1,20 @@
+{
+  "name": "fixture",
+  "scripts": {
+    "build": "echo build",
+    "lint": "echo lint",
+    "typecheck": "echo typecheck",
+    "test:run": "echo test:run",
+    "test:golden": "echo test:golden",
+    "agent:audit": "echo agent:audit",
+    "check:pr-compound": "echo check:pr-compound",
+    "metrics:compound-weekly": "echo metrics:compound-weekly",
+    "reliability:slo": "echo reliability:slo",
+    "self-host:maturity": "echo self-host:maturity",
+    "self-host:provider-backed": "echo self-host:provider-backed",
+    "self-host:flake": "echo self-host:flake",
+    "self-host:unattended-telemetry": "echo self-host:unattended-telemetry",
+    "docs:freshness": "echo docs:freshness",
+    "release:hardening": "echo release:hardening"
+  }
+}

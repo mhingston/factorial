@@ -1,0 +1,125 @@
+{
+  "schema_version": "self_host_unattended_telemetry_source.v1",
+  "generated_at": "2026-02-12T00:00:00.000Z",
+  "window": {
+    "start": "2026-01-29T00:00:00.000Z",
+    "end": "2026-02-12T00:00:00.000Z"
+  },
+  "maintenance_window_days": 14,
+  "merged_prs": [
+    {
+      "pr_id": "PR-201",
+      "merged_at": "2026-02-02T10:00:00.000Z",
+      "reverted_within_window": false,
+      "churn_commits_within_window": 1
+    },
+    {
+      "pr_id": "PR-202",
+      "merged_at": "2026-02-05T14:00:00.000Z",
+      "reverted_within_window": true,
+      "churn_commits_within_window": 4
+    },
+    {
+      "pr_id": "PR-203",
+      "merged_at": "2026-02-09T16:30:00.000Z",
+      "reverted_within_window": false,
+      "churn_commits_within_window": 2
+    },
+    {
+      "pr_id": "PR-204",
+      "merged_at": "2026-02-11T18:45:00.000Z",
+      "reverted_within_window": false,
+      "churn_commits_within_window": 0
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "RUN-001",
+      "status": "success",
+      "merged_pr_id": "PR-201",
+      "changed_files": 2,
+      "changed_test_files": 1,
+      "runtime_minutes": 6,
+      "input_tokens": 1000,
+      "output_tokens": 200,
+      "execution_minutes": 8
+    },
+    {
+      "run_id": "RUN-002",
+      "status": "success",
+      "merged_pr_id": "PR-202",
+      "changed_files": 8,
+      "changed_test_files": 3,
+      "runtime_minutes": 22,
+      "input_tokens": 4800,
+      "output_tokens": 900,
+      "execution_minutes": 26
+    },
+    {
+      "run_id": "RUN-003",
+      "status": "fail",
+      "merged_pr_id": "",
+      "changed_files": 5,
+      "changed_test_files": 2,
+      "runtime_minutes": 18,
+      "input_tokens": 3400,
+      "output_tokens": 600,
+      "execution_minutes": 20
+    },
+    {
+      "run_id": "RUN-004",
+      "status": "success",
+      "merged_pr_id": "PR-202",
+      "changed_files": 12,
+      "changed_test_files": 5,
+      "runtime_minutes": 48,
+      "input_tokens": 7200,
+      "output_tokens": 1200,
+      "execution_minutes": 52
+    },
+    {
+      "run_id": "RUN-005",
+      "status": "success",
+      "merged_pr_id": "PR-203",
+      "changed_files": 3,
+      "changed_test_files": 1,
+      "runtime_minutes": 9,
+      "input_tokens": 2200,
+      "output_tokens": 500,
+      "execution_minutes": 11
+    },
+    {
+      "run_id": "RUN-006",
+      "status": "success",
+      "merged_pr_id": "PR-203",
+      "changed_files": 16,
+      "changed_test_files": 6,
+      "runtime_minutes": 60,
+      "input_tokens": 9800,
+      "output_tokens": 1900,
+      "execution_minutes": 65
+    },
+    {
+      "run_id": "RUN-007",
+      "status": "fail",
+      "merged_pr_id": "",
+      "changed_files": 4,
+      "changed_test_files": 1,
+      "runtime_minutes": 12,
+      "input_tokens": 1800,
+      "output_tokens": 400,
+      "execution_minutes": 14
+    },
+    {
+      "run_id": "RUN-008",
+      "status": "success",
+      "merged_pr_id": "PR-204",
+      "changed_files": 7,
+      "changed_test_files": 2,
+      "runtime_minutes": 20,
+      "input_tokens": 4200,
+      "output_tokens": 700,
+      "execution_minutes": 22
+    }
+  ]
+}

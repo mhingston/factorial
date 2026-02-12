@@ -1,4 +1,4 @@
-import { generateObject, generateText, jsonSchema } from 'ai';
+import { generateObject, generateText, jsonSchema, streamText } from 'ai';
 import { spawn } from 'node:child_process';
 import type {
   LlmAdapter,
@@ -36,6 +36,20 @@ export class DefaultLlmAdapter implements LlmAdapter {
     };
 
     try {
+      if (request.backend === 'api' && !request.outputSchema) {
+        for await (const event of streamApiText(request)) {
+          yield event;
+        }
+        return;
+      }
+
+      if (request.backend === 'cli') {
+        for await (const event of streamCli(request)) {
+          yield event;
+        }
+        return;
+      }
+
       const result = await this.complete({
         backend: request.backend,
         nodeId: request.nodeId,
@@ -57,32 +71,16 @@ export class DefaultLlmAdapter implements LlmAdapter {
           data: {
             output: result.output,
             text_output: result.textOutput,
+            timestamp: new Date().toISOString(),
           },
         };
-      } else {
-        yield {
-          type: 'llm.stream.text',
-          data: {
-            text: result.textOutput,
-          },
-        };
+      } else if (result.textOutput.length > 0) {
+        yield createStreamDeltaEvent(request, result.textOutput);
       }
 
       yield {
         type: 'llm.stream.end',
-        data: {
-          node_id: request.nodeId,
-          adapter: result.adapter,
-          backend: result.backend,
-          operation: result.operation,
-          mode: result.mode,
-          finish_reason: result.finishReason,
-          usage: result.usage,
-          warnings: result.warnings,
-          provider_metadata: result.providerMetadata,
-          error: result.callError,
-          timestamp: new Date().toISOString(),
-        },
+        data: buildStreamEndData(request.nodeId, result),
       };
     } catch (error) {
       yield {
@@ -344,6 +342,196 @@ function resolveCliInvocation(request: LlmCompleteRequest & { cli: NonNullable<L
     env,
     envKeys: Object.keys(envOverrides),
     timeoutMs,
+  };
+}
+
+async function* streamApiText(request: LlmStreamRequest): AsyncGenerator<LlmStreamEvent> {
+  applyProviderEnvOverrides(request.provider, request.providerApiKeyEnv);
+  const model = await resolveModel(request.provider, request.model, {
+    apiKeyEnv: request.providerApiKeyEnv,
+  });
+  const result = streamText({
+    model: model as Parameters<typeof streamText>[0]['model'],
+    prompt: request.prompt,
+    abortSignal: request.signal,
+  });
+
+  let textOutput = '';
+  for await (const delta of result.textStream) {
+    textOutput += delta;
+    if (!delta) {
+      continue;
+    }
+    yield createStreamDeltaEvent(request, delta);
+  }
+
+  const streamResult: LlmCompleteResult = {
+    adapter: 'vercel-ai-sdk',
+    backend: 'api',
+    operation: 'generateText',
+    mode: 'text',
+    output: textOutput,
+    textOutput,
+    request: await result.request,
+    response: await result.response,
+    usage: await result.totalUsage,
+    finishReason: await result.finishReason,
+    warnings: await result.warnings,
+    providerMetadata: await result.providerMetadata,
+  };
+
+  yield {
+    type: 'llm.stream.end',
+    data: buildStreamEndData(request.nodeId, streamResult),
+  };
+}
+
+async function* streamCli(request: LlmStreamRequest): AsyncGenerator<LlmStreamEvent> {
+  if (!request.cli) {
+    throw new Error('CLI backend requires cli invocation config.');
+  }
+
+  const cliRequest = request as LlmStreamRequest & {
+    cli: NonNullable<LlmStreamRequest['cli']>;
+  };
+  const cliConfig = resolveCliInvocation(cliRequest as LlmCompleteRequest & {
+    cli: NonNullable<LlmCompleteRequest['cli']>;
+  });
+  const expectsStructuredOutput = Boolean(cliRequest.outputSchema);
+  const stdoutChunks: string[] = [];
+  const stderrChunks: string[] = [];
+  let pendingStdout = '';
+  let exitCode: number | null = null;
+  let exitSignal: NodeJS.Signals | null = null;
+
+  const child = spawn(cliConfig.executable, cliConfig.args, {
+    cwd: cliConfig.cwd,
+    env: cliConfig.env,
+    signal: cliRequest.signal,
+    timeout: cliConfig.timeoutMs,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  child.stderr?.on('data', chunk => {
+    stderrChunks.push(chunk.toString());
+  });
+
+  const closePromise = new Promise<void>((resolvePromise, rejectPromise) => {
+    child.on('error', rejectPromise);
+    child.on('close', (code, sig) => {
+      exitCode = code;
+      exitSignal = sig;
+      resolvePromise();
+    });
+  });
+
+  if (child.stdout) {
+    for await (const chunk of child.stdout) {
+      const chunkText = chunk.toString();
+      stdoutChunks.push(chunkText);
+      if (expectsStructuredOutput) {
+        continue;
+      }
+
+      pendingStdout += chunkText;
+      let newlineIndex = pendingStdout.indexOf('\n');
+      while (newlineIndex >= 0) {
+        const delta = pendingStdout.slice(0, newlineIndex + 1);
+        pendingStdout = pendingStdout.slice(newlineIndex + 1);
+        if (delta.length > 0) {
+          yield createStreamDeltaEvent(request, delta);
+        }
+        newlineIndex = pendingStdout.indexOf('\n');
+      }
+    }
+  }
+
+  await closePromise;
+
+  const stdout = stdoutChunks.join('');
+  const stderr = stderrChunks.join('');
+  const structured = extractCliStructuredOutput(stdout, expectsStructuredOutput);
+  if (expectsStructuredOutput && structured.mode === 'object') {
+    yield {
+      type: 'llm.stream.object',
+      data: {
+        output: structured.output,
+        text_output: structured.textOutput,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  } else if (pendingStdout.length > 0) {
+    yield createStreamDeltaEvent(request, pendingStdout);
+  }
+
+  const invocation = {
+    backend: 'cli',
+    node_id: cliRequest.nodeId,
+    provider: cliRequest.provider,
+    model: cliRequest.model,
+    executable: cliConfig.executable,
+    args: cliConfig.args,
+    cwd: cliConfig.cwd,
+    timeout_ms: cliConfig.timeoutMs,
+    env_keys: cliConfig.envKeys,
+  };
+  const streamResult: LlmCompleteResult = {
+    adapter: 'subprocess-cli',
+    backend: 'cli',
+    operation: 'cli',
+    mode: structured.mode,
+    output: structured.output,
+    textOutput: structured.textOutput,
+    callError: buildCliFailure(exitCode, exitSignal, stderr),
+    cliInvocation: invocation,
+    stdout,
+    stderr,
+    response: {
+      exit_code: exitCode,
+      exit_signal: exitSignal,
+    },
+  };
+
+  yield {
+    type: 'llm.stream.end',
+    data: buildStreamEndData(request.nodeId, streamResult),
+  };
+}
+
+function createStreamDeltaEvent(request: LlmStreamRequest, delta: string): LlmStreamEvent {
+  return {
+    type: 'llm.stream.delta',
+    data: {
+      node_id: request.nodeId,
+      backend: request.backend,
+      provider: request.provider,
+      model: request.model,
+      delta,
+      timestamp: new Date().toISOString(),
+    },
+  };
+}
+
+function buildStreamEndData(nodeId: string, result: LlmCompleteResult): Record<string, unknown> {
+  return {
+    node_id: nodeId,
+    adapter: result.adapter,
+    backend: result.backend,
+    operation: result.operation,
+    mode: result.mode,
+    output: result.output,
+    text_output: result.textOutput,
+    request: result.request,
+    response: result.response,
+    finish_reason: result.finishReason,
+    usage: result.usage,
+    warnings: result.warnings,
+    provider_metadata: result.providerMetadata,
+    cli_invocation: result.cliInvocation,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    error: result.callError,
+    timestamp: new Date().toISOString(),
   };
 }
 

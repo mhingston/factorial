@@ -6,6 +6,8 @@ This document defines how to measure whether engineering learnings are compoundi
 - Weekly (calendar week, Monday-Sunday).
 - Keep one short report entry per week in PR notes or team docs.
 - Standard report location: `docs/metrics/reports/week-YYYY-MM-DD_to_YYYY-MM-DD.md`.
+- Reliability SLO gate report location: `docs/metrics/reports/compound-reliability-slo-latest.json`.
+- Unattended telemetry report location: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
 
 ## Metrics and Formulas
 - `solutions_created_weekly`
@@ -41,6 +43,26 @@ Generate a standardized weekly report artifact:
 npm run metrics:compound-weekly -- --start "$START" --end "$END"
 ```
 
+Or use the first-class CLI helper:
+
+```bash
+npx factorial compound-weekly --start "$START" --end "$END"
+```
+
+Evaluate reliability SLO thresholds and publish deterministic policy evidence:
+
+```bash
+npm run reliability:slo -- --report docs/metrics/reports/compound-reliability-slo-latest.json
+```
+
+Evaluate unattended-run outcome/economics telemetry contract:
+
+```bash
+npm run self-host:unattended-telemetry -- \
+  --source docs/metrics/reports/self-host-unattended-telemetry-source-latest.json \
+  --report docs/metrics/reports/self-host-unattended-telemetry-latest.json
+```
+
 Count created solution docs:
 
 ```bash
@@ -65,6 +87,18 @@ To compute recurrence, cycles-to-close, reopen rate, and verifier agreement reli
 
 These are all encoded by `docs/templates/review.md`.
 
+## Reliability SLO Policy (BK-009)
+Reliability SLO gate schema: `compound_reliability_slo_report.v1`.
+
+Thresholds enforced by `npm run reliability:slo`:
+- `lock_resolution_rate >= 0.80`
+- `reopen_ratio <= 0.20`
+- `cadence_age_days <= 7` (based on latest weekly report end date)
+
+Policy hook behavior:
+- If all thresholds pass: `consensus_lock_decision = resolved`.
+- If any threshold fails or weekly evidence is invalid/missing: `consensus_lock_decision = reopen` (fail closed).
+
 ## Weekly Report Template
 ```md
 Week of YYYY-MM-DD
@@ -74,6 +108,7 @@ Week of YYYY-MM-DD
 - median_cycles_to_close:
 - reopen_rate:
 - verifier_agreement_rate:
+- review_artifacts_counted:
 - Notes / actions:
 ```
 

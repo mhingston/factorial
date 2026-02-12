@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { config as loadDotEnv } from 'dotenv';
 import { parseDOT } from '../../dot-parser/src/index.js';
@@ -84,6 +85,21 @@ interface ManifestCommandOptions {
   json?: boolean;
 }
 
+interface ConfidenceTuneCommandOptions {
+  logsRoot: string[];
+  targetEscalationRate: string;
+  minSamples: string;
+  output?: string;
+  json?: boolean;
+}
+
+interface CompoundWeeklyCommandOptions {
+  start: string;
+  end?: string;
+  output?: string;
+  json?: boolean;
+}
+
 interface RunManifest {
   schema_version: 'run_manifest.v1';
   generated_at: string;
@@ -159,6 +175,8 @@ interface RunManifest {
       cli_invocation_path: string;
       stdout_path: string;
       stderr_path: string;
+      stream_transcript_path: string;
+      stream_transcript_ndjson_path: string;
     };
   }>;
   artifacts: {
@@ -485,6 +503,136 @@ program
       console.log(renderManifestSummary(summary));
     } catch (error) {
       console.error('Failed to inspect manifest:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('confidence-tune')
+  .description(
+    'Analyze confidence.gate artifacts and propose deterministic threshold/escalation-target tuning'
+  )
+  .requiredOption(
+    '--logs-root <path...>',
+    'One or more logs roots containing confidence_result.json artifacts'
+  )
+  .option(
+    '--target-escalation-rate <rate>',
+    'Desired escalation rate in range [0,1] used for quantile threshold recommendation',
+    '0.25'
+  )
+  .option('--min-samples <count>', 'Minimum samples required before recommendation is marked ready', '5')
+  .option('--output <path>', 'Optional path to write JSON report artifact')
+  .option('--json', 'Emit machine-readable JSON output', false)
+  .action(async (options: ConfidenceTuneCommandOptions) => {
+    try {
+      const logsRoots = Array.from(new Set((options.logsRoot ?? []).map(value => resolve(value)))).sort((a, b) =>
+        a.localeCompare(b)
+      );
+      if (logsRoots.length === 0) {
+        throw new Error('confidence-tune requires at least one --logs-root');
+      }
+
+      const targetEscalationRate = parseUnitIntervalNumber(
+        options.targetEscalationRate,
+        'target-escalation-rate'
+      );
+      const minSamples = parsePositiveInteger(options.minSamples, 'min-samples');
+
+      const confidenceResultFiles = await collectConfidenceResultFiles(logsRoots);
+      if (confidenceResultFiles.length === 0) {
+        throw new Error('No confidence_result.json artifacts found under the provided --logs-root paths.');
+      }
+
+      const records: ConfidenceResultRecord[] = [];
+      const invalidArtifacts: ConfidenceTuneReport['invalid_artifacts'] = [];
+      for (const path of confidenceResultFiles) {
+        try {
+          records.push(await loadConfidenceResultRecord(path));
+        } catch (error) {
+          invalidArtifacts.push({
+            path,
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      if (records.length === 0) {
+        throw new Error('No valid confidence_result.json artifacts found after parsing inputs.');
+      }
+
+      const report = buildConfidenceTuneReport({
+        logsRoots,
+        targetEscalationRate,
+        minSamples,
+        records,
+        artifactsScanned: confidenceResultFiles.length,
+        invalidArtifacts,
+      });
+
+      if (options.output) {
+        const outputPath = resolve(options.output);
+        await mkdir(dirname(outputPath), { recursive: true });
+        await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`);
+      }
+
+      if (options.json) {
+        console.log(JSON.stringify(report, null, 2));
+        return;
+      }
+
+      console.log(renderConfidenceTuneReport(report));
+    } catch (error) {
+      console.error('Failed to tune confidence escalation:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('compound-weekly')
+  .description('Generate a standardized weekly compound metrics report from repository artifacts')
+  .requiredOption('--start <YYYY-MM-DD>', 'Week start date (inclusive)')
+  .option('--end <YYYY-MM-DD>', 'Week end date (inclusive); defaults to start + 6 days')
+  .option('--output <path>', 'Optional markdown report output path')
+  .option('--json', 'Emit machine-readable JSON output', false)
+  .action(async (options: CompoundWeeklyCommandOptions) => {
+    try {
+      const startDate = parseCompoundWeeklyDate(options.start, 'start');
+      const endDate = options.end
+        ? parseCompoundWeeklyDate(options.end, 'end')
+        : addUtcDays(startDate, 6);
+
+      if (endDate.getTime() < startDate.getTime()) {
+        throw new Error('end must be on or after start');
+      }
+
+      const start = formatUtcDate(startDate);
+      const end = formatUtcDate(endDate);
+      const summary = collectCompoundWeeklySummary(start, end);
+      const outputPath = resolveCompoundWeeklyOutputPath(start, end, options.output);
+      const markdown = renderCompoundWeeklyMarkdown(summary);
+
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, markdown, 'utf-8');
+
+      if (options.json) {
+        console.log(
+          JSON.stringify(
+            {
+              schema_version: 'compound_weekly_metrics.v1',
+              ...summary,
+              output_path: outputPath,
+            },
+            null,
+            2
+          )
+        );
+        return;
+      }
+
+      console.log(`Wrote compound weekly report: ${outputPath}`);
+    } catch (error) {
+      console.error('Failed to generate compound weekly metrics report:', error);
       process.exit(1);
     }
   });
@@ -896,6 +1044,9 @@ function collectModelProvenance(
         cli_invocation_path: asNonEmptyString(contextValues[`${prefix}cli_invocation_path`]) ?? '',
         stdout_path: asNonEmptyString(contextValues[`${prefix}stdout_path`]) ?? '',
         stderr_path: asNonEmptyString(contextValues[`${prefix}stderr_path`]) ?? '',
+        stream_transcript_path: asNonEmptyString(contextValues[`${prefix}stream_transcript_path`]) ?? '',
+        stream_transcript_ndjson_path:
+          asNonEmptyString(contextValues[`${prefix}stream_transcript_ndjson_path`]) ?? '',
       },
     });
   }
@@ -1023,6 +1174,488 @@ interface ManifestComparison {
   right_manifest_path: string;
   equal: boolean;
   diffs: ManifestComparisonDiff[];
+}
+
+type ConfidenceDecision = 'autonomous' | 'escalate';
+
+interface ConfidenceResultRecord {
+  source_path: string;
+  node_id: string;
+  confidence_signal_path: string;
+  observed_confidence: number;
+  escalation_threshold: number;
+  decision: ConfidenceDecision;
+  escalation_target: string;
+}
+
+interface ConfidenceTuneNodeSummary {
+  node_id: string;
+  sample_count: number;
+  decision_counts: {
+    autonomous: number;
+    escalate: number;
+  };
+  observed_escalation_rate: number;
+  target_escalation_rate: number;
+  recommendation_status: 'ready' | 'insufficient_samples';
+  observed_confidence: {
+    min: number;
+    p50: number;
+    p90: number;
+    max: number;
+    mean: number;
+  };
+  threshold_history: {
+    min: number;
+    p50: number;
+    max: number;
+  };
+  recommended_threshold: number;
+  threshold_delta: number;
+  route_candidates: Array<{ target: string; count: number }>;
+  recommended_escalation_target: string;
+}
+
+interface ConfidenceTuneReport {
+  schema_version: 'confidence_tuning_report.v1';
+  generated_at: string;
+  logs_roots: string[];
+  target_escalation_rate: number;
+  min_samples: number;
+  artifacts_scanned: number;
+  artifacts_loaded: number;
+  artifacts_invalid: number;
+  invalid_artifacts: Array<{ path: string; reason: string }>;
+  nodes: ConfidenceTuneNodeSummary[];
+}
+
+async function collectConfidenceResultFiles(logsRoots: string[]): Promise<string[]> {
+  const output: string[] = [];
+
+  const visit = async (path: string): Promise<void> => {
+    const entries = await readdir(path, { withFileTypes: true });
+    entries.sort((left, right) => left.name.localeCompare(right.name));
+    for (const entry of entries) {
+      const entryPath = join(path, entry.name);
+      if (entry.isDirectory()) {
+        await visit(entryPath);
+        continue;
+      }
+      if (entry.isFile() && entry.name === 'confidence_result.json') {
+        output.push(entryPath);
+      }
+    }
+  };
+
+  for (const logsRoot of logsRoots) {
+    if (!existsSync(logsRoot)) {
+      throw new Error(`Logs root not found: ${logsRoot}`);
+    }
+    await visit(logsRoot);
+  }
+
+  return output.sort((left, right) => left.localeCompare(right));
+}
+
+async function loadConfidenceResultRecord(path: string): Promise<ConfidenceResultRecord> {
+  const raw = JSON.parse(await readFile(path, 'utf-8')) as Record<string, unknown>;
+  const nodeId = asNonEmptyString(raw.node_id);
+  if (!nodeId) {
+    throw new Error('Missing node_id');
+  }
+
+  const signalPath = asNonEmptyString(raw.confidence_signal_path);
+  if (!signalPath) {
+    throw new Error('Missing confidence_signal_path');
+  }
+
+  const observed = asFiniteNumber(raw.observed_confidence);
+  if (observed === undefined) {
+    throw new Error('Missing observed_confidence');
+  }
+
+  const threshold = asFiniteNumber(raw.escalation_threshold);
+  if (threshold === undefined) {
+    throw new Error('Missing escalation_threshold');
+  }
+
+  const decisionRaw = asNonEmptyString(raw.decision);
+  const decision: ConfidenceDecision | null =
+    decisionRaw === 'autonomous' || decisionRaw === 'escalate' ? decisionRaw : null;
+  if (!decision) {
+    throw new Error('Invalid decision');
+  }
+
+  return {
+    source_path: path,
+    node_id: nodeId,
+    confidence_signal_path: signalPath,
+    observed_confidence: observed,
+    escalation_threshold: threshold,
+    decision,
+    escalation_target: asNonEmptyString(raw.escalation_target) ?? '',
+  };
+}
+
+function buildConfidenceTuneReport(options: {
+  logsRoots: string[];
+  targetEscalationRate: number;
+  minSamples: number;
+  records: ConfidenceResultRecord[];
+  artifactsScanned: number;
+  invalidArtifacts: ConfidenceTuneReport['invalid_artifacts'];
+}): ConfidenceTuneReport {
+  const grouped = new Map<string, ConfidenceResultRecord[]>();
+  for (const record of options.records) {
+    const bucket = grouped.get(record.node_id) ?? [];
+    bucket.push(record);
+    grouped.set(record.node_id, bucket);
+  }
+
+  const nodes: ConfidenceTuneNodeSummary[] = [];
+  for (const nodeId of Array.from(grouped.keys()).sort((left, right) => left.localeCompare(right))) {
+    const records = grouped.get(nodeId) ?? [];
+    records.sort((left, right) => left.source_path.localeCompare(right.source_path));
+    nodes.push(
+      summarizeConfidenceNode({
+        nodeId,
+        records,
+        targetEscalationRate: options.targetEscalationRate,
+        minSamples: options.minSamples,
+      })
+    );
+  }
+
+  return {
+    schema_version: 'confidence_tuning_report.v1',
+    generated_at: new Date().toISOString(),
+    logs_roots: [...options.logsRoots],
+    target_escalation_rate: roundNumber(options.targetEscalationRate),
+    min_samples: options.minSamples,
+    artifacts_scanned: options.artifactsScanned,
+    artifacts_loaded: options.records.length,
+    artifacts_invalid: options.invalidArtifacts.length,
+    invalid_artifacts: [...options.invalidArtifacts].sort((left, right) => left.path.localeCompare(right.path)),
+    nodes,
+  };
+}
+
+function summarizeConfidenceNode(options: {
+  nodeId: string;
+  records: ConfidenceResultRecord[];
+  targetEscalationRate: number;
+  minSamples: number;
+}): ConfidenceTuneNodeSummary {
+  const observedValues = options.records.map(record => record.observed_confidence).sort((left, right) => left - right);
+  const thresholdValues = options.records.map(record => record.escalation_threshold).sort((left, right) => left - right);
+
+  const decisionCounts = {
+    autonomous: options.records.filter(record => record.decision === 'autonomous').length,
+    escalate: options.records.filter(record => record.decision === 'escalate').length,
+  };
+
+  const routeCounts = new Map<string, number>();
+  const routeSource =
+    options.records.some(record => record.decision === 'escalate')
+      ? options.records.filter(record => record.decision === 'escalate')
+      : options.records;
+  for (const record of routeSource) {
+    if (record.escalation_target.length === 0) {
+      continue;
+    }
+    routeCounts.set(record.escalation_target, (routeCounts.get(record.escalation_target) ?? 0) + 1);
+  }
+
+  const routeCandidates = Array.from(routeCounts.entries())
+    .map(([target, count]) => ({ target, count }))
+    .sort((left, right) => {
+      if (left.count !== right.count) {
+        return right.count - left.count;
+      }
+      return left.target.localeCompare(right.target);
+    });
+
+  const currentThresholdMedian = calculateQuantile(thresholdValues, 0.5);
+  const recommendedThreshold = calculateQuantile(observedValues, options.targetEscalationRate);
+
+  return {
+    node_id: options.nodeId,
+    sample_count: options.records.length,
+    decision_counts: decisionCounts,
+    observed_escalation_rate: roundNumber(decisionCounts.escalate / options.records.length),
+    target_escalation_rate: roundNumber(options.targetEscalationRate),
+    recommendation_status: options.records.length >= options.minSamples ? 'ready' : 'insufficient_samples',
+    observed_confidence: {
+      min: roundNumber(observedValues[0]),
+      p50: roundNumber(calculateQuantile(observedValues, 0.5)),
+      p90: roundNumber(calculateQuantile(observedValues, 0.9)),
+      max: roundNumber(observedValues[observedValues.length - 1]),
+      mean: roundNumber(calculateMean(observedValues)),
+    },
+    threshold_history: {
+      min: roundNumber(thresholdValues[0]),
+      p50: roundNumber(currentThresholdMedian),
+      max: roundNumber(thresholdValues[thresholdValues.length - 1]),
+    },
+    recommended_threshold: roundNumber(recommendedThreshold),
+    threshold_delta: roundNumber(recommendedThreshold - currentThresholdMedian),
+    route_candidates: routeCandidates,
+    recommended_escalation_target: routeCandidates[0]?.target ?? '',
+  };
+}
+
+function renderConfidenceTuneReport(report: ConfidenceTuneReport): string {
+  const lines: string[] = [];
+  lines.push(`Confidence tuning report (${report.schema_version})`);
+  lines.push(`Generated: ${report.generated_at}`);
+  lines.push(`Logs roots: ${report.logs_roots.join(', ')}`);
+  lines.push(
+    `Artifacts: scanned=${report.artifacts_scanned} loaded=${report.artifacts_loaded} invalid=${report.artifacts_invalid}`
+  );
+  lines.push(
+    `Target escalation rate: ${report.target_escalation_rate} (min_samples=${report.min_samples})`
+  );
+
+  for (const node of report.nodes) {
+    lines.push('');
+    lines.push(`Node ${node.node_id}`);
+    lines.push(
+      `  samples=${node.sample_count} status=${node.recommendation_status} observed_escalation_rate=${node.observed_escalation_rate}`
+    );
+    lines.push(
+      `  threshold median=${node.threshold_history.p50} -> recommended=${node.recommended_threshold} (delta=${node.threshold_delta})`
+    );
+    lines.push(
+      `  route=${node.recommended_escalation_target || '(none)'} candidates=${node.route_candidates.length}`
+    );
+  }
+
+  if (report.invalid_artifacts.length > 0) {
+    lines.push('');
+    lines.push('Invalid artifacts:');
+    for (const invalid of report.invalid_artifacts) {
+      lines.push(`- ${invalid.path}: ${invalid.reason}`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function parseUnitIntervalNumber(value: string, flag: string): number {
+  const parsed = asFiniteNumber(value);
+  if (parsed === undefined || parsed < 0 || parsed > 1) {
+    throw new Error(`--${flag} must be a number in range [0,1]`);
+  }
+  return parsed;
+}
+
+function parsePositiveInteger(value: string, flag: string): number {
+  const parsed = asFiniteNumber(value);
+  if (parsed === undefined || !Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`--${flag} must be an integer >= 1`);
+  }
+  return parsed;
+}
+
+function roundNumber(value: number, decimals = 6): number {
+  const scale = 10 ** decimals;
+  return Math.round(value * scale) / scale;
+}
+
+function calculateMean(values: number[]): number {
+  const total = values.reduce((acc, value) => acc + value, 0);
+  return total / values.length;
+}
+
+function calculateQuantile(values: number[], q: number): number {
+  if (values.length === 0) {
+    return 0;
+  }
+  if (values.length === 1) {
+    return values[0];
+  }
+  const position = (values.length - 1) * q;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  if (lower === upper) {
+    return values[lower];
+  }
+  const weight = position - lower;
+  return values[lower] + (values[upper] - values[lower]) * weight;
+}
+
+interface CompoundWeeklySummary {
+  week: {
+    start: string;
+    end: string;
+  };
+  metrics: {
+    solutions_created_weekly: number;
+    context_updates_weekly: number;
+    known_issue_recurrence_rate: string;
+    median_cycles_to_close: string;
+    reopen_rate: string;
+    verifier_agreement_rate: string;
+    review_artifacts_counted: number;
+  };
+  notes: string;
+}
+
+function parseCompoundWeeklyDate(value: string, field: string): Date {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`${field} must be YYYY-MM-DD`);
+  }
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`${field} is invalid`);
+  }
+  return date;
+}
+
+function addUtcDays(date: Date, days: number): Date {
+  const output = new Date(date.getTime());
+  output.setUTCDate(output.getUTCDate() + days);
+  return output;
+}
+
+function formatUtcDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function resolveCompoundWeeklyOutputPath(start: string, end: string, explicitOutput?: string): string {
+  if (explicitOutput) {
+    return resolve(explicitOutput);
+  }
+  return resolve(`docs/metrics/reports/week-${start}_to_${end}.md`);
+}
+
+function collectCompoundWeeklySummary(start: string, end: string): CompoundWeeklySummary {
+  const since = `${start} 00:00`;
+  const until = `${end} 23:59`;
+
+  const createdSolutionsRaw = runGitForCompoundWeekly(
+    `git log --since="${since}" --until="${until}" --diff-filter=A --name-only --pretty=format: -- docs/solutions`
+  );
+  const createdSolutions = splitUniqueNonEmptyLines(createdSolutionsRaw).filter(path => {
+    return /docs\/solutions\/.*\.md$/i.test(path) && !/README\.md|example-/i.test(path);
+  });
+
+  const contextUpdatesRaw = runGitForCompoundWeekly(
+    `git log --since="${since}" --until="${until}" --pretty=format:%H -- AGENTS.md CLAUDE.md`
+  );
+  const contextUpdates = splitUniqueNonEmptyLines(contextUpdatesRaw).length;
+
+  const reviewFilesRaw = runGitForCompoundWeekly(
+    `git log --since="${since}" --until="${until}" --name-only --pretty=format: -- docs/reviews`
+  );
+  const reviewFiles = splitUniqueNonEmptyLines(reviewFilesRaw).filter(path => /docs\/reviews\/.*\.md$/i.test(path));
+
+  const issueClasses: string[] = [];
+  const lockDecisions: string[] = [];
+  for (const reviewPath of reviewFiles) {
+    try {
+      const content = readFileSync(resolve(reviewPath), 'utf8');
+      issueClasses.push(...parseIssueClassesFromReviewContent(content));
+      const decision = parseLockDecisionFromReviewContent(content);
+      if (decision) {
+        lockDecisions.push(decision);
+      }
+    } catch {
+      // Ignore missing/removed review files when traversing historical ranges.
+    }
+  }
+
+  const classCounts = new Map<string, number>();
+  for (const issueClass of issueClasses) {
+    classCounts.set(issueClass, (classCounts.get(issueClass) ?? 0) + 1);
+  }
+  let repeatedFindings = 0;
+  for (const count of classCounts.values()) {
+    if (count > 1) {
+      repeatedFindings += count - 1;
+    }
+  }
+
+  const reopenCount = lockDecisions.filter(decision => decision === 'reopen').length;
+
+  return {
+    week: { start, end },
+    metrics: {
+      solutions_created_weekly: createdSolutions.length,
+      context_updates_weekly: contextUpdates,
+      known_issue_recurrence_rate: formatRatioAsRate(repeatedFindings, issueClasses.length),
+      median_cycles_to_close: 'N/A (single-pass batch data only in this week range)',
+      reopen_rate: formatRatioAsRate(reopenCount, lockDecisions.length),
+      verifier_agreement_rate: 'N/A (no independent duplicate verifier runs recorded)',
+      review_artifacts_counted: reviewFiles.length,
+    },
+    notes: 'Generated from git history and review artifacts via factorial compound-weekly.',
+  };
+}
+
+function renderCompoundWeeklyMarkdown(summary: CompoundWeeklySummary): string {
+  return [
+    `Week of ${summary.week.start} to ${summary.week.end}`,
+    `- solutions_created_weekly: ${summary.metrics.solutions_created_weekly}`,
+    `- context_updates_weekly: ${summary.metrics.context_updates_weekly}`,
+    `- known_issue_recurrence_rate: ${summary.metrics.known_issue_recurrence_rate}`,
+    `- median_cycles_to_close: ${summary.metrics.median_cycles_to_close}`,
+    `- reopen_rate: ${summary.metrics.reopen_rate}`,
+    `- verifier_agreement_rate: ${summary.metrics.verifier_agreement_rate}`,
+    `- review_artifacts_counted: ${summary.metrics.review_artifacts_counted}`,
+    `- Notes / actions: ${summary.notes}`,
+    '',
+  ].join('\n');
+}
+
+function runGitForCompoundWeekly(command: string): string {
+  try {
+    return execSync(command, { encoding: 'utf8' });
+  } catch {
+    return '';
+  }
+}
+
+function splitUniqueNonEmptyLines(value: string): string[] {
+  return Array.from(
+    new Set(
+      value
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function parseIssueClassesFromReviewContent(content: string): string[] {
+  const issueClasses: string[] = [];
+  const lines = content.split('\n');
+  for (const line of lines) {
+    if (!line.startsWith('|')) continue;
+    const cells = line
+      .split('|')
+      .map(cell => cell.trim())
+      .filter(cell => cell.length > 0);
+    if (cells.length < 7) continue;
+    const [issueId, issueClass, severity] = cells;
+    if (issueId === 'issue_id' || issueId === '---') continue;
+    if (!/^P[123]$/i.test(severity.replace(/`/g, ''))) continue;
+    issueClasses.push(issueClass.replace(/`/g, ''));
+  }
+  return issueClasses;
+}
+
+function parseLockDecisionFromReviewContent(content: string): string {
+  const match = content.match(/Decision:\s*`?(resolved|reopen)`?/i);
+  return match ? match[1].toLowerCase() : '';
+}
+
+function formatRatioAsRate(numerator: number, denominator: number): string {
+  if (denominator === 0) {
+    return 'N/A';
+  }
+  const percent = ((numerator / denominator) * 100).toFixed(1);
+  return `${percent}% (${numerator}/${denominator})`;
 }
 
 function summarizeManifest(manifest: RunManifest, manifestPath: string): ManifestSummary {

@@ -1,0 +1,151 @@
+{
+  "schema_version": "self_host_unattended_telemetry_report.v1",
+  "generated_at": "2026-02-12T02:39:09.524Z",
+  "report_path": "docs/metrics/reports/self-host-unattended-telemetry-latest.json",
+  "publication": {
+    "command": "npm run self-host:unattended-telemetry",
+    "deterministic_inputs": [
+      "docs/metrics/reports/self-host-unattended-telemetry-source-latest.json"
+    ],
+    "freshness_requirements": {
+      "source_schema_version": "self_host_unattended_telemetry_source.v1",
+      "max_source_age_days": 14
+    },
+    "cost_proxy_model": {
+      "token_cost_proxy_per_1k_tokens": 0.002,
+      "execution_cost_proxy_per_minute": 0.01
+    },
+    "task_bucket_model": {
+      "small_max_score": 10,
+      "medium_max_score": 25,
+      "score_formula": "changed_files + (changed_test_files * 2) + (runtime_minutes / 5)"
+    }
+  },
+  "source": {
+    "path": "docs/metrics/reports/self-host-unattended-telemetry-source-latest.json",
+    "schema_version": "self_host_unattended_telemetry_source.v1",
+    "generated_at": "2026-02-12T00:00:00.000Z",
+    "window": {
+      "start": "2026-01-29T00:00:00.000Z",
+      "end": "2026-02-12T00:00:00.000Z"
+    },
+    "maintenance_window_days": 14,
+    "age_days": 0
+  },
+  "metrics": {
+    "total_runs": 8,
+    "successful_runs": 6,
+    "merged_prs": 4,
+    "run_success_rate": 0.75,
+    "run_to_merge_ratio": 2,
+    "task_distribution": {
+      "small": 3,
+      "medium": 3,
+      "large": 2
+    },
+    "token_cost_proxy_total": 0.0816,
+    "execution_cost_proxy_total": 2.18,
+    "total_cost_proxy": 2.2616,
+    "cost_per_merged_pr_proxy": 0.5654,
+    "reverted_pr_count": 1,
+    "churned_pr_count": 3,
+    "total_churn_commits": 7,
+    "revert_rate": 0.25,
+    "churn_pr_rate": 0.75,
+    "average_churn_commits_per_merged_pr": 1.75
+  },
+  "summary": {
+    "overall_status": "pass",
+    "failed_check_ids": [],
+    "total_runs": 8,
+    "successful_runs": 6,
+    "merged_prs": 4,
+    "run_success_rate": 0.75,
+    "run_to_merge_ratio": 2,
+    "cost_per_merged_pr_proxy": 0.5654,
+    "revert_rate": 0.25,
+    "churn_pr_rate": 0.75,
+    "average_churn_commits_per_merged_pr": 1.75,
+    "task_distribution": {
+      "small": 3,
+      "medium": 3,
+      "large": 2
+    }
+  },
+  "checks": [
+    {
+      "id": "UT-001",
+      "level": "unattended-telemetry",
+      "name": "Source schema and required fields",
+      "status": "pass",
+      "summary": "Source artifact is present, parseable, and schema-compliant.",
+      "evidence": [
+        "docs/metrics/reports/self-host-unattended-telemetry-source-latest.json"
+      ],
+      "details": {
+        "source_exists": true,
+        "source_parse_error": "",
+        "expected_schema_version": "self_host_unattended_telemetry_source.v1",
+        "observed_schema_version": "self_host_unattended_telemetry_source.v1",
+        "validation_errors": []
+      }
+    },
+    {
+      "id": "UT-002",
+      "level": "unattended-telemetry",
+      "name": "Source freshness requirement",
+      "status": "pass",
+      "summary": "Source generated_at is within freshness SLA.",
+      "evidence": [
+        "docs/metrics/reports/self-host-unattended-telemetry-source-latest.json"
+      ],
+      "details": {
+        "today": "2026-02-12",
+        "source_generated_at": "2026-02-12T00:00:00.000Z",
+        "source_age_days": 0,
+        "max_source_age_days": 14
+      }
+    },
+    {
+      "id": "UT-003",
+      "level": "unattended-telemetry",
+      "name": "Required outcome/economics metrics completeness",
+      "status": "pass",
+      "summary": "Required unattended outcome/economics metrics are computed and complete.",
+      "evidence": [
+        "docs/metrics/reports/self-host-unattended-telemetry-source-latest.json"
+      ],
+      "details": {
+        "total_runs": 8,
+        "successful_runs": 6,
+        "merged_prs": 4,
+        "run_success_rate": 0.75,
+        "run_to_merge_ratio": 2,
+        "cost_per_merged_pr_proxy": 0.5654,
+        "task_distribution": {
+          "small": 3,
+          "medium": 3,
+          "large": 2
+        }
+      }
+    },
+    {
+      "id": "UT-004",
+      "level": "unattended-telemetry",
+      "name": "Post-merge maintenance indicator completeness",
+      "status": "pass",
+      "summary": "Revert and churn indicators are computed for bounded maintenance window.",
+      "evidence": [
+        "docs/metrics/reports/self-host-unattended-telemetry-source-latest.json"
+      ],
+      "details": {
+        "maintenance_window_days": 14,
+        "reverted_pr_count": 1,
+        "churned_pr_count": 3,
+        "revert_rate": 0.25,
+        "churn_pr_rate": 0.75,
+        "average_churn_commits_per_merged_pr": 1.75
+      }
+    }
+  ]
+}

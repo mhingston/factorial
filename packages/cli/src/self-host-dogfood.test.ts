@@ -1,28 +1,36 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { mkdtemp, readFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { spawn } from 'node:child_process';
-
-interface CommandResult { code: number; stdout: string; stderr: string }
-
-const ROOT_DIR = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))));
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import {
+  ROOT_DIR,
+  createSuiteIsolation,
+  ensureDeterministicCliBuild,
+  runCommand,
+  type SuiteIsolation,
+} from './test-harness';
 
 describe('Self-host dogfood script', () => {
+  let suiteIsolation: SuiteIsolation;
+
   beforeAll(async () => {
-    const build = await run(['npm', 'run', 'build'], ROOT_DIR);
-    expect(build.code).toBe(0);
+    await ensureDeterministicCliBuild();
+    suiteIsolation = await createSuiteIsolation('self-host-dogfood');
   });
 
   it('runs resolved+reopen scenarios and enforces lock decision', async () => {
-    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-dogfood-'));
-    const result = await run([
-      process.execPath,
-      join(ROOT_DIR, 'scripts', 'self-host-dogfood.js'),
-      '--logs-root',
-      logsRoot,
-    ], ROOT_DIR);
+    const logsRoot = await suiteIsolation.createLogsRoot('dogfood');
+    const result = await runCommand(
+      [
+        process.execPath,
+        join(ROOT_DIR, 'scripts', 'self-host-dogfood.js'),
+        '--logs-root',
+        logsRoot,
+      ],
+      ROOT_DIR,
+      {
+        DOGFOOD_SKIP_BUILD: '1',
+      },
+    );
 
     expect(result.code).toBe(0);
 
@@ -58,16 +66,3 @@ describe('Self-host dogfood script', () => {
     expect(Boolean(summary.reopen_fail)).toBe(true);
   });
 });
-
-async function run(cmd: string[], cwd: string): Promise<CommandResult> {
-  return new Promise(resolve => {
-    const [exe, ...args] = cmd;
-    const child = spawn(exe, args, { cwd, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] });
-    const out: string[] = [];
-    const err: string[] = [];
-    child.stdout.on('data', c => out.push(String(c)));
-    child.stderr.on('data', c => err.push(String(c)));
-    child.on('close', code => resolve({ code: code ?? 1, stdout: out.join(''), stderr: err.join('') }));
-  });
-}
-

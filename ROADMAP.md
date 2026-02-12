@@ -1,12 +1,18 @@
 # Roadmap
 
-Last updated: 2026-02-11
+Last updated: 2026-02-12
 
 ## Current Direction
 - Keep the core graph execution model stable.
 - Improve reliability through deterministic contracts, quality gates, and golden regression coverage.
 - Improve engineering throughput with a repository-native Plan -> Work -> Review -> Compound loop.
 - Add scenario-driven validation at scale via a Digital Twin Universe (DTU) for third-party dependency behavior.
+- Preserve unattended-agent trust boundaries (isolated execution, bounded CI retry loops, and explicit human review before merge).
+- Expand factory metrics beyond PR volume to include success-rate, task-distribution, economics, and post-merge maintenance signals.
+- Keep execution docs fresh through deterministic drift checks across AGENTS command contracts, README command surface, and ROADMAP backlog direction.
+- Bound markdown growth with explicit line-count budgets, compact active handoff docs, and archive-backed roadmap compaction.
+- Keep companion-claim declarations synchronized across roadmap, conformance matrix, scope contract, and maturity ladder with fail-closed drift checks.
+- Strengthen self-improvement by publishing deterministic confidence-tuning recommendations as reviewable inputs to the existing lock-governed loop.
 
 Issue breakdown:
 - 0.2.x prioritized issues: [`docs/roadmap/0.2-prioritized-issues.md`](./docs/roadmap/0.2-prioritized-issues.md)
@@ -17,8 +23,24 @@ Issue breakdown:
 - 0.3.x self-hosted dogfooding completion report: [`docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md`](./docs/roadmap/0.3-self-hosted-factory-dogfooding-completion.md)
 - 0.3.x judge/retry/governance completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md)
 - Backlog `BK-001` replay/provenance UX completion report: [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md)
+- Backlog `BK-002` confidence escalation tuning completion report: [`docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md`](./docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md)
+- Backlog `BK-003` weekly compound metrics helper completion report: [`docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md`](./docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md)
+- Backlog `BK-004` spec-conformance matrix + parser policy closure completion report: [`docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md`](./docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md)
+- Backlog `BK-005` companion spec scope contract completion report: [`docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md`](./docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md)
+- Backlog `BK-006` self-hosting maturity ladder and promotion gates completion report: [`docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md`](./docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md)
+- Backlog `BK-007` provider-backed maturity evidence pipeline completion report: [`docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md`](./docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md)
+- Backlog `BK-008` release hardening gates completion report: [`docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md`](./docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md)
+- Backlog `BK-009` reliability SLO gates and auto-reopen policy hooks completion report: [`docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md`](./docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md)
+- Backlog `BK-010` deterministic verification hardening and flake replay gate completion report: [`docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md`](./docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md)
+- Backlog `BK-011` native streaming parity and transcript conformance completion report: [`docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md`](./docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md)
+- Backlog `BK-012` autonomous evidence bootstrap and `AU-*` guardrails completion report: [`docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md`](./docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md)
+- Backlog `BK-013` claims-consistency guardrails completion report: [`docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md`](./docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md)
+- Backlog `BK-014` provider-backed live-canary evidence hardening completion report: [`docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md`](./docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md)
+- Backlog `BK-015` unattended-run outcome and economics telemetry completion report: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md)
+- Backlog `BK-016` documentation freshness guardrails completion report: [`docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md`](./docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md)
+- Backlog `BK-017` markdown compaction and context-window guardrails completion report: [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md)
 
-## Status Snapshot (2026-02-11)
+## Status Snapshot (2026-02-12)
 | Item | Milestone | Status | Notes |
 | --- | --- | --- | --- |
 | `RMD-020` / `PKG-020C` | 0.2.x | Done | Finalization batch 1 completed on 2026-02-11; evidence recorded in this checkout. See completion report: [`docs/roadmap/0.2-core-convergence-completion.md`](./docs/roadmap/0.2-core-convergence-completion.md). |
@@ -31,6 +53,22 @@ Issue breakdown:
 | `RMD-033` | 0.3.x | Done | Targeted retry/failure taxonomy hardening finalized with explicit class routing coverage and deterministic tests; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
 | `RMD-034` | 0.3.x | Done | Promotion and governance profile enforcement finalized via lint overlays and golden/regression evidence; see completion report: [`docs/roadmap/0.3-judge-retry-governance-completion.md`](./docs/roadmap/0.3-judge-retry-governance-completion.md). |
 | `BK-001` | backlog | Done | Replay/provenance UX improvements completed with `manifest` summary/diff command and e2e coverage; see completion report: [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md). |
+| `BK-002` | backlog | Done | Confidence escalation tuning completed with deterministic `confidence-tune` recommendations derived from observed run artifacts; see completion report: [`docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md`](./docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md). |
+| `BK-003` | backlog | Done | Weekly compound metrics helper completed with first-class CLI command (`compound-weekly`) and deterministic report/JSON output from repository artifacts; see completion report: [`docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md`](./docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md). |
+| `BK-004` | backlog | Done | External spec-conformance matrix published with strict `digraph` parser policy closure and evidence mapping; see completion report: [`docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md`](./docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md). |
+| `BK-005` | backlog | Done | Companion spec scope contract published with evidence-backed `implemented|partial|out-of-scope` declarations and non-ambiguous claims wording; see completion report: [`docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md`](./docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md). |
+| `BK-006` | backlog | Done | Self-hosting maturity ladder and objective promotion gates implemented with CI/reporting enforcement and explicit current-level declaration; see completion report: [`docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md`](./docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md). |
+| `BK-007` | backlog | Done | Provider-backed maturity evidence pipeline completed with published `self_host_provider_backed_report.v1`, deterministic publication command, and objective PB gate verification in `self-host:maturity`; see completion report: [`docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md`](./docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md). |
+| `BK-008` | backlog | Done | Release hardening gates completed with deterministic SBOM/signing/provenance verification command + CI/release enforcement; see completion report: [`docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md`](./docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md). |
+| `BK-009` | backlog | Done | Reliability SLO guardrails completed with deterministic threshold evaluator, `resolved|reopen` policy hook, and CI gate artifact publication; see completion report: [`docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md`](./docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md). |
+| `BK-010` | backlog | Done | Deterministic verification hardening completed with shared CLI/e2e build isolation helpers, `self_host_flake_report.v1` replay gate command, and CI flake-threshold enforcement; see completion report: [`docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md`](./docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md). |
+| `BK-011` | backlog | Done | Native streaming parity completed with incremental delta contract, deterministic stream-vs-complete parity tests, and codergen transcript provenance publication; see completion report: [`docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md`](./docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md). |
+| `BK-012` | backlog | Done | Autonomous evidence bootstrap completed with deterministic `self_host_autonomous_report.v1` + `self_host_agent_audit_report.v1` publication commands and strict AU gate schema validation; see completion report: [`docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md`](./docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md). |
+| `BK-013` | backlog | Done | Claims-consistency guardrails completed with deterministic `claims:audit` report contract, fixture-backed mismatch detection, and fail-closed CI enforcement; see completion report: [`docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md`](./docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md). |
+| `BK-014` | backlog | Done | Provider-backed live-canary evidence hardening completed with bounded `self_host_provider_backed_live_report.v1` publication command, optional advisory local mode, and explicit configured fail-closed nightly lane; see completion report: [`docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md`](./docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md). |
+| `BK-015` | backlog | Done | Unattended-run outcome/economics telemetry completed with deterministic `self_host_unattended_telemetry_report.v1` publication, strict source schema/freshness checks, and fail-closed CI validation lane; see completion report: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md). |
+| `BK-016` | backlog | Done | Documentation freshness guardrails completed with deterministic `docs_freshness_report.v1`, fixture-backed drift tests, and fail-closed CI enforcement over command-surface + backlog-direction declarations; see completion report: [`docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md`](./docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md). |
+| `BK-017` | backlog | Done | Markdown compaction/context-window guardrails completed with docs size budgets (`DF-005`), required compact handoff/archive assets (`DF-006`), and ROADMAP artifact-list compaction into archive files; see completion report: [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md). |
 
 Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
@@ -38,45 +76,41 @@ Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Implement `LlmAdapter.stream()` and prove >=2-provider parity: tracked under `RMD-031`, no new item.
 - Add repository dogfooding/self-host workflow: tracked under `RMD-035` and completed, no new item.
 
-Active execution artifacts:
-- `PKG-020C` batch 1 plan: [`docs/plans/pkg-020c-spec-conformance-batch-1-plan.md`](./docs/plans/pkg-020c-spec-conformance-batch-1-plan.md)
-- `PKG-020C` batch 1 review: [`docs/reviews/pkg-020c-spec-conformance-batch-1-review.md`](./docs/reviews/pkg-020c-spec-conformance-batch-1-review.md)
-- `PKG-020C` batch 2 plan: [`docs/plans/pkg-020c-spec-conformance-batch-2-plan.md`](./docs/plans/pkg-020c-spec-conformance-batch-2-plan.md)
-- `PKG-020C` batch 2 review: [`docs/reviews/pkg-020c-spec-conformance-batch-2-review.md`](./docs/reviews/pkg-020c-spec-conformance-batch-2-review.md)
-- `RMD-021` batch 1 plan: [`docs/plans/rmd-021-worktree-parity-batch-1-plan.md`](./docs/plans/rmd-021-worktree-parity-batch-1-plan.md)
-- `RMD-021` batch 1 review: [`docs/reviews/rmd-021-worktree-parity-batch-1-review.md`](./docs/reviews/rmd-021-worktree-parity-batch-1-review.md)
-- `RMD-021` handoff seed: [`docs/plans/rmd-021-subagent-handoff-batch-1.md`](./docs/plans/rmd-021-subagent-handoff-batch-1.md)
-- `RMD-022` batch 1 plan: [`docs/plans/rmd-022-compound-enforcement-batch-1-plan.md`](./docs/plans/rmd-022-compound-enforcement-batch-1-plan.md)
-- `RMD-022` batch 1 review: [`docs/reviews/rmd-022-compound-enforcement-batch-1-review.md`](./docs/reviews/rmd-022-compound-enforcement-batch-1-review.md)
-- `RMD-031` handoff seed: [`docs/plans/rmd-031-subagent-handoff-batch-1.md`](./docs/plans/rmd-031-subagent-handoff-batch-1.md)
-- `RMD-031` batch 1 plan: [`docs/plans/rmd-031-provider-adapter-batch-1-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-1-plan.md)
-- `RMD-031` batch 1 review: [`docs/reviews/rmd-031-provider-adapter-batch-1-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-1-review.md)
-- `RMD-031` batch 1 solution: [`docs/solutions/llm-adapter-boundary-and-provenance-normalization.md`](./docs/solutions/llm-adapter-boundary-and-provenance-normalization.md)
-- `RMD-031` batch 2 plan: [`docs/plans/rmd-031-provider-adapter-batch-2-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-2-plan.md)
-- `RMD-031` batch 2 review: [`docs/reviews/rmd-031-provider-adapter-batch-2-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-2-review.md)
-- `RMD-031` batch 2 solution: [`docs/solutions/llm-stream-and-golden-duration-stability.md`](./docs/solutions/llm-stream-and-golden-duration-stability.md)
-- `RMD-031` batch 3 plan: [`docs/plans/rmd-031-provider-adapter-batch-3-plan.md`](./docs/plans/rmd-031-provider-adapter-batch-3-plan.md)
-- `RMD-031` batch 3 review: [`docs/reviews/rmd-031-provider-adapter-batch-3-review.md`](./docs/reviews/rmd-031-provider-adapter-batch-3-review.md)
-- `RMD-031` batch 3 solution: [`docs/solutions/provider-parity-normalized-contract-tests.md`](./docs/solutions/provider-parity-normalized-contract-tests.md)
-- `RMD-020/021/022` finalization batch plan: [`docs/plans/rmd-020-022-finalization-batch-1-plan.md`](./docs/plans/rmd-020-022-finalization-batch-1-plan.md)
-- `RMD-020/021/022` finalization batch review: [`docs/reviews/rmd-020-022-finalization-batch-1-review.md`](./docs/reviews/rmd-020-022-finalization-batch-1-review.md)
-- `RMD-020/021/022` finalization batch solution: [`docs/solutions/finalization-evidence-and-roadmap-closeout.md`](./docs/solutions/finalization-evidence-and-roadmap-closeout.md)
-- `RMD-035` batch 1 plan: [`docs/plans/rmd-035-self-host-dogfooding-batch-1-plan.md`](./docs/plans/rmd-035-self-host-dogfooding-batch-1-plan.md)
-- `RMD-035` batch 1 review: [`docs/reviews/rmd-035-self-host-dogfooding-batch-1-review.md`](./docs/reviews/rmd-035-self-host-dogfooding-batch-1-review.md)
-- `RMD-035` batch 1 solution: [`docs/solutions/self-hosted-dogfood-loop-with-lock-enforcement.md`](./docs/solutions/self-hosted-dogfood-loop-with-lock-enforcement.md)
-- `RMD-032/033/034` finalization batch plan: [`docs/plans/rmd-032-034-finalization-batch-1-plan.md`](./docs/plans/rmd-032-034-finalization-batch-1-plan.md)
-- `RMD-032/033/034` finalization batch review: [`docs/reviews/rmd-032-034-finalization-batch-1-review.md`](./docs/reviews/rmd-032-034-finalization-batch-1-review.md)
-- `RMD-032/033/034` finalization batch solution: [`docs/solutions/judge-retry-governance-finalization-closeout.md`](./docs/solutions/judge-retry-governance-finalization-closeout.md)
-- `BK-001` batch 1 plan: [`docs/plans/bk-001-replay-provenance-ux-batch-1-plan.md`](./docs/plans/bk-001-replay-provenance-ux-batch-1-plan.md)
-- `BK-001` batch 1 review: [`docs/reviews/bk-001-replay-provenance-ux-batch-1-review.md`](./docs/reviews/bk-001-replay-provenance-ux-batch-1-review.md)
-- `BK-001` batch 1 solution: [`docs/solutions/replay-manifest-summary-and-diff.md`](./docs/solutions/replay-manifest-summary-and-diff.md)
+External-spec alignment follow-up (captured 2026-02-12):
+- Attractor core implementation is broadly aligned and validated in local CI/test evidence.
+- Companion-spec scope contract is now explicit and auditable via `docs/companion-spec-scope-contract.md`.
+- Self-hosting maturity is now formalized via `docs/self-hosting-maturity-ladder.md` with executable gate checks (`npm run self-host:maturity`).
+- Current declared level is `provider-backed`; promotion criteria for `autonomous` remain objective and auditable.
+- Active BK backlog queue is currently empty after `BK-017`; docs freshness gate remains active operational enforcement (`npm run docs:freshness`).
+
+Outstanding operational follow-up (captured 2026-02-12):
+- `OP-001` (planned): tighten cross-doc claim synchronization by extending drift checks so roadmap/scope/matrix/maturity declarations cannot diverge without fail-closed CI evidence.
+- `OP-002` (planned): publish periodic, deterministic `confidence-tune` recommendation artifacts as reviewable inputs (not auto-apply) to the existing lock-decision workflow.
+
+Claims consistency anchors (BK-013):
+- Declared current level: `provider-backed`
+- Declared next level: `autonomous`
+- CAL-DELTA-02 status: `closed`
+- ULLM-DELTA-02 status: `closed`
+- Companion unattended autonomy scope: `out-of-scope`
+
+Stripe field-report synthesis (captured 2026-02-12 from attached PDF):
+- At-scale unattended throughput appears to depend more on trust infrastructure than model novelty (isolation boundaries, tooling depth, selective test mapping, explicit review gates).
+- Volume metrics (`merged PRs/week`) are not enough to evaluate factory quality; success-rate, task-mix complexity, and cost-per-merged-PR must be tracked explicitly.
+- Human review remains a hard boundary in regulated contexts; unattended generation does not remove governance requirements.
+- Durable, provider-agnostic tool contracts (MCP-style) reduce vendor lock-in risk and improve agent swap flexibility.
+
+Active execution artifacts (compacted):
+- Current compact handoff: [`docs/roadmap/active-handoff.md`](./docs/roadmap/active-handoff.md)
+- Archive index: [`docs/roadmap/archive/README.md`](./docs/roadmap/archive/README.md)
+- Archived detailed execution-artifact listing: [`docs/roadmap/archive/active-execution-artifacts-through-bk-016.md`](./docs/roadmap/archive/active-execution-artifacts-through-bk-016.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
 
 Execution order (do not reorder unless blocked):
-1. `BK-002`: Confidence-based human escalation tuning
-2. `BK-003`: Weekly compound metrics helper command
+1. `OP-001`: Cross-doc claim synchronization ratchet (non-`BK` operational follow-up).
+2. `OP-002`: Reviewable confidence-tuning recommendation publication loop (non-`BK` operational follow-up).
 
 ### PKG-020C: Attractor spec conformance hardening (0.2.x, completed)
 - Status:
@@ -182,6 +216,131 @@ Execution order (do not reorder unless blocked):
 - Completion artifact:
   - [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md)
 
+### BK-002: Confidence-based human escalation tuning (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with deterministic confidence threshold/route tuning command and regression evidence.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md`](./docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md)
+
+### BK-003: Weekly compound metrics helper command (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with first-class CLI helper command and deterministic markdown/JSON output for weekly compound reporting.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md`](./docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md)
+
+### BK-004: External spec-conformance matrix + parser policy closure (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with published `docs/spec-conformance-matrix.md` and explicit strict `digraph` parser policy documentation.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md`](./docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md)
+
+### BK-005: Companion spec scope contract + parity evidence declaration (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with explicit companion-spec scope contract and auditable claims language across README/roadmap artifacts.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md`](./docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md)
+
+### BK-006: Self-hosting maturity ladder and promotion gates (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with staged self-host maturity gates, CI/reporting enforcement, and explicit current-level declaration.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md`](./docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md)
+
+### BK-007: Provider-backed maturity evidence pipeline (backlog, completed)
+- Status:
+  - Closed on 2026-02-11 with published provider-backed evidence report schema/command path and objective `PB-001` + `PB-002` maturity gate verification.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md`](./docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md)
+
+### BK-008: Release hardening gates (SBOM/signing/provenance) (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic release hardening gate command/report contracts and CI/release workflow enforcement.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md`](./docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md)
+
+### BK-009: Reliability SLO gates and auto-reopen policy hooks (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic reliability SLO evaluator/report schema, fail-closed `consensus_lock_decision` policy hook, and CI gate artifact publication.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md`](./docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md)
+
+### BK-010: Deterministic verification hardening and flake replay gate (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic CLI/e2e prebuild + suite isolation helpers, `self_host_flake_report.v1` publication command, and CI flake-threshold enforcement.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md`](./docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md)
+
+### BK-011: Native streaming parity and transcript conformance (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with native incremental stream delta flow, deterministic stream-vs-complete parity coverage, codergen transcript artifacts, and run manifest transcript provenance mapping.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md`](./docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md)
+
+### BK-012: Autonomous evidence bootstrap and `AU-*` guardrails (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic autonomous/agent-audit evidence publication commands, strict AU gate schema validation in maturity evaluation, and explicit human-free guardrail policy assertions.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md`](./docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md)
+
+### BK-013: Claims-consistency guardrails across roadmap/spec/maturity docs (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic claims-audit report publication (`claims_consistency_report.v1`), fixture-backed mismatch detection, and fail-closed CI claims-consistency gating.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md`](./docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md)
+
+### BK-014: Provider-backed live-canary evidence hardening (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic bounded live-canary publication (`self_host_provider_backed_live_report.v1`), advisory-by-default local policy mode, and explicit secret-gated fail-closed nightly workflow lane.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md`](./docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md)
+
+### BK-015: Unattended-run outcome and economics telemetry (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic unattended telemetry publication (`self_host_unattended_telemetry_report.v1`), strict source schema/freshness checks, and fail-closed CI validation lane.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md)
+
+### BK-016: Documentation freshness guardrails (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with deterministic docs freshness publication (`docs_freshness_report.v1`), fixture-backed drift regression coverage, and fail-closed CI validation lane.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md`](./docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md)
+
+### BK-017: Markdown compaction and context-window guardrails (backlog, completed)
+- Status:
+  - Closed on 2026-02-12 with docs-size budget enforcement (`DF-005`), required compact handoff/archive references (`DF-006`), and roadmap artifact-list compaction into archive docs.
+- Completion artifact:
+  - [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md)
+
+### OP-001: Cross-doc claim synchronization ratchet (operational follow-up)
+- Goal:
+  - Prevent declaration drift across claim-bearing docs while keeping updates auditable and fail-closed.
+- Required scope:
+  - Extend drift checks to enforce synchronized declarations across:
+    - `ROADMAP.md` (current/next level and active queue language).
+    - `docs/spec-conformance-matrix.md` (active delta closure declarations).
+    - `docs/companion-spec-scope-contract.md` (scope/claim status wording).
+    - `docs/self-hosting-maturity-ladder.md` (declared level and promotion-gate wording).
+  - Fail CI closed when declarations diverge without synchronized updates and refreshed evidence artifacts.
+  - Keep checks deterministic and fixture-backed.
+- Exit criteria:
+  - Drift is rejected with actionable mismatch diagnostics.
+  - Standard roadmap claim updates require synchronized edits across the claim set.
+  - Guardrail runs in the default contributor loop (`npm run docs:freshness` and/or `npm run claims:audit`).
+
+### OP-002: Reviewable confidence-tuning recommendation publication loop (operational follow-up)
+- Goal:
+  - Strengthen self-improvement by publishing deterministic recommendations without automatic policy mutation.
+- Required scope:
+  - Publish cadence-based recommendation artifacts derived from `confidence_result.json` via `confidence-tune`.
+  - Link recommendations into plan/review/compound artifacts as explicit lock-decision inputs.
+  - Enforce recommendation-only behavior: no automatic threshold or route updates.
+  - Record adoption/rejection decisions in review artifacts for traceability.
+- Exit criteria:
+  - Deterministic recommendation artifacts are produced and linked from active convergence work.
+  - Lock decisions (`resolved|reopen`) remain human-governed with recommendation context attached.
+  - No unattended threshold mutation path exists outside reviewed and merged changes.
+
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
   - Create a plan artifact from `docs/templates/plan.md`.
@@ -228,6 +387,76 @@ Execution order (do not reorder unless blocked):
   - Added replay-focused diff output over normalized graph/config/status/provenance fields.
   - Added e2e coverage for run-vs-replay manifest equivalence and updated README usage.
   - Completion artifact: [`docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md`](./docs/roadmap/backlog-bk-001-replay-provenance-ux-completion.md)
+- [x] BK-002: Confidence-based human escalation tuning
+  - Added `confidence-tune` CLI command to aggregate `confidence_result.json` artifacts across logs roots and emit deterministic threshold/route recommendations.
+  - Added deterministic JSON contract with quantile-based threshold recommendation and escalation-target route ranking.
+  - Added e2e smoke coverage for command output and recommendation status behavior.
+  - Completion artifact: [`docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md`](./docs/roadmap/backlog-bk-002-confidence-escalation-tuning-completion.md)
+- [x] BK-003: Weekly compound metrics helper command
+  - Added `compound-weekly` CLI command to generate standardized weekly metrics reports from git/review artifacts.
+  - Added deterministic JSON payload mode and explicit markdown report output path handling.
+  - Added e2e smoke coverage for command/report contract behavior.
+  - Completion artifact: [`docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md`](./docs/roadmap/backlog-bk-003-weekly-compound-metrics-helper-completion.md)
+- [x] BK-004: External spec-conformance matrix + parser policy closure
+  - Added `docs/spec-conformance-matrix.md` mapping active Attractor/coding-agent-loop/unified-llm deltas to deterministic evidence.
+  - Formally closed parser policy decision as strict `digraph`-only (`graph` mode rejected; `digraph`/`strict digraph` accepted) with parser + test + docs alignment.
+  - Linked matrix artifact in README and roadmap status references.
+  - Completion artifact: [`docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md`](./docs/roadmap/backlog-bk-004-spec-conformance-matrix-and-parser-policy-completion.md)
+- [x] BK-005: Companion spec scope contract + parity evidence declaration
+  - Added `docs/companion-spec-scope-contract.md` with explicit `implemented|partial|out-of-scope` declarations for coding-agent-loop and unified-llm capabilities.
+  - Updated conformance matrix and README/roadmap wording to ensure claims are auditable and non-ambiguous.
+  - Linked deterministic evidence/tests for each declared capability scope.
+  - Completion artifact: [`docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md`](./docs/roadmap/backlog-bk-005-companion-spec-scope-contract-completion.md)
+- [x] BK-006: Self-hosting maturity ladder and promotion gates
+  - Added executable maturity gate runner (`npm run self-host:maturity`) with objective `DL-*`/`PB-*`/`AU-*` gate evaluation and versioned report output.
+  - Added CI `self-host-maturity` job enforcing `deterministic-local` requirement and uploading maturity report artifacts.
+  - Published `docs/self-hosting-maturity-ladder.md` declaring current level and required criteria for next level promotion.
+  - Completion artifact: [`docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md`](./docs/roadmap/backlog-bk-006-self-hosting-maturity-ladder-and-promotion-gates-completion.md)
+- [x] BK-007: Provider-backed maturity evidence pipeline
+  - Added deterministic provider-backed evidence publication command (`npm run self-host:provider-backed`) producing `self_host_provider_backed_report.v1`.
+  - Published `docs/metrics/reports/self-host-provider-backed-latest.json` with objective `openai` + `anthropic` pass/fail statuses.
+  - Updated `self-host:maturity` `PB-001`/`PB-002` gates to verify published evidence contract without weakening deterministic-local CI requirement.
+  - Completion artifact: [`docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md`](./docs/roadmap/backlog-bk-007-provider-backed-maturity-evidence-pipeline-completion.md)
+- [x] BK-008: Release hardening gates (SBOM/signing/provenance)
+  - Added deterministic release hardening command (`npm run release:hardening`) publishing report + SBOM + signature artifacts.
+  - Added provenance policy verification checks against release workflow requirements (`--provenance`, required permissions, hardening gate ordering).
+  - Added CI `release-hardening` job and release workflow enforcement prior to publish.
+  - Completion artifact: [`docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md`](./docs/roadmap/backlog-bk-008-release-hardening-gates-completion.md)
+- [x] BK-009: Reliability SLO gates and auto-reopen policy hooks
+  - Added deterministic reliability SLO command (`npm run reliability:slo`) publishing `compound_reliability_slo_report.v1`.
+  - Added explicit threshold checks (lock-resolution minimum, reopen-ratio maximum, cadence freshness) and fail-closed `consensus_lock_decision` policy output.
+  - Added CI `reliability-slo` job with report artifact upload and actionable gate failure behavior.
+  - Completion artifact: [`docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md`](./docs/roadmap/backlog-bk-009-reliability-slo-gates-and-auto-reopen-policy-hooks-completion.md)
+- [x] BK-010: Deterministic verification hardening and flake replay gate
+  - Added deterministic CLI/e2e suite harness with shared prebuild lock/sentinel and per-suite temp/log isolation helpers.
+  - Added deterministic flake replay command (`npm run self-host:flake`) publishing `self_host_flake_report.v1` with required-suite pass-rate evidence.
+  - Added CI `self-host-flake` gate enforcing replay pass-rate threshold with report artifact upload.
+  - Completion artifact: [`docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md`](./docs/roadmap/backlog-bk-010-deterministic-verification-hardening-and-flake-replay-gate-completion.md)
+- [x] BK-011: Native streaming parity and transcript conformance
+  - Implemented native incremental stream flow for supported adapter paths (`llm.stream.start|delta|end|error`) with normalized end metadata.
+  - Added deterministic stream-vs-complete parity tests and explicit cancellation/error conformance tests.
+  - Added codergen transcript artifact publication (`stream_transcript.json` + `stream_transcript.ndjson`) and run manifest transcript provenance mapping.
+  - Completion artifact: [`docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md`](./docs/roadmap/backlog-bk-011-native-streaming-parity-and-transcript-conformance-completion.md)
+- [x] BK-012: Autonomous evidence bootstrap and `AU-*` guardrails
+  - Added deterministic autonomous evidence publisher command (`npm run self-host:autonomous`) publishing `self_host_autonomous_report.v1`.
+  - Added deterministic agent-audit evidence publisher command (`npm run self-host:agent-audit`) publishing `self_host_agent_audit_report.v1` from `agent:audit` output contract.
+  - Updated `self-host:maturity` AU gate evaluation to perform strict published schema validation for `AU-001` and `AU-002`.
+  - Completion artifact: [`docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md`](./docs/roadmap/backlog-bk-012-autonomous-evidence-bootstrap-and-au-guardrails-completion.md)
+- [x] BK-013: Claims-consistency guardrails across roadmap/spec/maturity docs
+  - Added deterministic cross-document claims audit command (`npm run claims:audit`) publishing `claims_consistency_report.v1`.
+  - Added fixture-backed pass/fail coverage for compliant claims and mismatch drift scenarios.
+  - Added CI `claims-consistency` fail-closed gate with report artifact publication.
+  - Completion artifact: [`docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md`](./docs/roadmap/backlog-bk-013-claims-consistency-guardrails-completion.md)
+- [x] BK-014: Provider-backed live-canary evidence hardening
+  - Added deterministic bounded live-canary publication command (`npm run self-host:provider-backed-live`) publishing `self_host_provider_backed_live_report.v1`.
+  - Added advisory-by-default local mode and explicit fail-closed `--require-pass` policy mode.
+  - Added secret-gated nightly/dispatch live-canary workflow lane with fail-closed enforcement when configured.
+  - Completion artifact: [`docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md`](./docs/roadmap/backlog-bk-014-provider-backed-live-canary-evidence-hardening-completion.md)
+- [x] BK-015: Unattended-run outcome and economics telemetry
+  - Added deterministic unattended telemetry publication command (`npm run self-host:unattended-telemetry`) publishing `self_host_unattended_telemetry_report.v1` from bounded repository input artifact.
+  - Added strict source schema/freshness checks and fail-closed report semantics for missing/invalid telemetry fields.
+  - Added CI unattended telemetry validation lane and report artifact upload.
+  - Completion artifact: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md)
 
 ## Roadmap Board (Single Source of Truth)
 ### Now
@@ -241,20 +470,37 @@ Execution order (do not reorder unless blocked):
 | `RMD-033` | Targeted retry and failure taxonomy hardening | Done | Closed via explicit class routing + retry map regression coverage — see completion report. |
 | `RMD-034` | Promotion and governance profiles | Done | Closed via promotion/profile lint overlays and golden coverage — see completion report. |
 | `BK-001` | Replay/provenance UX improvements | Done | Closed via manifest summary/diff command and replay parity coverage — see completion report. |
+| `BK-002` | Confidence-based human escalation tuning | Done | Closed via deterministic `confidence-tune` recommendation command and e2e coverage — see completion report. |
+| `BK-003` | Weekly compound metrics helper command | Done | Closed via deterministic `compound-weekly` CLI helper and report contract coverage — see completion report. |
+| `BK-004` | External spec-conformance matrix + parser policy closure | Done | Closed via published conformance matrix and strict parser policy documentation — see completion report. |
+| `BK-005` | Companion spec scope contract + parity evidence declaration | Done | Closed via explicit companion-spec scope contract and evidence-linked claims language — see completion report. |
+| `BK-006` | Self-hosting maturity ladder and promotion gates | Done | Closed via staged maturity gate runner, CI/reporting enforcement, and explicit level declaration — see completion report. |
+| `BK-007` | Provider-backed maturity evidence pipeline | Done | Closed via published `self_host_provider_backed_report.v1` evidence, deterministic publication command, and objective PB gate verification — see completion report. |
+| `BK-008` | Release hardening gates (SBOM/signing/provenance) | Done | Closed via deterministic release hardening report/SBOM/signature artifacts and CI/release policy enforcement — see completion report. |
+| `BK-009` | Reliability SLO gates and auto-reopen policy hooks | Done | Closed via deterministic SLO threshold evaluator, fail-closed `resolved|reopen` policy hook, and CI artifact gate enforcement — see completion report. |
+| `BK-010` | Deterministic verification hardening and flake replay gate | Done | Closed via deterministic CLI/e2e suite isolation helpers, replay-rate evidence publication (`self_host_flake_report.v1`), and CI flake-threshold enforcement — see completion report. |
+| `BK-011` | Native streaming parity and transcript conformance | Done | Closed via native incremental stream delta flow, deterministic parity/cancellation conformance tests, and codergen transcript provenance publication — see completion report. |
+| `BK-012` | Autonomous evidence bootstrap and `AU-*` guardrails | Done | Closed via deterministic autonomous/agent-audit report publication contracts and strict AU gate schema validation in `self-host:maturity` — see completion report. |
+| `BK-013` | Claims-consistency guardrails for roadmap/spec/maturity declarations | Done | Closed via deterministic `claims:audit` report contract, fixture-backed mismatch detection, and fail-closed CI claims-consistency gate — see completion report. |
+| `BK-014` | Provider-backed live-canary evidence publication | Done | Closed via bounded `self_host_provider_backed_live_report.v1` publication command, advisory local mode, and secret-gated fail-closed nightly canary lane — see completion report. |
+| `BK-015` | Unattended-run outcome and economics telemetry | Done | Closed via deterministic unattended telemetry report contract (`self_host_unattended_telemetry_report.v1`), strict source schema/freshness checks, and fail-closed CI unattended telemetry lane — see completion report. |
+| `BK-016` | Documentation freshness guardrails | Done | Closed via deterministic `docs_freshness_report.v1` contract, fixture-backed drift tests, and fail-closed CI docs-freshness lane — see completion report. |
+| `BK-017` | Markdown compaction and context-window guardrails | Done | Closed via docs size-budget checks (`DF-005`), compact handoff/archive guardrails (`DF-006`), and roadmap artifact-list compaction into archive docs — see completion report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| `BK-002` | Confidence-based human escalation tuning | Backlog | Tune escalation thresholds and routes from observed run data with deterministic validation artifacts. |
-| `BK-003` | Weekly compound metrics helper command | Backlog | Add optional helper command to generate standardized weekly reports from repository artifacts. |
+| `OP-001` | Cross-doc claim synchronization ratchet | Planned | CI fails closed when roadmap/spec matrix/scope contract/maturity declarations drift without synchronized updates and evidence refresh. |
+| `OP-002` | Reviewable confidence-tuning recommendation loop | Planned | Deterministic recommendation artifact is published on cadence and consumed as explicit review input to lock-governed convergence (no auto-apply path). |
 
 ### Later
 | ID | Item | Status | Notes |
 | --- | --- | --- | --- |
-| `—` | No deferred items beyond active backlog queue | `N/A` | `BK-002` and `BK-003` are already prioritized in `Next`. |
+| None | None | N/A | No additional queued backlog items in current roadmap snapshot. |
 
 ## External References
 - DTU context: [factory.strongdm.ai](https://factory.strongdm.ai/)
 - Attractor orchestration spec: [attractor-spec.md](https://github.com/strongdm/attractor/blob/main/attractor-spec.md)
 - Coding agent loop spec: [coding-agent-loop-spec.md](https://github.com/strongdm/attractor/blob/main/coding-agent-loop-spec.md)
 - Unified LLM client spec: [unified-llm-spec.md](https://github.com/strongdm/attractor/blob/main/unified-llm-spec.md)
+- Stripe field-report source (attached PDF): `/Users/markhingston/Downloads/Stripe’s AI agents now write 1,000+ pull requests per week _ by JP Caparas _ Feb, 2026 _ Medium.pdf`

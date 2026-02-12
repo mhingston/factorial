@@ -35,6 +35,27 @@ jobs:
       - name: Dry-run package
         run: npm pack --dry-run
 
+      - name: Evaluate release hardening gates
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          npm run release:hardening -- \
+            --strict-signing \
+            --signing-key-env RELEASE_SIGNING_KEY \
+            --report ./logs/release_hardening/report.json \
+            --sbom ./logs/release_hardening/sbom.json \
+            --signature ./logs/release_hardening/signature.json \
+            --release-workflow ./.github/workflows/release.yml
+
+      - name: Upload release hardening artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-hardening-artifacts
+          path: |
+            logs/release_hardening/report.json
+            logs/release_hardening/sbom.json
+            logs/release_hardening/signature.json
+
       - name: Publish to npm
         run: npm publish --access public --provenance
         env:

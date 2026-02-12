@@ -1,0 +1,64 @@
+{
+  "schema_version": "self_host_agent_audit_report.v1",
+  "generated_at": "2026-02-12T02:05:37.594Z",
+  "report_path": "docs/metrics/reports/self-host-agent-audit-latest.json",
+  "publication": {
+    "command": "npm run self-host:agent-audit",
+    "audit_command": "npm run agent:audit"
+  },
+  "summary": {
+    "overall_status": "pass",
+    "audit_result": "PASS",
+    "required_checks_passed": 4,
+    "required_checks_failed": 0,
+    "optional_checks_skipped": 1,
+    "exit_code": 0,
+    "parsed_checks": 5
+  },
+  "checks": [
+    {
+      "id": "AUD-001",
+      "level": "autonomous",
+      "name": "Lint (`npm run lint`)",
+      "status": "pass",
+      "required": true,
+      "detail": "ok"
+    },
+    {
+      "id": "AUD-002",
+      "level": "autonomous",
+      "name": "Typecheck (`npm run typecheck`)",
+      "status": "pass",
+      "required": true,
+      "detail": "ok"
+    },
+    {
+      "id": "AUD-003",
+      "level": "autonomous",
+      "name": "Tests (`npm run test:run`)",
+      "status": "pass",
+      "required": true,
+      "detail": "ok"
+    },
+    {
+      "id": "AUD-004",
+      "level": "autonomous",
+      "name": "Git access (`git status --porcelain`)",
+      "status": "pass",
+      "required": true,
+      "detail": "ok"
+    },
+    {
+      "id": "AUD-005",
+      "level": "autonomous",
+      "name": "Optional local service probe",
+      "status": "skip",
+      "required": false,
+      "detail": "Set AGENT_AUDIT_SERVICE_URL to enable this check."
+    }
+  ],
+  "execution": {
+    "stdout_tail": "(`npm run lint`): ok\n\n[check] Typecheck (`npm run typecheck`)\n[PASS] Typecheck (`npm run typecheck`): ok\n\n[check] Tests (`npm run test:run`)\n[PASS] Tests (`npm run test:run`): ok\n\n[check] Git access (`git status --porcelain`)\n[PASS] Git access (`git status --porcelain`): ok\n[SKIP] Optional local service probe: Set AGENT_AUDIT_SERVICE_URL to enable this check.\n\n=== Agent Capability Audit Summary ===\nRequired checks passed: 4\nRequired checks failed: 0\nOptional checks skipped: 1\nAudit result: PASS\n",
+    "stderr_tail": ""
+  }
+}

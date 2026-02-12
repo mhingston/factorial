@@ -1,0 +1,126 @@
+{
+  "schema_version": "self_host_autonomous_report.v1",
+  "generated_at": "2026-02-12T02:05:31.226Z",
+  "report_path": "docs/metrics/reports/self-host-autonomous-latest.json",
+  "publication": {
+    "command": "npm run self-host:autonomous",
+    "deterministic_inputs": [
+      "docs/metrics/reports/self-host-flake-latest.json",
+      "docs/metrics/reports/compound-reliability-slo-latest.json",
+      "docs/metrics/reports/self-host-provider-backed-latest.json",
+      "docs/self-hosting-maturity-ladder.md",
+      "docs/companion-spec-scope-contract.md"
+    ]
+  },
+  "summary": {
+    "au001_status": "pass",
+    "stability_pass": true,
+    "guardrails_pass": true,
+    "human_free_pass": true,
+    "overall_status": "pass",
+    "failed_check_ids": []
+  },
+  "checks": [
+    {
+      "id": "AU-STAB-001",
+      "level": "autonomous",
+      "name": "Deterministic flake replay stability evidence",
+      "command": "npm run self-host:flake",
+      "status": "pass",
+      "summary": "Flake replay report exists with required schema and pass status.",
+      "evidence": [
+        "docs/metrics/reports/self-host-flake-latest.json"
+      ],
+      "details": {
+        "exists": true,
+        "parse_error": "",
+        "schema_ok": true,
+        "summary_overall_status": "pass"
+      }
+    },
+    {
+      "id": "AU-STAB-002",
+      "level": "autonomous",
+      "name": "Reliability SLO lock-decision stability evidence",
+      "command": "npm run reliability:slo",
+      "status": "pass",
+      "summary": "Reliability SLO report exists with required schema, pass status, and resolved lock decision.",
+      "evidence": [
+        "docs/metrics/reports/compound-reliability-slo-latest.json"
+      ],
+      "details": {
+        "exists": true,
+        "parse_error": "",
+        "schema_ok": true,
+        "summary_overall_status": "pass",
+        "consensus_lock_decision": "resolved"
+      }
+    },
+    {
+      "id": "AU-STAB-003",
+      "level": "autonomous",
+      "name": "Provider-backed baseline evidence continuity",
+      "command": "npm run self-host:provider-backed",
+      "status": "pass",
+      "summary": "Provider-backed report exists with required schema and pass status.",
+      "evidence": [
+        "docs/metrics/reports/self-host-provider-backed-latest.json"
+      ],
+      "details": {
+        "exists": true,
+        "parse_error": "",
+        "schema_ok": true,
+        "summary_overall_status": "pass"
+      }
+    },
+    {
+      "id": "AU-GUARD-001",
+      "level": "autonomous",
+      "name": "Companion scope autonomy boundary policy",
+      "command": "read docs/companion-spec-scope-contract.md",
+      "status": "pass",
+      "summary": "Companion scope contract explicitly keeps unattended external autonomy out-of-scope.",
+      "evidence": [
+        "docs/companion-spec-scope-contract.md"
+      ],
+      "details": {
+        "exists": true,
+        "read_error": "",
+        "out_of_scope_policy_present": true
+      }
+    },
+    {
+      "id": "AU-GUARD-002",
+      "level": "autonomous",
+      "name": "Declared maturity remains staged and non-autonomous",
+      "command": "read docs/self-hosting-maturity-ladder.md",
+      "status": "pass",
+      "summary": "Maturity declaration remains provider-backed with autonomous as next gated level.",
+      "evidence": [
+        "docs/self-hosting-maturity-ladder.md"
+      ],
+      "details": {
+        "exists": true,
+        "read_error": "",
+        "declared_current_level_provider_backed": true,
+        "declared_next_level_autonomous": true
+      }
+    },
+    {
+      "id": "AU-HUMAN-001",
+      "level": "autonomous",
+      "name": "Human-free guardrail policy assertion",
+      "command": "read docs/companion-spec-scope-contract.md",
+      "status": "pass",
+      "summary": "Companion scope policy explicitly forbids unattended external-system autonomy claims.",
+      "evidence": [
+        "docs/companion-spec-scope-contract.md"
+      ],
+      "details": {
+        "exists": true,
+        "read_error": "",
+        "explicit_human_free_boundary_present": true
+      }
+    }
+  ]
+}
