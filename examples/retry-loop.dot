@@ -1,0 +1,109 @@
+# Retry with Failure Analysis
+# Smart retry routing based on failure classification
+
+digraph RetryWithFailure {
+    graph [goal="Smart retry with targeted failure handling",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Initial attempt
+    attempt [prompt="Attempt to deploy the application:
+    1. Build the Docker image
+    2. Run database migrations
+    3. Deploy to staging environment
+    4. Run smoke tests
+    
+    If any step fails, report the specific failure.",
+             label="Deploy Attempt"]
+    
+    # Analyze the failure
+    analyze [type="failure.analyze",
+             retry_policy="targeted",
+             retry_target_transient="retry_transient",
+             retry_target_quality_gap="improve_deployment",
+             retry_target_tool_error="fix_tool",
+             retry_target_spec_mismatch="clarify_spec",
+             label="Analyze Failure"]
+    
+    # Retry paths based on failure classification
+    retry_transient [prompt="Retry the deployment operation. This is a transient failure (network issue, temporary service unavailable).
+    
+    Actions:
+    1. Wait 5 seconds
+    2. Retry the failed step
+    3. If still failing after 3 attempts, escalate to human",
+                     label="Retry (Transient)"]
+    
+    improve_deployment [prompt="The deployment failed due to quality issues (test failures, validation errors).
+    
+    Actions:
+    1. Review test output
+    2. Fix failing tests or validation issues
+    3. Re-run deployment
+    4. If issues persist, escalate to human",
+                        label="Improve & Retry"]
+    
+    fix_tool [prompt="The deployment failed due to tool/configuration issues (missing CLI, wrong credentials, invalid config).
+    
+    Actions:
+    1. Verify tool installation and versions
+    2. Check environment variables and credentials
+    3. Validate configuration files
+    4. Retry deployment
+    5. If still failing, escalate to human",
+              label="Fix Tools & Retry"]
+    
+    clarify_spec [prompt="The deployment failed because the specification was unclear or changed.
+    
+    Actions:
+    1. Review deployment requirements
+    2. Clarify ambiguous requirements
+    3. Update deployment script if needed
+    4. Re-run deployment
+    5. If spec is still unclear, escalate to human",
+                  label="Clarify & Retry"]
+    
+    # Human escalation
+    human_escalate [shape=hexagon,
+                    type="wait.human",
+                    label="Human Intervention"]
+    
+    # Success after retry
+    success [prompt="Deployment succeeded after retry!
+    
+    Generate summary:
+    1. Initial failure reason
+    2. Remediation actions taken
+    3. Final deployment status
+    4. Lessons learned",
+             label="Success"]
+    
+    # Main flow
+    start -> attempt
+    attempt -> success [label="Success"]
+    attempt -> analyze [label="Failure"]
+    
+    # Analyze routes to appropriate retry path
+    analyze -> retry_transient [label="Transient"]
+    analyze -> improve_deployment [label="Quality Gap"]
+    analyze -> fix_tool [label="Tool Error"]
+    analyze -> clarify_spec [label="Spec Mismatch"]
+    
+    # Retry paths loop back to attempt
+    retry_transient -> attempt
+    improve_deployment -> attempt
+    fix_tool -> attempt
+    clarify_spec -> attempt
+    
+    # Human escalation (if retries exhausted)
+    retry_transient -> human_escalate [label="Max Retries", style=dashed]
+    improve_deployment -> human_escalate [label="Max Retries", style=dashed]
+    fix_tool -> human_escalate [label="Max Retries", style=dashed]
+    clarify_spec -> human_escalate [label="Max Retries", style=dashed]
+    
+    # Final paths to exit
+    success -> exit
+    human_escalate -> exit
+}

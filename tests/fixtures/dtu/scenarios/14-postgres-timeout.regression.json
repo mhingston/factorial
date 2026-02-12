@@ -1,0 +1,52 @@
+{
+  "scenario_id": "scn-postgres-timeout",
+  "suite": "regression",
+  "description": "Test Postgres timeout simulation through reference twin.",
+  "request": {
+    "twin_id": "postgres",
+    "operation": "sql.query",
+    "scenario_id": "postgres-timeout",
+    "seed": "phase-a-seed-014",
+    "input": {
+      "sql": "SELECT * FROM large_table",
+      "params": [],
+      "actor": "platform-bot",
+      "simulate": "timeout"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "postgres-timeout"
+    }
+  },
+  "expected": {
+    "twin_id": "postgres",
+    "twin_version": "0.1.0",
+    "operation": "sql.query",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "timeout",
+      "class": "transient",
+      "message": "Timeout in postgres twin.",
+      "retryable": true,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400020,
+      "latency_ms": 20,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "postgres-timeout",
+      "provider": "postgres"
+    }
+  },
+  "expected_failure_mode": "timeout",
+  "tags": ["postgres", "regression", "timeout"]
+}

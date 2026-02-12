@@ -1,0 +1,120 @@
+# Quality Pipeline CI/CD
+# Complete CI/CD pipeline with multiple quality gates
+
+digraph QualityPipeline {
+    graph [goal="Complete CI/CD quality pipeline",
+           promotion_stage="canary",
+           quality_profile="strict",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Stage 1: Static Analysis
+    lint [type="quality.gate",
+          gate_type="lint",
+          gate_command="npm run lint",
+          label="Lint",
+          failure_target="fix_issues"]
+    
+    format_check [type="quality.gate",
+                  gate_type="custom",
+                  gate_command="npm run format:check",
+                  label="Format Check",
+                  failure_target="fix_issues"]
+    
+    # Stage 2: Type Safety
+    typecheck [type="quality.gate",
+               gate_type="typecheck",
+               gate_command="npm run typecheck",
+               label="Type Check",
+               failure_target="fix_issues"]
+    
+    # Stage 3: Testing
+    unit_tests [type="quality.gate",
+                gate_type="tests",
+                gate_command="npm run test:unit",
+                label="Unit Tests",
+                failure_target="fix_issues"]
+    
+    integration_tests [type="quality.gate",
+                       gate_type="tests",
+                       gate_command="npm run test:integration",
+                       label="Integration Tests",
+                       failure_target="fix_issues"]
+    
+    # Stage 4: Security
+    security_scan [type="quality.gate",
+                   gate_type="security",
+                   gate_command="npm audit --audit-level=moderate",
+                   label="Security Scan",
+                   failure_target="fix_security"]
+    
+    # Stage 5: AI Code Review
+    code_review [type="judge.rubric",
+                 judge_rubric_path="./rubrics/code-review.md",
+                 score_threshold=0.75,
+                 label="AI Code Review"]
+    
+    # Gate based on AI review score
+    review_gate [type="confidence.gate",
+                 confidence_signal_path="judge.code_review.score",
+                 escalation_threshold=0.75,
+                 escalation_target="senior_review",
+                 label="Review Gate"]
+    
+    # Stage 6: Build Verification
+    build [type="quality.gate",
+           gate_type="custom",
+           gate_command="npm run build",
+           label="Build Verification",
+           failure_target="fix_build"]
+    
+    # Success path
+    deploy [prompt="All quality gates passed! Generate deployment summary:
+    1. Changes included in this deployment
+    2. Test results summary
+    3. Security scan results
+    4. Performance impact assessment
+    5. Rollback plan",
+            label="Prepare Deploy"]
+    
+    # Failure recovery paths
+    fix_issues [prompt="Fix the code quality issues identified by the automated checks. Address:
+    1. Lint errors
+    2. Format issues
+    3. Type errors
+    4. Test failures
+    
+    Make minimal changes to fix issues while preserving functionality.",
+                label="Fix Issues"]
+    
+    fix_security [prompt="Address security vulnerabilities:
+    1. Update vulnerable dependencies
+    2. Fix any security anti-patterns in code
+    3. Verify fixes don't break functionality
+    4. Document any acceptable risks",
+                  label="Fix Security"]
+    
+    senior_review [shape=hexagon,
+                   type="wait.human",
+                   label="Senior Review"]
+    
+    fix_build [prompt="Fix build errors:
+    1. Check for TypeScript compilation errors
+    2. Verify all imports are correct
+    3. Check for missing dependencies
+    4. Ensure build scripts work correctly",
+               label="Fix Build"]
+    
+    # Main success flow
+    start -> lint -> format_check -> typecheck -> unit_tests -> integration_tests -> security_scan -> code_review -> review_gate -> build -> deploy -> exit
+    
+    # Failure recovery flows (loop back to appropriate gate)
+    fix_issues -> lint
+    fix_security -> security_scan
+    fix_build -> build
+    
+    # Review escalation flow
+    review_gate -> senior_review -> build
+}

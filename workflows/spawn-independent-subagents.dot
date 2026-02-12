@@ -1,0 +1,53 @@
+digraph SpawnIndependentSubagents {
+  graph [goal="Spawn all independent factory enhancement subagents in parallel"]
+  rankdir=TB
+  
+  start [shape=Mdiamond, label="Start Parallel Delegation"]
+  exit [shape=Msquare, label="All Subagents Spawned"]
+  
+  // Spawn SA-001: Provider-Native Tool Profiles (Independent)
+  spawn_sa001 [type="tool",
+               label="Spawn SA-001",
+               tool_name="spawn_agent",
+               task="Implement provider-native tool profiles for OpenAI (apply_patch v4a), Anthropic (old_string/new_string), and Gemini. Create packages/core/src/profiles/ with profile registry. Follow docs/plans/subagent-sa001-provider-profiles.md. Generate provider-profile-parity-latest.json evidence.",
+               allowed_tools="[read_file,write_file,edit_file,shell,grep,glob]",
+               max_turns="100"]
+  
+  // Spawn SA-002: Reasoning Token Transparency (Independent)
+  spawn_sa002 [type="tool",
+               label="Spawn SA-002",
+               tool_name="spawn_agent",
+               task="Extend LlmAdapter contract to surface reasoning tokens. Implement extraction for OpenAI, Anthropic, and Gemini. Write reasoning.md artifacts. Update economics module. Follow docs/plans/subagent-sa002-reasoning-tokens.md. Generate reasoning-token-coverage-latest.json evidence.",
+               allowed_tools="[read_file,write_file,edit_file,shell,grep,glob]",
+               max_turns="80"]
+  
+  // Spawn SA-004: Lightweight Subagent Tools (Independent)
+  spawn_sa004 [type="tool",
+               label="Spawn SA-004",
+               tool_name="spawn_agent",
+               task="Implement LightweightSubagent class with tool loop. Create spawn_agent, wait, send_input, close_agent tools. Build SubagentRegistry with depth limiting. Support parallel execution. Follow docs/plans/subagent-sa004-lightweight-subagents.md. Generate subagent-performance-latest.json evidence.",
+               allowed_tools="[read_file,write_file,edit_file,shell,grep,glob]",
+               max_turns="120"]
+  
+  // Spawn SA-005: Multi-Modal Support (Independent, uses types from SA-002)
+  spawn_sa005 [type="tool",
+               label="Spawn SA-005",
+               tool_name="spawn_agent",
+               task="Extend ContentPart types with ImageData, AudioData, DocumentData. Implement file loading utilities. Update all provider adapters for multi-modal content. Add node attributes for image_input, audio_input, document_input. Follow docs/plans/subagent-sa005-multimodal-support.md. Generate multimodal-compatibility-latest.json evidence.",
+               allowed_tools="[read_file,write_file,edit_file,shell,grep,glob]",
+               max_turns="100"]
+  
+  // Checkpoint to track spawning
+  checkpoint_spawned [type="builtin",
+                      label="Checkpoint: Subagents Spawned",
+                      action="log_context",
+                      log_keys="[sa001_agent_id,sa002_agent_id,sa004_agent_id,sa005_agent_id]"]
+  
+  // Parallel fan-out from start
+  start -> spawn_sa001 -> checkpoint_spawned
+  start -> spawn_sa002 -> checkpoint_spawned
+  start -> spawn_sa004 -> checkpoint_spawned
+  start -> spawn_sa005 -> checkpoint_spawned
+  
+  checkpoint_spawned -> exit
+}

@@ -1,0 +1,57 @@
+{
+  "scenario_id": "scn-sendgrid-send-email",
+  "suite": "smoke",
+  "description": "Send email through SendGrid twin and verify deterministic success payload.",
+  "request": {
+    "twin_id": "sendgrid",
+    "operation": "email.send",
+    "scenario_id": "sendgrid-send-email",
+    "seed": "phase-a-seed-018",
+    "input": {
+      "to": "recipient@example.com",
+      "from": "sender@example.com",
+      "subject": "Test Email",
+      "text": "This is a test email",
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "sendgrid-send-email"
+    }
+  },
+  "expected": {
+    "twin_id": "sendgrid",
+    "twin_version": "0.1.0",
+    "operation": "email.send",
+    "status": "success",
+    "output": {
+      "message_id": "msg_856341",
+      "to": "recipient@example.com",
+      "from": "sender@example.com",
+      "subject": "Test Email",
+      "status": "queued",
+      "template_id": null,
+      "sent_at": "2025-02-10T16:00:00.000Z",
+      "sent_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400008,
+      "latency_ms": 8,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "sendgrid-send-email",
+      "provider": "sendgrid",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["sendgrid", "smoke", "email"]
+}

@@ -1,0 +1,75 @@
+# Lightweight Subagent Example
+# Spawns parallel subagents for independent research tasks
+
+digraph LightweightSubagent {
+    graph [goal="Research multiple topics in parallel using subagents",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Spawn subagent for authentication research
+    spawn_auth [type="tool",
+                tool_name="spawn_agent",
+                task="Research modern authentication methods for web applications. Focus on:
+    1. JWT vs session-based auth
+    2. OAuth 2.0 and OpenID Connect
+    3. MFA implementation strategies
+    4. Security best practices
+    
+    Provide a comprehensive summary with pros/cons of each approach.",
+                label="Spawn: Auth Research"]
+    
+    # Spawn subagent for database research
+    spawn_db [type="tool",
+              tool_name="spawn_agent",
+              task="Research database options for a high-scale application. Compare:
+    1. PostgreSQL vs MySQL
+    2. MongoDB vs DynamoDB
+    3. Redis use cases
+    4. Read replicas and sharding strategies
+    
+    Provide recommendations with trade-offs.",
+              label="Spawn: DB Research"]
+    
+    # Spawn subagent for frontend framework research
+    spawn_frontend [type="tool",
+                    tool_name="spawn_agent",
+                    task="Research frontend frameworks for 2025. Compare:
+    1. React vs Vue vs Svelte
+    2. SSR frameworks (Next.js, Nuxt, SvelteKit)
+    3. Performance characteristics
+    4. Ecosystem and tooling
+    
+    Provide a recommendation based on team size and project complexity.",
+                    label="Spawn: Frontend Research"]
+    
+    # Wait for all subagents to complete
+    wait_all [type="tool",
+              tool_name="wait_for_all",
+              label="Wait for All"]
+    
+    # Synthesize findings into architecture recommendation
+    synthesize [prompt="Synthesize the research findings into a unified architecture recommendation:
+    
+    **Authentication:** [Summary from auth subagent]
+    **Database:** [Summary from db subagent]
+    **Frontend:** [Summary from frontend subagent]
+    
+    Provide:
+    1. Recommended tech stack
+    2. Architecture diagram description
+    3. Implementation roadmap
+    4. Risk assessment
+    5. Cost estimates",
+                label="Synthesize Architecture"]
+    
+    # Human review
+    review [shape=hexagon, type="wait.human", label="Review Architecture"]
+    
+    # Fan out from start to spawn all subagents in parallel
+    start -> spawn_auth -> wait_all
+    start -> spawn_db -> wait_all
+    start -> spawn_frontend -> wait_all
+    wait_all -> synthesize -> review -> exit
+}

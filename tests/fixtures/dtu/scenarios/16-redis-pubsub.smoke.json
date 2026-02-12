@@ -1,0 +1,52 @@
+{
+  "scenario_id": "scn-redis-pubsub",
+  "suite": "smoke",
+  "description": "Test Redis pub/sub operations through reference twin.",
+  "request": {
+    "twin_id": "redis",
+    "operation": "pubsub.publish",
+    "scenario_id": "redis-pubsub",
+    "seed": "phase-a-seed-016",
+    "input": {
+      "channel": "notifications",
+      "message": "New order received",
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "redis-pubsub"
+    }
+  },
+  "expected": {
+    "twin_id": "redis",
+    "twin_version": "0.1.0",
+    "operation": "pubsub.publish",
+    "status": "success",
+    "output": {
+      "channel": "notifications",
+      "message_id": "546832",
+      "subscribers_received": 2,
+      "published_at": "2025-02-10T16:00:00.000Z",
+      "published_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400002,
+      "latency_ms": 2,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "redis-pubsub",
+      "provider": "redis",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["redis", "smoke", "pubsub"]
+}

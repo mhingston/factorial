@@ -1,0 +1,105 @@
+{
+  "report_version": "1.0",
+  "timestamp": "2026-02-12T14:05:36.983Z",
+  "test_scenarios": [
+    {
+      "name": "Extreme caching - 100% input, minimal output",
+      "description": "Retrieval from large cached context with yes/no answer",
+      "model": "claude-3-opus",
+      "without_caching": {
+        "input_tokens": 100000,
+        "output_tokens": 10,
+        "cost_usd": 0.30015000000000003
+      },
+      "with_caching": {
+        "input_tokens": 100000,
+        "output_tokens": 10,
+        "cache_read_tokens": 100000,
+        "cost_usd": 0.030150000000000007,
+        "savings_percent": 90
+      }
+    },
+    {
+      "name": "Large context query - 100% input cached",
+      "description": "Retrieval from large cached knowledge base with brief output",
+      "model": "claude-3-opus",
+      "without_caching": {
+        "input_tokens": 50000,
+        "output_tokens": 500,
+        "cost_usd": 0.15750000000000003
+      },
+      "with_caching": {
+        "input_tokens": 50000,
+        "output_tokens": 500,
+        "cache_read_tokens": 50000,
+        "cost_usd": 0.022500000000000003,
+        "savings_percent": 86
+      }
+    },
+    {
+      "name": "Multi-turn conversation (15 turns) - 95% cached",
+      "description": "Extended conversation with aggressive caching",
+      "model": "claude-3-opus",
+      "without_caching": {
+        "input_tokens": 35000,
+        "output_tokens": 4000,
+        "cost_usd": 0.165
+      },
+      "with_caching": {
+        "input_tokens": 35000,
+        "output_tokens": 4000,
+        "cache_read_tokens": 33250,
+        "cost_usd": 0.075225,
+        "savings_percent": 54
+      }
+    },
+    {
+      "name": "Code analysis batch - 98% input cached",
+      "description": "Analyzing code with cached context and instructions",
+      "model": "claude-3-sonnet",
+      "without_caching": {
+        "input_tokens": 25000,
+        "output_tokens": 1500,
+        "cost_usd": 0.026000000000000002
+      },
+      "with_caching": {
+        "input_tokens": 25000,
+        "output_tokens": 1500,
+        "cache_read_tokens": 24500,
+        "cost_usd": 0.008360000000000001,
+        "savings_percent": 68
+      }
+    },
+    {
+      "name": "Document processing pipeline - 97% cached",
+      "description": "Processing documents with stable system context",
+      "model": "claude-3-haiku",
+      "without_caching": {
+        "input_tokens": 20000,
+        "output_tokens": 1000,
+        "cost_usd": 0.00625
+      },
+      "with_caching": {
+        "input_tokens": 20000,
+        "output_tokens": 1000,
+        "cache_read_tokens": 19400,
+        "cost_usd": 0.001885,
+        "savings_percent": 70
+      }
+    }
+  ],
+  "aggregate_statistics": {
+    "total_cost_without_caching_usd": 0.6549,
+    "total_cost_with_caching_usd": 0.1381,
+    "total_savings_usd": 0.5168,
+    "overall_savings_percent": 79,
+    "scenarios_meeting_50_percent_threshold": 5,
+    "scenarios_meeting_90_percent_threshold": 1
+  },
+  "strategy_recommendations": {
+    "system-only": "Best for: Single-turn queries with large system prompts, repeated identical queries",
+    "system-plus-early": "Best for: Multi-turn conversations (3-5 turns), balanced caching",
+    "aggressive": "Best for: Long conversations (10+ turns), maximum savings but higher cache write costs"
+  },
+  "recommendation": "Enable caching for all Anthropic workflows with >3 turns. Use system-plus-early as default strategy."
+}

@@ -1,0 +1,38 @@
+# Multi-Modal Image Analysis
+# Analyzes a screenshot or image using vision-capable LLMs
+
+digraph ImageAnalysis {
+    graph [goal="Analyze UI screenshot and provide recommendations",
+           rankdir=LR]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Analyze the screenshot using GPT-4o Vision or Claude
+    analyze_ui [prompt="Describe the user interface elements visible in this screenshot. Identify:
+    1. The main components (navigation, content areas, forms, etc.)
+    2. Layout and visual hierarchy
+    3. Any potential usability issues
+    4. Accessibility concerns
+    
+    Provide a structured analysis.",
+                label="Analyze UI",
+                image_input="./screenshots/dashboard.png",
+                llm_provider="openai",
+                llm_model="gpt-4o"]
+    
+    # Generate recommendations based on the analysis
+    recommend [prompt="Based on the UI analysis, provide specific recommendations for:
+    1. Layout improvements
+    2. Visual hierarchy enhancements
+    3. Usability fixes
+    4. Accessibility improvements
+    
+    Format as actionable items.",
+               label="Generate Recommendations"]
+    
+    # Human review of recommendations
+    review [shape=hexagon, type="wait.human", label="Review Recommendations"]
+    
+    start -> analyze_ui -> recommend -> review -> exit
+}

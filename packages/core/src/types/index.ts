@@ -9,6 +9,56 @@ export type StageStatus =
   | 'RETRY' 
   | 'SKIPPED';
 
+// Multi-modal content types (SA-005)
+export type ImageMediaType = 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp';
+export type AudioMediaType = 'audio/wav' | 'audio/mp3' | 'audio/m4a' | 'audio/ogg';
+export type DocumentMediaType = 'application/pdf' | 'text/plain' | 'text/markdown';
+
+export interface ImageData {
+  url?: string;
+  data?: Buffer;
+  media_type: ImageMediaType;
+  detail?: 'auto' | 'low' | 'high';
+}
+
+export interface AudioData {
+  url?: string;
+  data?: Buffer;
+  media_type: AudioMediaType;
+}
+
+export interface DocumentData {
+  url?: string;
+  data?: Buffer;
+  media_type: DocumentMediaType;
+  file_name?: string;
+}
+
+export enum ContentKind {
+  TEXT = 'TEXT',
+  IMAGE = 'IMAGE',
+  AUDIO = 'AUDIO',
+  DOCUMENT = 'DOCUMENT',
+  TOOL_CALL = 'TOOL_CALL',
+  TOOL_RESULT = 'TOOL_RESULT',
+  THINKING = 'THINKING'
+}
+
+export interface ContentPart {
+  kind: ContentKind;
+  text?: string;
+  image?: ImageData;
+  audio?: AudioData;
+  document?: DocumentData;
+}
+
+export interface Message {
+  role: 'system' | 'user' | 'assistant' | 'tool';
+  content: ContentPart[];
+  name?: string;
+  tool_call_id?: string;
+}
+
 export interface Outcome {
   status: StageStatus;
   preferred_label?: string;
@@ -95,6 +145,7 @@ export interface LlmCompleteRequest {
   provider: string;
   model: string;
   prompt: string;
+  messages?: Message[];
   providerApiKeyEnv?: string;
   outputSchema?: Record<string, unknown> | null;
   outputSchemaName?: string;
@@ -130,6 +181,8 @@ export interface LlmCompleteResult {
   cliInvocation?: Record<string, unknown>;
   stdout?: string;
   stderr?: string;
+  reasoning?: string;
+  reasoningTokens?: number;
 }
 
 export interface LlmStreamRequest {
@@ -138,6 +191,7 @@ export interface LlmStreamRequest {
   provider: string;
   model: string;
   prompt: string;
+  messages?: Message[];
   providerApiKeyEnv?: string;
   outputSchema?: Record<string, unknown> | null;
   outputSchemaName?: string;
@@ -159,6 +213,13 @@ export interface LlmStreamRequest {
 export interface LlmStreamEvent {
   type: string;
   data?: unknown;
+  reasoningDelta?: string;
+}
+
+export interface ReasoningData {
+  text: string;
+  signature?: string;
+  redacted?: boolean;
 }
 
 export interface LlmAdapter {

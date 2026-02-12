@@ -1,0 +1,54 @@
+{
+  "scenario_id": "scn-redis-kv-operations",
+  "suite": "smoke",
+  "description": "Test Redis key-value operations through reference twin.",
+  "request": {
+    "twin_id": "redis",
+    "operation": "kv.set",
+    "scenario_id": "redis-kv-operations",
+    "seed": "phase-a-seed-015",
+    "input": {
+      "key": "user:123",
+      "value": { "name": "Alice", "active": true },
+      "ttl_seconds": 3600,
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "redis-kv-operations"
+    }
+  },
+  "expected": {
+    "twin_id": "redis",
+    "twin_version": "0.1.0",
+    "operation": "kv.set",
+    "status": "success",
+    "output": {
+      "key": "user:123",
+      "value": { "name": "Alice", "active": true },
+      "ttl_seconds": 3600,
+      "previous_value": null,
+      "set_at": "2025-02-10T16:00:00.000Z",
+      "set_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400002,
+      "latency_ms": 2,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "redis-kv-operations",
+      "provider": "redis",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["redis", "smoke", "kv"]
+}

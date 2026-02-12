@@ -1,0 +1,189 @@
+# Parallel Research with Subagents
+# Research multiple topics in parallel and synthesize results
+
+digraph ParallelResearch {
+    graph [goal="Research multiple architecture options in parallel",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Parallel fan-out: spawn subagents for different research topics
+    
+    # Subagent 1: Research databases
+    spawn_db [type="tool",
+              tool_name="spawn_agent",
+              task="Research database options for a high-traffic web application (100K+ req/s):
+
+**Requirements:**
+- Handle 100K+ reads per second
+- 10K+ writes per second
+- 99.9% uptime SLA
+- Global distribution (3 regions)
+- Strong consistency for financial data
+- Eventual consistency acceptable for analytics
+
+**Compare:**
+1. PostgreSQL with read replicas
+2. MongoDB Atlas
+3. Amazon Aurora
+4. CockroachDB
+5. Spanner
+
+For each option provide:
+- Pros and cons
+- Cost estimates (monthly)
+- Scalability limits
+- Operational complexity
+- Migration path from current MySQL setup
+
+Return a ranked recommendation list.",
+              label="Research: Databases"]
+    
+    # Subagent 2: Research caching strategies
+    spawn_cache [type="tool",
+                 tool_name="spawn_agent",
+                 task="Research caching strategies for high-traffic web application:
+
+**Requirements:**
+- 100K+ req/s
+- Cache hit rate target: 95%+
+- Max latency: 10ms (p99)
+- Cache invalidation must be reliable
+- Support for complex query caching
+
+**Compare:**
+1. Redis Cluster
+2. Memcached
+3. Cloud CDN (CloudFront/CloudFlare)
+4. In-memory caching (application level)
+5. Database query caching
+
+For each option provide:
+- Implementation complexity
+- Performance characteristics
+- Cache invalidation strategies
+- Cost estimates
+- Monitoring requirements
+
+Return best practices and recommended stack.",
+                 label="Research: Caching"]
+    
+    # Subagent 3: Research load balancing
+    spawn_lb [type="tool",
+              tool_name="spawn_agent",
+              task="Research load balancing strategies for microservices:
+
+**Requirements:**
+- 100K+ req/s across services
+- 50+ microservices
+- Circuit breaker pattern needed
+- Rate limiting per tenant
+- Health checks and auto-failover
+- Blue-green deployment support
+
+**Compare:**
+1. NGINX with custom modules
+2. HAProxy
+3. AWS ALB/NLB
+4. Istio Service Mesh
+5. Traefik
+
+For each option provide:
+- Configuration complexity
+- Feature comparison
+- Performance benchmarks
+- Cost at scale
+- Operational overhead
+
+Return architecture recommendation with configuration examples.",
+              label="Research: Load Balancing"]
+    
+    # Subagent 4: Research monitoring
+    spawn_monitor [type="tool",
+                   tool_name="spawn_agent",
+                   task="Research monitoring and observability stack:
+
+**Requirements:**
+- 100K+ req/s across 50+ services
+- Distributed tracing needed
+- Custom business metrics
+- Alerting on SLO breaches
+- Cost optimization visibility
+
+**Compare:**
+1. Prometheus + Grafana
+2. Datadog
+3. New Relic
+4. Dynatrace
+5. OpenTelemetry + Jaeger + custom
+
+For each option provide:
+- Setup complexity
+- Cost at scale (monthly)
+- Key features and limitations
+- Alerting capabilities
+- Dashboard customization
+
+Return recommended stack with implementation guide.",
+                   label="Research: Monitoring"]
+    
+    # Wait for all subagents to complete
+    wait_all [type="tool",
+              tool_name="wait_for_all",
+              label="Wait for Results"]
+    
+    # Synthesize all research into unified architecture
+    synthesize [prompt="Synthesize the parallel research findings into a unified architecture document:
+
+**Input Research:**
+1. [Database recommendations from subagent]
+2. [Caching strategies from subagent]
+3. [Load balancing approach from subagent]
+4. [Monitoring stack from subagent]
+
+**Output - Architecture Document:**
+
+1. **Executive Summary** (2-3 paragraphs)
+2. **Recommended Tech Stack** with justification
+3. **Architecture Diagram** (describe components and data flow)
+4. **Implementation Roadmap** (phased approach over 6 months)
+5. **Cost Analysis** (monthly operational costs)
+6. **Risk Assessment** (technical and operational risks)
+7. **Migration Strategy** (from current MySQL monolith)
+8. **Success Metrics** (KPIs to track)
+
+Format as a professional architecture document suitable for executive review.",
+                label="Synthesize Architecture"]
+    
+    # Technical review
+    tech_review [type="judge.rubric",
+                 judge_rubric_path="./rubrics/architecture-review.md",
+                 score_threshold=0.8,
+                 label="Architecture Review"]
+    
+    # Final approval gate
+    approval_gate [type="confidence.gate",
+                   confidence_signal_path="judge.tech_review.score",
+                   escalation_threshold=0.8,
+                   escalation_target="architect_approval",
+                   label="Approval Gate"]
+    
+    architect_approval [shape=hexagon,
+                        type="wait.human",
+                        label="Lead Architect Review"]
+    
+    # Parallel fan-out from start
+    start -> spawn_db -> wait_all
+    start -> spawn_cache -> wait_all
+    start -> spawn_lb -> wait_all
+    start -> spawn_monitor -> wait_all
+    
+    # Sequential synthesis and review
+    wait_all -> synthesize -> tech_review -> approval_gate
+    
+    # Gate branches
+    approval_gate -> exit [label="Auto-Approved"]
+    approval_gate -> architect_approval [label="Needs Review"]
+    architect_approval -> exit
+}

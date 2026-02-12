@@ -1,0 +1,154 @@
+{
+  "report_version": "1.0",
+  "report_date": "2026-02-12",
+  "feature": "SA-004 Lightweight Subagent Tools",
+  "scenarios": [
+    {
+      "name": "Simple task execution",
+      "description": "Basic subagent task execution with single turn",
+      "lightweight": {
+        "duration_ms": 150,
+        "context_tokens": 50,
+        "overhead": "minimal",
+        "implementation": "Direct LLM adapter calls"
+      },
+      "success_criteria": {
+        "tool_loop_implemented": true,
+        "max_turns_enforced": true,
+        "token_tracking": true
+      }
+    },
+    {
+      "name": "Depth limiting",
+      "description": "Enforcement of max_subagent_depth",
+      "lightweight": {
+        "max_depth_configurable": true,
+        "depth_calculation": "parent chain traversal",
+        "failure_mode": "throws clear error"
+      },
+      "success_criteria": {
+        "depth_tracking": true,
+        "configurable_limit": true,
+        "clear_error_messages": true
+      }
+    },
+    {
+      "name": "Parallel execution",
+      "description": "Spawn multiple subagents concurrently",
+      "lightweight": {
+        "concurrency_model": "Promise.all with optional limits",
+        "max_concurrent": "configurable",
+        "timeout_handling": "per-agent and global"
+      },
+      "success_criteria": {
+        "parallel_spawn": true,
+        "concurrency_limits": true,
+        "timeout_support": true,
+        "result_aggregation": true
+      }
+    },
+    {
+      "name": "toModelOutput summarization",
+      "description": "Context-efficient result summarization",
+      "lightweight": {
+        "summary_length": "configurable (default 500 chars)",
+        "truncation_indicator": "'...' suffix",
+        "preserves_status": "success/failure indication"
+      },
+      "success_criteria": {
+        "configurable_max_length": true,
+        "truncation_handling": true,
+        "status_preservation": true
+      }
+    }
+  ],
+  "tools_implemented": [
+    {
+      "name": "spawn_agent",
+      "description": "Spawn a lightweight subagent for scoped tasks",
+      "parameters": ["task", "model", "tools", "parent_id"],
+      "async": true,
+      "returns": "agent_id, status"
+    },
+    {
+      "name": "wait",
+      "description": "Wait for subagent completion with timeout",
+      "parameters": ["agent_id", "timeout_ms"],
+      "async": true,
+      "returns": "result with summary"
+    },
+    {
+      "name": "send_input",
+      "description": "Send steering input to running subagent",
+      "parameters": ["agent_id", "message"],
+      "async": true,
+      "returns": "acknowledgment"
+    },
+    {
+      "name": "close_agent",
+      "description": "Forcefully terminate a subagent",
+      "parameters": ["agent_id"],
+      "async": true,
+      "returns": "closure confirmation"
+    }
+  ],
+  "components": {
+    "LightweightSubagent": {
+      "file": "packages/core/src/subagents/lightweight-agent.ts",
+      "responsibilities": [
+        "Tool loop execution",
+        "Turn limiting",
+        "Token usage tracking",
+        "Abort handling"
+      ],
+      "lines_of_code": 220
+    },
+    "SubagentRegistry": {
+      "file": "packages/core/src/subagents/registry.ts",
+      "responsibilities": [
+        "Agent lifecycle tracking",
+        "Depth limit enforcement",
+        "Status management",
+        "Singleton instance"
+      ],
+      "lines_of_code": 119
+    },
+    "ToolImplementations": {
+      "file": "packages/core/src/subagents/tools.ts",
+      "tools": ["SpawnAgentTool", "WaitForAgentTool", "SendInputTool", "CloseAgentTool"],
+      "lines_of_code": 290
+    },
+    "ParallelExecution": {
+      "file": "packages/core/src/subagents/parallel-execution.ts",
+      "responsibilities": [
+        "Concurrent subagent management",
+        "Result aggregation",
+        "Timeout coordination"
+      ],
+      "lines_of_code": 268
+    }
+  },
+  "test_coverage": {
+    "test_file": "packages/core/src/subagents/lightweight-agent.test.ts",
+    "tests_count": 28,
+    "coverage_areas": [
+      "LightweightSubagent execution",
+      "Max turns enforcement",
+      "Abort handling",
+      "Token tracking",
+      "Registry depth limiting",
+      "Agent lifecycle",
+      "All four tools",
+      "Parallel execution",
+      "toModelOutput summarization"
+    ],
+    "all_tests_passing": true
+  },
+  "integration_status": {
+    "exports_added_to_core": true,
+    "types_exported": true,
+    "singleton_registry_available": true,
+    "tool_instances_available": true
+  },
+  "recommendation": "Use lightweight agents for tasks < 50 turns requiring parallel execution. Enables delegation pattern without heavy ManagerLoop overhead."
+}

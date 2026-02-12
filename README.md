@@ -30,6 +30,9 @@ digraph CodeReview {
 - **Human-in-the-Loop**: Automatic escalation when confidence is low
 - **Parallel Execution**: Fan-out/fan-in with git worktree isolation
 - **Deterministic**: Same input always produces same output + artifacts
+- **Multi-Modal**: Analyze images, documents, and audio in workflows
+- **Provider-Optimized**: Native tool profiles for OpenAI, Anthropic, Gemini
+- **Cost-Effective**: Anthropic prompt caching reduces costs by 50-90%
 
 ## Installation
 
@@ -96,6 +99,39 @@ const result = await attractor.run();
 console.log(`Status: ${result.status}`);
 ```
 
+## Examples Gallery
+
+Starter workflows:
+- `examples/simple.dot` - Linear workflow
+- `examples/branching.dot` - Conditional logic with loops
+- `examples/human-gate.dot` - Human approval pattern
+- `examples/parallel.dot` - Parallel execution
+
+Quality and governance:
+- `examples/confidence-escalation.dot` - Confidence gate with escalation
+- `examples/quality-pipeline.dot` - CI/CD quality gates
+- `examples/retry-loop.dot` - Targeted retry with failure analysis
+- `examples/code-review-complete.dot` - Production-ready review pipeline
+
+Multi-modal:
+- `examples/image-analysis.dot` - Image analysis (vision)
+- `examples/document-qa.dot` - PDF/document Q&A
+- `examples/audio-transcription.dot` - Audio transcription (Gemini)
+
+Provider and caching:
+- `examples/provider-selection.dot` - Per-node provider selection
+- `examples/anthropic-caching.dot` - Prompt caching for cost reduction
+
+Subagents and delegation:
+- `examples/lightweight-subagent.dot` - Lightweight subagent pattern
+- `examples/parallel-research.dot` - Parallel subagent research
+- `examples/manager-loop.dot` - Manager loop supervisor pattern
+
+Automation:
+- `examples/pr-automation.dot` - PR review + merge pipeline
+
+See all examples in `examples/`.
+
 ## AI Workflow Builder
 
 Factorial includes a comprehensive AI skill for building DOT workflows:
@@ -111,6 +147,28 @@ Factorial includes a comprehensive AI skill for building DOT workflows:
 ```
 
 See [skills/factorial-workflow-builder/](skills/factorial-workflow-builder/) for the full skill documentation, including node types reference and attributes catalog.
+
+### Queue Interviewer (Deterministic Testing)
+
+Test workflows with `wait.human` nodes deterministically by pre-recording answers:
+
+```typescript
+import { QueueInterviewer, WaitForHumanHandler } from '@mhingston5/factorial';
+
+// Pre-record answers for human gates
+const interviewer = new QueueInterviewer([
+  { key: 'A' },  // First human gate: choose option 'A'
+  { key: 'R' },  // Second human gate: choose option 'R'
+]);
+
+// Use in workflow
+const handler = new WaitForHumanHandler(interviewer);
+```
+
+Useful for:
+- **Regression testing** - Replay known answers to verify workflow behavior
+- **Deterministic CI** - Ensure consistent execution in automated tests
+- **Batch processing** - Pre-configure approval chains
 
 ## CLI Commands
 
@@ -129,6 +187,106 @@ See [skills/factorial-workflow-builder/](skills/factorial-workflow-builder/) for
 
 Event consumers can subscribe to the execution stream documented in
 [Execution Event Stream](docs/execution-event-stream.md).
+
+## New Features
+
+### Multi-Modal Support (Images, Documents, Audio)
+
+Process images, PDFs, and audio files in your workflows:
+
+```dot
+digraph ImageAnalysis {
+  analyze [prompt="Describe this UI screenshot",
+           image_input="./screenshot.png"]
+}
+```
+
+**Supported formats:**
+- **Images**: PNG, JPEG, GIF, WEBP (all providers)
+- **Documents**: PDF, TXT, MD (Anthropic + Gemini)
+- **Audio**: WAV, MP3, M4A (Gemini only)
+
+### Provider-Native Tool Profiles
+
+Factorial now uses provider-optimized tool formats for better performance:
+
+- **OpenAI**: Uses `apply_patch` v4a format for file modifications
+- **Anthropic**: Uses `old_string`/`new_string` exact-match editing
+- **Gemini**: Uses native search-and-replace conventions
+
+```dot
+digraph ProviderExample {
+  // OpenAI will use apply_patch format
+  edit_openai [prompt="Update the code", llm_provider="openai"]
+  
+  // Anthropic will use edit_file format
+  edit_anthropic [prompt="Update the code", llm_provider="anthropic"]
+}
+```
+
+### Anthropic Prompt Caching
+
+Reduce API costs by 50-90% with automatic prompt caching:
+
+```dot
+digraph CachingExample {
+  cached_task [
+    prompt="Long multi-turn task",
+    llm_provider="anthropic",
+    enable_caching="true",
+    cache_strategy="system-plus-early"
+  ]
+}
+```
+
+**Cache strategies:**
+- `system-only`: Cache system prompt only
+- `system-plus-early`: Cache system + first 2 messages (default)
+- `aggressive`: Cache all messages except latest
+
+### Reasoning Token Tracking
+
+Track hidden reasoning costs separately from visible output:
+
+```bash
+# After execution, check reasoning artifacts
+ls logs/<node_id>/reasoning.md
+```
+
+Reasoning tokens are tracked separately in economics reports:
+```json
+{
+  "usage": {
+    "input_tokens": 1000,
+    "output_tokens": 500,
+    "reasoning_tokens": 200
+  }
+}
+```
+
+### Lightweight Subagent Tools
+
+Spawn parallel subagents for independent tasks:
+
+```dot
+digraph ParallelResearch {
+  // Spawn multiple research agents
+  spawn_a [type="tool", tool_name="spawn_agent", task="Research topic A"]
+  spawn_b [type="tool", tool_name="spawn_agent", task="Research topic B"]
+  
+  // Wait for all to complete
+  wait_all [type="tool", tool_name="wait_for_all"]
+  
+  // Synthesize results
+  synthesize [prompt="Combine findings from both topics"]
+}
+```
+
+**Available tools:**
+- `spawn_agent`: Create lightweight subagent
+- `wait`: Wait for completion with summarization
+- `send_input`: Send steering to running agent
+- `close_agent`: Forcefully terminate agent
 
 ## Node Types
 
@@ -184,10 +342,7 @@ digraph CodeReview {
 ```
 
 More examples in [`examples/`](./examples/):
-- `simple.dot` - Linear workflow
-- `branching.dot` - Conditional logic with loops
-- `parallel.dot` - Parallel execution
-- `engineering-loop-*.dot` - Manager delegation pattern
+See the Examples Gallery above for categorized workflows.
 
 ## Configuration
 
@@ -232,6 +387,75 @@ Enforce standards before proceeding:
 - `judge.rubric` - AI-powered evaluation with scoring
 - `confidence.gate` - Auto-approve high confidence, escalate low confidence
 - Promotion stages: `dev` → `canary` → `prod` with increasing strictness
+</details>
+
+<details>
+<summary><b>Multi-Modal Support</b></summary>
+
+Process images, documents, and audio in workflows:
+
+```dot
+digraph MultiModal {
+  analyze_image [prompt="Describe this UI", image_input="./ui.png"]
+  read_pdf [prompt="Summarize findings", document_input="./paper.pdf"]
+  transcribe [prompt="Transcribe meeting", audio_input="./meeting.m4a", llm_provider="gemini"]
+}
+```
+
+- **Images**: PNG, JPEG, GIF, WEBP (all providers)
+- **Documents**: PDF, TXT, MD (Anthropic + Gemini)
+- **Audio**: WAV, MP3, M4A (Gemini only)
+</details>
+
+<details>
+<summary><b>Provider-Native Tool Profiles</b></summary>
+
+Optimized tool formats for each provider:
+
+- **OpenAI**: `apply_patch` v4a format for edits
+- **Anthropic**: `old_string`/`new_string` exact-match editing
+- **Gemini**: Native conventions
+
+Set per-node: `llm_provider="openai"` | `"anthropic"` | `"gemini"`
+</details>
+
+<details>
+<summary><b>Anthropic Prompt Caching</b></summary>
+
+Reduce costs by 50-90% with automatic caching:
+
+```dot
+node [llm_provider="anthropic", enable_caching="true", cache_strategy="system-plus-early"]
+```
+
+Strategies: `system-only`, `system-plus-early`, `aggressive`
+</details>
+
+<details>
+<summary><b>Reasoning Token Tracking</b></summary>
+
+Track reasoning costs separately:
+
+```bash
+ls logs/<node_id>/reasoning.md  # View reasoning content
+```
+
+Economics reports include `reasoning_tokens` field for cost analysis.
+</details>
+
+<details>
+<summary><b>Lightweight Subagent Tools</b></summary>
+
+Spawn parallel subagents for independent tasks:
+
+```dot
+digraph Parallel {
+  spawn [type="tool", tool_name="spawn_agent", task="Research topic"]
+  wait [type="tool", tool_name="wait"]
+}
+```
+
+Tools: `spawn_agent`, `wait`, `send_input`, `close_agent`
 </details>
 
 <details>
@@ -354,6 +578,14 @@ Core preserves the [Attractor execution model](https://factory.strongdm.ai/produ
 - [Execution Event Stream](docs/execution-event-stream.md) - Event schema for UI/telemetry consumers
 - [DTU Satisfaction Report](docs/dtu-satisfaction-report.md) - Scenario satisfaction metrics
 - [Active Handoff](docs/roadmap/active-handoff.md) - Current execution context
+
+### Evidence Reports
+
+- [Provider Profile Parity](docs/metrics/reports/provider-profile-parity-latest.json) - Cross-provider tool alignment
+- [Reasoning Token Coverage](docs/metrics/reports/reasoning-token-coverage-latest.json) - Reasoning tracking by provider
+- [Anthropic Caching Effectiveness](docs/metrics/reports/anthropic-caching-effectiveness-latest.json) - 79% cost reduction
+- [Subagent Performance](docs/metrics/reports/subagent-performance-latest.json) - Lightweight vs ManagerLoop comparison
+- [Multi-Modal Compatibility](docs/metrics/reports/multimodal-compatibility-latest.json) - Content type support matrix
 
 ## License
 

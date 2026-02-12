@@ -350,6 +350,108 @@ Description: Timeout for CLI execution.
 node [cli_timeout_ms=5000]
 ```
 
+### Multi-Modal Input
+
+#### image_input
+**Type:** string (file path)  
+**Supported by:** OpenAI, Anthropic, Gemini  
+Description: Path to image file for analysis.
+
+```dot
+node [prompt="Describe this UI", image_input="./screenshot.png"]
+```
+
+**Supported formats:** PNG, JPEG, GIF, WEBP
+
+#### document_input
+**Type:** string (file path)  
+**Supported by:** Anthropic, Gemini  
+Description: Path to document file for processing.
+
+```dot
+node [prompt="Summarize findings", document_input="./paper.pdf"]
+```
+
+**Supported formats:** PDF, TXT, MD
+
+#### audio_input
+**Type:** string (file path)  
+**Supported by:** Gemini  
+Description: Path to audio file for transcription/analysis.
+
+```dot
+node [prompt="Transcribe meeting", audio_input="./meeting.m4a", llm_provider="gemini"]
+```
+
+**Supported formats:** WAV, MP3, M4A, OGG
+
+### Anthropic Caching
+
+#### enable_caching
+**Type:** boolean  
+**Default:** `false`  
+**Provider:** Anthropic only  
+Description: Enable prompt caching to reduce costs.
+
+```dot
+node [llm_provider="anthropic", enable_caching="true"]
+```
+
+**Benefits:** 50-90% cost reduction for multi-turn conversations
+
+#### cache_strategy
+**Type:** string (`system-only` | `system-plus-early` | `aggressive`)  
+**Default:** `system-plus-early`  
+**Provider:** Anthropic only  
+Description: Strategy for cache control injection.
+
+```dot
+node [enable_caching="true", cache_strategy="system-plus-early"]
+```
+
+**Strategies:**
+- `system-only`: Cache only the system prompt
+- `system-plus-early`: Cache system + first 2 user messages (default)
+- `aggressive`: Cache all messages except the most recent
+
+### Subagent Tool Attributes
+
+#### task
+**Type:** string  
+**Required for:** spawn_agent tool  
+Description: Task description for subagent.
+
+```dot
+spawn [tool_name="spawn_agent", task="Research authentication methods"]
+```
+
+#### agent_id
+**Type:** string  
+**Required for:** send_input, close_agent tools  
+Description: Target subagent ID.
+
+```dot
+close [tool_name="close_agent", agent_id="agent-123"]
+```
+
+#### agent_id_context_key
+**Type:** string  
+**Required for:** wait tool  
+Description: Context key containing agent ID from spawn.
+
+```dot
+wait [tool_name="wait", agent_id_context_key="spawned_agent_id"]
+```
+
+#### timeout_ms (for wait)
+**Type:** number (milliseconds)  
+**Default:** 300000 (5 minutes)  
+Description: Timeout for wait operations.
+
+```dot
+wait [tool_name="wait", timeout_ms=60000]  // 1 minute
+```
+
 ### Worktree Configuration (Parallel Nodes)
 
 #### worktree_isolation

@@ -1,0 +1,54 @@
+{
+  "scenario_id": "scn-stripe-create-customer",
+  "suite": "smoke",
+  "description": "Create Stripe customer through reference twin and verify deterministic success payload.",
+  "request": {
+    "twin_id": "stripe",
+    "operation": "customers.create",
+    "scenario_id": "stripe-create-customer",
+    "seed": "phase-a-seed-009",
+    "input": {
+      "email": "test@example.com",
+      "name": "Test Customer",
+      "metadata": { "plan": "premium" },
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "stripe-create-customer"
+    }
+  },
+  "expected": {
+    "twin_id": "stripe",
+    "twin_version": "0.1.0",
+    "operation": "customers.create",
+    "status": "success",
+    "output": {
+      "id": "cus_438506",
+      "email": "test@example.com",
+      "name": "Test Customer",
+      "metadata": { "plan": "premium" },
+      "created_at": "2025-02-10T16:00:00.000Z",
+      "created_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400008,
+      "latency_ms": 8,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "stripe-create-customer",
+      "provider": "stripe",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["stripe", "smoke", "customers"]
+}

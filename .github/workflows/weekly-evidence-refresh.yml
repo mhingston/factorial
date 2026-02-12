@@ -1,0 +1,122 @@
+name: Weekly Evidence Refresh
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sundays at midnight UTC
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  compound-weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Weekly Compound Report
+        run: |
+          npm run metrics:compound-weekly -- \
+            --start $(date -d "last sunday - 6 days" +%Y-%m-%d) \
+            --end $(date -d "last sunday" +%Y-%m-%d) \
+            --output docs/metrics/reports/week-latest.md
+
+      - name: Upload Compound Weekly Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compound-weekly-report
+          path: docs/metrics/reports/week-latest.md
+
+  self-host-provider-backed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Provider-backed Evidence
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          npm run self-host:provider-backed -- \
+            --report docs/metrics/reports/self-host-provider-backed-latest.json
+
+      - name: Upload Provider-backed Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-host-provider-backed-report
+          path: docs/metrics/reports/self-host-provider-backed-latest.json
+
+  self-host-autonomous:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Autonomous Evidence
+        run: |
+          npm run self-host:autonomous -- \
+            --report docs/metrics/reports/self-host-autonomous-latest.json
+
+      - name: Upload Autonomous Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-host-autonomous-report
+          path: docs/metrics/reports/self-host-autonomous-latest.json
+
+  evidence-freshness-check:
+    runs-on: ubuntu-latest
+    needs: [compound-weekly, self-host-provider-backed, self-host-autonomous]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Evidence Freshness
+        run: |
+          npm run evidence:freshness -- \
+            --max-age-hours 168 \
+            --report docs/metrics/reports/evidence-freshness-latest.json
+
+      - name: Upload Freshness Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-freshness-report
+          path: docs/metrics/reports/evidence-freshness-latest.json

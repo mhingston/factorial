@@ -5,6 +5,15 @@ import { evaluateCondition } from '../conditions/index.js';
 import { ExecutionCancelledError } from '../engine/index.js';
 import type { ExecutionEngine } from '../engine/index.js';
 import { createDefaultLlmAdapter } from '../llm/index.js';
+import {
+  ContentKind,
+  type Message,
+  getSupportedContentTypes,
+  hasMultimodalContent,
+  loadAudio,
+  loadDocument,
+  loadImage,
+} from '../multimodal/index.js';
 import type { Context, Graph, Handler, LlmAdapter, Node, Outcome } from '../types/index.js';
 import { WorktreeManager, type WorktreeMergeStrategy } from '../worktree/index.js';
 
@@ -228,6 +237,16 @@ export class CodergenHandler implements Handler {
       const promptPath = join(stageDir, 'prompt.md');
       await writeFile(promptPath, fullPrompt);
 
+      // Build multi-modal messages (SA-005)
+      const { messages: multimodalMessages, warnings: _multimodalWarnings } = await buildMultimodalMessages(node);
+      if (multimodalMessages.length > 0) {
+        await writeMultimodalArtifacts(stageDir, multimodalMessages);
+      }
+
+      // Validate provider supports multi-modal content
+      // TODO: Log validation warnings
+      void validateProviderSupportsMultimodal(provider, multimodalMessages);
+
       const outputContractRequired = asBoolean(node.attributes.output_contract_required) ?? false;
       let schemaConfig: OutputSchemaConfig | null = null;
       let schemaConfigError: string | undefined;
@@ -323,6 +342,7 @@ export class CodergenHandler implements Handler {
             provider,
             model: modelName,
             prompt: fullPrompt,
+            messages: multimodalMessages.length > 0 ? multimodalMessages : undefined,
             providerApiKeyEnv: providerSettings.apiKeyEnv,
             outputSchema: schemaConfig?.schema ?? null,
             outputSchemaName: schemaConfig?.schemaName,
@@ -382,6 +402,7 @@ export class CodergenHandler implements Handler {
             provider,
             model: modelName,
             prompt: fullPrompt,
+            messages: multimodalMessages.length > 0 ? multimodalMessages : undefined,
             outputSchema: schemaConfig?.schema ?? null,
             outputMode: schemaConfig?.mode,
             cli: {
@@ -814,6 +835,121 @@ function normalizeStatus(value: string): StageStatus | null {
     SKIPPED: 'SKIPPED',
   };
   return map[normalized] ?? null;
+}
+
+// Multi-modal helper functions (SA-005)
+async function buildMultimodalMessages(node: Node): Promise<{ messages: Message[]; warnings: string[] }> {
+  const messages: Message[] = [];
+  const warnings: string[] = [];
+
+  // Handle image input
+  const imageInput = node.attributes.image_input as string | undefined;
+  if (imageInput) {
+    try {
+      const imageData = await loadImage(imageInput);
+      messages.push({
+        role: 'user',
+        content: [
+          {
+            kind: ContentKind.IMAGE,
+            image: imageData,
+          },
+        ],
+      });
+    } catch (error) {
+      warnings.push(`Failed to load image: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Handle audio input
+  const audioInput = node.attributes.audio_input as string | undefined;
+  if (audioInput) {
+    try {
+      const audioData = await loadAudio(audioInput);
+      messages.push({
+        role: 'user',
+        content: [
+          {
+            kind: ContentKind.AUDIO,
+            audio: audioData,
+          },
+        ],
+      });
+    } catch (error) {
+      warnings.push(`Failed to load audio: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Handle document input
+  const documentInput = node.attributes.document_input as string | undefined;
+  if (documentInput) {
+    try {
+      const documentData = await loadDocument(documentInput);
+      messages.push({
+        role: 'user',
+        content: [
+          {
+            kind: ContentKind.DOCUMENT,
+            document: documentData,
+          },
+        ],
+      });
+    } catch (error) {
+      warnings.push(`Failed to load document: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  return { messages, warnings };
+}
+
+async function writeMultimodalArtifacts(stageDir: string, messages: Message[]): Promise<void> {
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+
+    for (let j = 0; j < msg.content.length; j++) {
+      const part = msg.content[j];
+
+      if (part.kind === ContentKind.IMAGE && part.image?.data) {
+        const ext = part.image.media_type.split('/')[1];
+        await writeFile(join(stageDir, `input_${i}_${j}.${ext}`), part.image.data);
+      }
+
+      if (part.kind === ContentKind.AUDIO && part.audio?.data) {
+        const ext = part.audio.media_type.split('/')[1];
+        await writeFile(join(stageDir, `input_${i}_${j}.${ext}`), part.audio.data);
+      }
+
+      if (part.kind === ContentKind.DOCUMENT && part.document?.data) {
+        const ext = part.document.media_type === 'application/pdf' ? 'pdf' : 'txt';
+        await writeFile(join(stageDir, `input_${i}_${j}.${ext}`), part.document.data);
+      }
+    }
+  }
+}
+
+function validateProviderSupportsMultimodal(provider: string, messages: Message[]): string[] {
+  const warnings: string[] = [];
+  if (!hasMultimodalContent(messages)) {
+    return warnings;
+  }
+
+  const supported = getSupportedContentTypes(provider);
+
+  for (const msg of messages) {
+    for (const part of msg.content) {
+      if (part.kind === ContentKind.IMAGE && !supported.images) {
+        warnings.push(`Provider ${provider} does not support images`);
+      }
+      if (part.kind === ContentKind.AUDIO && !supported.audio) {
+        warnings.push(`Provider ${provider} does not support audio`);
+      }
+      if (part.kind === ContentKind.DOCUMENT && !supported.documents) {
+        warnings.push(`Provider ${provider} does not support documents`);
+      }
+    }
+  }
+
+  return warnings;
 }
 
 function assertNotCancelled(signal?: AbortSignal): void {

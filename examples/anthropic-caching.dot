@@ -1,0 +1,69 @@
+# Anthropic Prompt Caching Example
+# Demonstrates cost reduction with prompt caching
+
+digraph AnthropicCaching {
+    graph [goal="Long conversation with prompt caching enabled",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Initial context setup - this gets cached
+    setup_context [prompt="You are a senior software architect reviewing a large codebase.
+    The codebase is a microservices architecture with the following components:
+    - API Gateway (Node.js)
+    - Auth Service (Go)
+    - User Service (Python)
+    - Database Layer (PostgreSQL)
+    - Cache Layer (Redis)
+    - Message Queue (RabbitMQ)
+    
+    Your role is to review code changes for best practices, security, and performance.",
+                   label="Setup Context",
+                   llm_provider="anthropic",
+                   llm_model="claude-3-5-sonnet-20241022",
+                   enable_caching="true",
+                   cache_strategy="system-plus-early"]
+    
+    # Multiple review rounds - context is cached so these are cheaper
+    review_1 [prompt="Review the API Gateway changes for:
+    1. Security vulnerabilities
+    2. Rate limiting implementation
+    3. Error handling
+    4. Performance optimizations",
+              label="Review: API Gateway"]
+    
+    review_2 [prompt="Review the Auth Service changes for:
+    1. JWT implementation correctness
+    2. Password hashing
+    3. Session management
+    4. OAuth flow implementation",
+              label="Review: Auth Service"]
+    
+    review_3 [prompt="Review the Database Layer changes for:
+    1. Query optimization
+    2. Index usage
+    3. Transaction handling
+    4. Migration safety",
+              label="Review: Database Layer"]
+    
+    review_4 [prompt="Review the Cache Layer changes for:
+    1. Cache invalidation strategy
+    2. Key naming conventions
+    3. TTL settings
+    4. Fallback mechanisms",
+              label="Review: Cache Layer"]
+    
+    # Compile final report
+    final_report [prompt="Compile a comprehensive review report:
+    1. Executive summary
+    2. Critical issues found
+    3. Recommendations by priority
+    4. Code quality score (0-100)
+    5. Approval recommendation (approve/request changes/reject)",
+                  label="Final Report"]
+    
+    # Caching saves ~79% on tokens 2-5 because context is reused
+    
+    start -> setup_context -> review_1 -> review_2 -> review_3 -> review_4 -> final_report -> exit
+}

@@ -39,6 +39,7 @@ Issue breakdown:
 - Backlog `BK-015` unattended-run outcome and economics telemetry completion report: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md)
 - Backlog `BK-016` documentation freshness guardrails completion report: [`docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md`](./docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md)
 - Backlog `BK-017` markdown compaction and context-window guardrails completion report: [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md)
+- Factory improvements batch (EV-001, SC-001, SS-001, EF-001) compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
 
 ## Status Snapshot (2026-02-12)
 | Item | Milestone | Status | Notes |
@@ -69,6 +70,10 @@ Issue breakdown:
 | `BK-015` | backlog | Done | Unattended-run outcome/economics telemetry completed with deterministic `self_host_unattended_telemetry_report.v1` publication, strict source schema/freshness checks, and fail-closed CI validation lane; see completion report: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md). |
 | `BK-016` | backlog | Done | Documentation freshness guardrails completed with deterministic `docs_freshness_report.v1`, fixture-backed drift tests, and fail-closed CI enforcement over command-surface + backlog-direction declarations; see completion report: [`docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md`](./docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md). |
 | `BK-017` | backlog | Done | Markdown compaction/context-window guardrails completed with docs size budgets (`DF-005`), required compact handoff/archive assets (`DF-006`), and ROADMAP artifact-list compaction into archive files; see completion report: [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md). |
+| `EV-001` | improvement | Done | Economic Visibility completed with token economics dashboard and cost calculation across providers; see compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md). |
+| `SC-001` | improvement | Done | Scenario Curation completed with interactive TUI and CLI for scenario catalog management; see compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md). |
+| `SS-001` | improvement | Done | Satisfaction Scoring completed with LLM-as-judge rubric-based evaluation system; see compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md). |
+| `EF-001` | improvement | Done | Evidence Freshness completed with automated tracking and CI gate for stale detection; see compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md). |
 | `BK-018` | backlog | Active | Phase 1-4 complete (FA-001 through FA-009): External system operations + circuit breakers; self-modification DOT generation; configuration optimization; codegen validation; distributed coordination; cross-repo lock propagation; full autonomy telemetry; self-healing evidence; see execution plan: [`docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md`](./docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md). |
 
 Design-review follow-up mapping (to avoid duplicate roadmap items):
@@ -304,9 +309,56 @@ Use this section as the default starting point for a new coding agent session.
 
 ### BK-017: Markdown compaction and context-window guardrails (backlog, completed)
 - Status:
-  - Closed on 2026-02-12 with docs-size budget enforcement (`DF-005`), required compact handoff/archive references (`DF-006`), and roadmap artifact-list compaction into archive docs.
+  - Closed on 2026-02-12 with docs-size budget enforcement (`DF-005`), required compact handoff/archive references (`DF-006`), and ROADMAP artifact-list compaction into archive docs.
 - Completion artifact:
   - [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md)
+
+### EV-001: Economic Visibility (factory improvement, completed)
+- Status:
+  - Closed on 2026-02-12 with token economics dashboard implementation and cost calculation across providers (OpenAI, Anthropic, Google).
+- Scope:
+  - Token economics tracking and dashboard with cost calculation
+  - Provider-agnostic cost aggregation (input/output token rates)
+  - CLI command: `factorial metrics:economics`
+  - 36 unit tests with full coverage
+- Completion artifact:
+  - [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
+
+### SC-001: Scenario Curation (factory improvement, completed)
+- Status:
+  - Closed on 2026-02-12 with interactive TUI and CLI commands for scenario catalog management.
+- Scope:
+  - Interactive TUI for scenario management (list, promote, check, exit)
+  - Freshness checking for holdout scenarios
+  - Promotion workflows from holdout to in-repo
+  - CLI commands: `factorial scenarios:curate`, `factorial scenarios:check-freshness`
+  - Scenario templates and catalog directory structure
+- Completion artifact:
+  - [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
+
+### SS-001: Satisfaction Scoring (factory improvement, completed)
+- Status:
+  - Closed on 2026-02-12 with LLM-as-judge scoring system implementation.
+- Scope:
+  - Rubric-based evaluation system
+  - Score aggregation logic
+  - LLM-as-judge implementation with graceful error handling
+  - CLI command: `factorial score:satisfaction`
+  - Full unit test coverage
+- Completion artifact:
+  - [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
+
+### EF-001: Evidence Freshness (factory improvement, completed)
+- Status:
+  - Closed on 2026-02-12 with automated evidence freshness tracking and CI gate.
+- Scope:
+  - Automated freshness tracking for evidence artifacts
+  - CI gate for stale evidence detection
+  - Drift monitoring capabilities
+  - CLI commands: `factorial check:freshness`, `factorial check:drift`
+  - EvidenceFreshnessReport schema v1
+- Completion artifact:
+  - [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
 
 ### OP-001: Cross-doc claim synchronization ratchet (operational follow-up)
 - Status: Done (2026-02-12)
@@ -470,6 +522,28 @@ Use this section as the default starting point for a new coding agent session.
   - Added strict source schema/freshness checks and fail-closed report semantics for missing/invalid telemetry fields.
   - Added CI unattended telemetry validation lane and report artifact upload.
   - Completion artifact: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md)
+- [x] EV-001: Economic Visibility
+  - Added token economics dashboard with cost calculation across providers (OpenAI, Anthropic, Google).
+  - Implemented provider-agnostic cost aggregation with input/output token rate tracking.
+  - Added CLI command `factorial metrics:economics` for dashboard access.
+  - Completion artifact: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
+- [x] SC-001: Scenario Curation
+  - Added interactive TUI for scenario catalog management with list, promote, check, and exit operations.
+  - Implemented freshness checking for holdout scenarios with staleness detection.
+  - Added CLI commands `factorial scenarios:curate` and `factorial scenarios:check-freshness`.
+  - Established scenario templates and catalog directory structure (`scenarios/in-repo/`, `scenarios/holdout/`).
+  - Completion artifact: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
+- [x] SS-001: Satisfaction Scoring
+  - Added LLM-as-judge scoring system with rubric-based evaluation.
+  - Implemented score aggregation logic and rubric definitions.
+  - Added CLI command `factorial score:satisfaction` with full unit test coverage.
+  - Completion artifact: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
+- [x] EF-001: Evidence Freshness
+  - Added automated evidence freshness tracking with CI gate for stale detection.
+  - Implemented drift monitoring capabilities and schema validation.
+  - Added CLI commands `factorial check:freshness` and `factorial check:drift`.
+  - Established EvidenceFreshnessReport schema v1 contract.
+  - Completion artifact: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md)
 
 ## Roadmap Board (Single Source of Truth)
 ### Now
@@ -499,6 +573,10 @@ Use this section as the default starting point for a new coding agent session.
 | `BK-015` | Unattended-run outcome and economics telemetry | Done | Closed via deterministic unattended telemetry report contract (`self_host_unattended_telemetry_report.v1`), strict source schema/freshness checks, and fail-closed CI unattended telemetry lane — see completion report. |
 | `BK-016` | Documentation freshness guardrails | Done | Closed via deterministic `docs_freshness_report.v1` contract, fixture-backed drift tests, and fail-closed CI docs-freshness lane — see completion report. |
 | `BK-017` | Markdown compaction and context-window guardrails | Done | Closed via docs size-budget checks (`DF-005`), compact handoff/archive guardrails (`DF-006`), and roadmap artifact-list compaction into archive docs — see completion report. |
+| `EV-001` | Economic Visibility (token economics tracking) | Done | Closed via token economics dashboard with cost calculation across providers — see compound report. |
+| `SC-001` | Scenario Curation (interactive TUI and CLI) | Done | Closed via interactive scenario management TUI with freshness checking and promotion workflows — see compound report. |
+| `SS-001` | Satisfaction Scoring (LLM-as-judge) | Done | Closed via rubric-based LLM-as-judge scoring system with aggregation logic — see compound report. |
+| `EF-001` | Evidence Freshness (automated tracking) | Done | Closed via automated evidence freshness tracking with CI gate for stale detection — see compound report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |

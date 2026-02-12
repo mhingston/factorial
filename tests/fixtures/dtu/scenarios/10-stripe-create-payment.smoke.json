@@ -1,0 +1,58 @@
+{
+  "scenario_id": "scn-stripe-create-payment",
+  "suite": "smoke",
+  "description": "Create Stripe payment through reference twin and verify deterministic success payload.",
+  "request": {
+    "twin_id": "stripe",
+    "operation": "payments.create",
+    "scenario_id": "stripe-create-payment",
+    "seed": "phase-a-seed-010",
+    "input": {
+      "customer_id": "cus_12345",
+      "amount": 5000,
+      "currency": "usd",
+      "description": "Test payment",
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "stripe-create-payment"
+    }
+  },
+  "expected": {
+    "twin_id": "stripe",
+    "twin_version": "0.1.0",
+    "operation": "payments.create",
+    "status": "success",
+    "output": {
+      "id": "pi_835214",
+      "customer_id": "cus_12345",
+      "amount": 5000,
+      "currency": "usd",
+      "description": "Test payment",
+      "metadata": {},
+      "status": "succeeded",
+      "created_at": "2025-02-10T16:00:00.000Z",
+      "created_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400012,
+      "latency_ms": 12,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "stripe-create-payment",
+      "provider": "stripe",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["stripe", "smoke", "payments"]
+}

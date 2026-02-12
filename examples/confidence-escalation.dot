@@ -1,0 +1,80 @@
+# Confidence Gate with Escalation
+# Demonstrates automatic approval vs human escalation based on confidence
+
+digraph ConfidenceEscalation {
+    graph [goal="Auto-approve high confidence, escalate low confidence",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Generate code
+    generate [prompt="Write a function to calculate fibonacci numbers:
+    - Handle edge cases (negative numbers, non-integers)
+    - Include input validation
+    - Add comprehensive error handling
+    - Include JSDoc comments
+    - Optimize for performance
+    
+    Return the complete function.",
+              label="Generate Code"]
+    
+    # Quality gate - lint the code
+    lint [type="quality.gate",
+          gate_type="lint",
+          gate_command="npm run lint",
+          label="Lint Check"]
+    
+    # Quality gate - run tests
+    test [type="quality.gate",
+          gate_type="tests",
+          gate_command="npm run test:unit",
+          label="Unit Tests"]
+    
+    # AI evaluation using rubric
+    evaluate [type="judge.rubric",
+              judge_rubric_path="./rubrics/code-quality.md",
+              score_threshold=0.8,
+              score_weights='{"correctness":0.4,"performance":0.3,"documentation":0.2,"style":0.1}',
+              label="AI Evaluation"]
+    
+    # Confidence gate - auto-approve or escalate
+    # If score >= 0.8, auto-approve
+    # If score < 0.8, escalate to human
+    gate [type="confidence.gate",
+          confidence_signal_path="judge.evaluate.score",
+          escalation_threshold=0.8,
+          escalation_target="human_review",
+          label="Confidence Gate"]
+    
+    # Auto-approved path
+    finalize [prompt="The code has been auto-approved with high confidence. Generate:
+    1. Summary of the implementation
+    2. Test coverage report
+    3. Performance benchmarks
+    4. Deployment checklist",
+              label="Finalize (Auto)"]
+    
+    # Human escalation path
+    human_review [shape=hexagon,
+                  type="wait.human",
+                  label="Human Review Required"]
+    
+    revise [prompt="Address the human reviewer's feedback:
+    1. Implement requested changes
+    2. Add any additional tests needed
+    3. Update documentation
+    4. Re-run quality checks",
+            label="Revise Code"]
+    
+    # Flow: Start -> Generate -> Quality Gates -> Evaluate -> Gate
+    start -> generate -> lint -> test -> evaluate -> gate
+    
+    # Gate branches
+    gate -> finalize [label="High Confidence (≥0.8)", weight=10]
+    gate -> human_review [label="Low Confidence (<0.8)", weight=5]
+    
+    # Both paths lead to exit
+    finalize -> exit
+    human_review -> revise -> exit
+}

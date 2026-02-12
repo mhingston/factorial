@@ -1,5 +1,5 @@
-import { generateObject, generateText, jsonSchema, streamText } from 'ai';
 import { spawn } from 'node:child_process';
+import { generateObject, generateText, jsonSchema, streamText } from 'ai';
 import type {
   LlmAdapter,
   LlmCompleteRequest,
@@ -7,6 +7,31 @@ import type {
   LlmStreamEvent,
   LlmStreamRequest,
 } from '../types/index.js';
+import {
+  type ExtractionResult,
+  extractAnthropicReasoning,
+  extractGeminiReasoning,
+  extractOpenAIReasoning,
+} from './reasoning-extraction.js';
+
+// Export SA-003: Anthropic Prompt Caching
+export {
+  AnthropicAdapter,
+  createAnthropicAdapter,
+  type AnthropicConfig,
+} from './anthropic-adapter.js';
+
+export {
+  CacheMonitor,
+  calculateAnthropicCost,
+  getGlobalCacheMonitor,
+  resetGlobalCacheMonitor,
+  type CacheMetrics,
+  type CacheEffectivenessReport,
+  type CostCalculation,
+  type ModelInfo,
+  type UsageWithCache,
+} from './cache-monitor.js';
 
 type ProviderEnvKey = 'OPENAI_API_KEY' | 'ANTHROPIC_API_KEY' | 'GOOGLE_GENERATIVE_AI_API_KEY';
 
@@ -115,19 +140,31 @@ async function completeApi(request: LlmCompleteRequest): Promise<LlmCompleteResu
       schemaDescription: request.outputSchemaDescription,
       abortSignal: request.signal,
     });
+
+    const extraction = extractReasoningFromResponse(
+      {
+        text: serializeForMarkdown(result.object),
+        usage: result.usage,
+        response: result.response,
+      },
+      request.provider
+    );
+
     return {
       adapter: 'vercel-ai-sdk',
       backend: 'api',
       operation: 'generateObject',
       mode: 'object',
       output: result.object,
-      textOutput: serializeForMarkdown(result.object),
+      textOutput: extraction.text,
       request: result.request,
       response: result.response,
       usage: result.usage,
       finishReason: result.finishReason,
       warnings: result.warnings,
       providerMetadata: result.providerMetadata,
+      reasoning: extraction.reasoning,
+      reasoningTokens: extraction.reasoningTokens,
     };
   }
 
@@ -137,20 +174,77 @@ async function completeApi(request: LlmCompleteRequest): Promise<LlmCompleteResu
     abortSignal: request.signal,
   });
 
+  const extraction = extractReasoningFromResponse(
+    {
+      text: result.text,
+      usage: result.usage,
+      response: result.response,
+    },
+    request.provider
+  );
+
   return {
     adapter: 'vercel-ai-sdk',
     backend: 'api',
     operation: 'generateText',
     mode: 'text',
     output: result.text,
-    textOutput: result.text,
+    textOutput: extraction.text,
     request: result.request,
     response: result.response,
     usage: result.usage,
     finishReason: result.finishReason,
     warnings: result.warnings,
     providerMetadata: result.providerMetadata,
+    reasoning: extraction.reasoning,
+    reasoningTokens: extraction.reasoningTokens,
   };
+}
+
+function extractReasoningFromResponse(
+  response: { text: string; usage?: unknown; response?: unknown },
+  provider: string
+): ExtractionResult {
+  const normalizedProvider = provider.toLowerCase().trim();
+
+  try {
+    switch (normalizedProvider) {
+      case 'openai':
+        return extractOpenAIReasoning({
+          text: response.text,
+          usage: response.usage as { completionTokensDetails?: { reasoningTokens?: number } },
+        });
+      case 'anthropic':
+        return extractAnthropicReasoning({
+          text: response.text,
+          content: Array.isArray((response.response as Record<string, unknown>)?.content)
+            ? (response.response as Record<string, unknown>).content
+            : [],
+        } as Parameters<typeof extractAnthropicReasoning>[0]);
+      case 'google':
+      case 'gemini':
+        return extractGeminiReasoning({
+          text: response.text,
+          candidates: Array.isArray((response.response as Record<string, unknown>)?.candidates)
+            ? (response.response as Record<string, unknown>).candidates
+            : [],
+          usageMetadata: (response.response as Record<string, unknown>)?.usageMetadata,
+        } as Parameters<typeof extractGeminiReasoning>[0]);
+      default:
+        return {
+          reasoning: undefined,
+          reasoningTokens: undefined,
+          text: response.text,
+        };
+    }
+  } catch {
+    // If extraction fails, return the original text without reasoning
+    return {
+      reasoning: undefined,
+      reasoningTokens: undefined,
+      text: response.text,
+    };
+  }
 }
 
 async function completeCli(request: LlmCompleteRequest): Promise<LlmCompleteResult> {
@@ -357,6 +451,8 @@ async function* streamApiText(request: LlmStreamRequest): AsyncGenerator<LlmStre
   });
 
   let textOutput = '';
+  let reasoningOutput = '';
+
   for await (const delta of result.textStream) {
     textOutput += delta;
     if (!delta) {
@@ -365,19 +461,49 @@ async function* streamApiText(request: LlmStreamRequest): AsyncGenerator<LlmStre
     yield createStreamDeltaEvent(request, delta);
   }
 
+  // Extract reasoning from the full response
+  const response = await result.response;
+  const usage = await result.totalUsage;
+  const extraction = extractReasoningFromResponse(
+    {
+      text: textOutput,
+      usage,
+      response,
+    },
+    request.provider
+  );
+
+  // Yield reasoning event if reasoning content is available
+  if (extraction.reasoning) {
+    yield {
+      type: 'llm.stream.reasoning',
+      data: {
+        node_id: request.nodeId,
+        provider: request.provider,
+        model: request.model,
+        reasoning: extraction.reasoning,
+        reasoning_tokens: extraction.reasoningTokens,
+        timestamp: new Date().toISOString(),
+      },
+    };
+    reasoningOutput = extraction.reasoning;
+  }
+
   const streamResult: LlmCompleteResult = {
     adapter: 'vercel-ai-sdk',
     backend: 'api',
     operation: 'generateText',
     mode: 'text',
     output: textOutput,
-    textOutput,
+    textOutput: extraction.text,
     request: await result.request,
-    response: await result.response,
-    usage: await result.totalUsage,
+    response,
+    usage,
     finishReason: await result.finishReason,
     warnings: await result.warnings,
     providerMetadata: await result.providerMetadata,
+    reasoning: reasoningOutput || undefined,
+    reasoningTokens: extraction.reasoningTokens,
   };
 
   yield {
@@ -521,6 +647,8 @@ function buildStreamEndData(nodeId: string, result: LlmCompleteResult): Record<s
     mode: result.mode,
     output: result.output,
     text_output: result.textOutput,
+    reasoning: result.reasoning,
+    reasoning_tokens: result.reasoningTokens,
     request: result.request,
     response: result.response,
     finish_reason: result.finishReason,

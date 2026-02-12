@@ -1,0 +1,745 @@
+{
+  "schema_version": "cross_repo_coordination_report.v1",
+  "generated_at": "2026-02-12T11:45:43.346Z",
+  "summary": {
+    "total_scenarios": 8,
+    "passed": 7,
+    "failed": 1,
+    "cycle_detection_passed": true,
+    "lock_propagation_passed": true,
+    "transitive_chain_passed": true,
+    "network_failure_handled": true,
+    "rollback_coordination_passed": true
+  },
+  "scenarios": [
+    {
+      "scenario_id": "cycle-detection",
+      "status": "fail",
+      "propagated_locks": [
+        {
+          "repo": "repo-a",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "repo-b",
+          "lock_decision": "resolved"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "repo-a",
+          "status": "failed",
+          "error": "Dependency cycle detected",
+          "completed_at": "2026-02-12T11:45:43.340Z"
+        },
+        {
+          "repo": "repo-b",
+          "status": "failed",
+          "error": "Dependency cycle detected",
+          "completed_at": "2026-02-12T11:45:43.340Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "repo-a",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.339Z"
+        },
+        {
+          "repo": "repo-b",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.339Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "repo-a",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "repo-b",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [
+        "Dependency cycles detected: repo-a -> repo-b -> repo-a",
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    },
+    {
+      "scenario_id": "transitive-lock-propagation",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "api-gateway",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "database",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "frontend-app",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "user-service",
+          "lock_decision": "reopen"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "api-gateway",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "database",
+          "status": "failed",
+          "error": "Dependency lock is reopened",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "frontend-app",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "user-service",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "api-gateway",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "database",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "frontend-app",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "user-service",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "api-gateway",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "database",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "frontend-app",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "user-service",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [
+        "Lock propagation resulted in reopen decisions.",
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    },
+    {
+      "scenario_id": "diamond-dependency-pattern",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "auth-service",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "data-api",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "shared-db",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "web-client",
+          "lock_decision": "reopen"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "auth-service",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "data-api",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "shared-db",
+          "status": "failed",
+          "error": "Dependency lock is reopened",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "web-client",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "auth-service",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "data-api",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "shared-db",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "web-client",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "auth-service",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "data-api",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "shared-db",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "web-client",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [
+        "Lock propagation resulted in reopen decisions.",
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    },
+    {
+      "scenario_id": "network-failure-handling",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "service-a",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "service-b",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "service-c",
+          "lock_decision": "resolved"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "service-a",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "service-b",
+          "status": "failed",
+          "error": "Simulated network failure",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "service-c",
+          "status": "completed",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "service-a",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "service-b",
+          "reachable": false,
+          "failure_reason": "Simulated network partition"
+        },
+        {
+          "repo": "service-c",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "service-a",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "service-b",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "service-c",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    },
+    {
+      "scenario_id": "rollback-coordination",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "app-tier",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "data-layer",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "middleware",
+          "lock_decision": "resolved"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "app-tier",
+          "status": "failed",
+          "error": "Deployment failed"
+        },
+        {
+          "repo": "data-layer",
+          "status": "rolled_back",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "middleware",
+          "status": "rolled_back",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "app-tier",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "data-layer",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "middleware",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "app-tier",
+          "rollback_initiated": true,
+          "rollback_completed": true
+        },
+        {
+          "repo": "data-layer",
+          "rollback_initiated": true,
+          "rollback_completed": true
+        },
+        {
+          "repo": "middleware",
+          "rollback_initiated": true,
+          "rollback_completed": true
+        }
+      ],
+      "notes": [
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": true
+    },
+    {
+      "scenario_id": "five-repo-complex-graph",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "api-core",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "auth-engine",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "cache-layer",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "cdn-assets",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "customer-portal",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "primary-db",
+          "lock_decision": "reopen"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "api-core",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "auth-engine",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "cache-layer",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "cdn-assets",
+          "status": "completed",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "customer-portal",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "primary-db",
+          "status": "failed",
+          "error": "Dependency lock is reopened",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "api-core",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "auth-engine",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "cache-layer",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "cdn-assets",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "customer-portal",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "primary-db",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "api-core",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "auth-engine",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "cache-layer",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "cdn-assets",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "customer-portal",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "primary-db",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [
+        "Lock propagation resulted in reopen decisions.",
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    },
+    {
+      "scenario_id": "repo-a-depends-on-b-completion",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "downstream-repo",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "upstream-repo",
+          "lock_decision": "resolved"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "downstream-repo",
+          "status": "completed",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "upstream-repo",
+          "status": "completed",
+          "started_at": "2026-02-12T11:45:43.346Z",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "downstream-repo",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "upstream-repo",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "downstream-repo",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "upstream-repo",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    },
+    {
+      "scenario_id": "failure-cascade-handling",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "layer-1",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "layer-2",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "layer-3",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "layer-4",
+          "lock_decision": "resolved"
+        }
+      ],
+      "execution_results": [
+        {
+          "repo": "layer-1",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "layer-2",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "layer-3",
+          "status": "failed",
+          "error": "Dependency failed",
+          "completed_at": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "layer-4",
+          "status": "failed",
+          "error": "Infrastructure failure"
+        }
+      ],
+      "network_results": [
+        {
+          "repo": "layer-1",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "layer-2",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "layer-3",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        },
+        {
+          "repo": "layer-4",
+          "reachable": true,
+          "last_heartbeat": "2026-02-12T11:45:43.346Z"
+        }
+      ],
+      "rollback_results": [
+        {
+          "repo": "layer-1",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "layer-2",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "layer-3",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        },
+        {
+          "repo": "layer-4",
+          "rollback_initiated": false,
+          "rollback_completed": false
+        }
+      ],
+      "notes": [
+        "Execution failures detected, rollback coordinated."
+      ],
+      "transitive_chain_valid": true,
+      "rollback_coordinated": false
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "cycle_detection",
+        "passed": true,
+        "message": "Cycle detection exercised."
+      },
+      {
+        "name": "lock_propagation",
+        "passed": true,
+        "message": "Lock propagation exercised."
+      },
+      {
+        "name": "transitive_chain_validation",
+        "passed": true,
+        "message": "Transitive dependency chains validated."
+      },
+      {
+        "name": "network_failure_handling",
+        "passed": true,
+        "message": "Network failures handled gracefully."
+      },
+      {
+        "name": "rollback_coordination",
+        "passed": true,
+        "message": "Rollback coordination across repos verified."
+      }
+    ]
+  },
+  "fa_007_status": "pass"
+}

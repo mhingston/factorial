@@ -1,0 +1,51 @@
+{
+  "scenario_id": "scn-redis-auth-failure",
+  "suite": "regression",
+  "description": "Test Redis authentication failure simulation through reference twin.",
+  "request": {
+    "twin_id": "redis",
+    "operation": "kv.get",
+    "scenario_id": "redis-auth-failure",
+    "seed": "phase-a-seed-017",
+    "input": {
+      "key": "test:key",
+      "actor": "platform-bot",
+      "simulate": "auth_failed"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "redis-auth-failure"
+    }
+  },
+  "expected": {
+    "twin_id": "redis",
+    "twin_version": "0.1.0",
+    "operation": "kv.get",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "auth_failed",
+      "class": "auth",
+      "message": "Authentication failed for redis twin.",
+      "retryable": false,
+      "details": {}
+    },
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400002,
+      "latency_ms": 2,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "redis-auth-failure",
+      "provider": "redis"
+    }
+  },
+  "expected_failure_mode": "auth_failure",
+  "tags": ["redis", "regression", "auth"]
+}

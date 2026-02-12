@@ -1,0 +1,57 @@
+{
+  "scenario_id": "scn-sendgrid-template",
+  "suite": "smoke",
+  "description": "Create email template through SendGrid twin and verify deterministic success payload.",
+  "request": {
+    "twin_id": "sendgrid",
+    "operation": "templates.create",
+    "scenario_id": "sendgrid-template",
+    "seed": "phase-a-seed-019",
+    "input": {
+      "name": "Welcome Email",
+      "subject": "Welcome to our service!",
+      "html_content": "<html><body><h1>Welcome!</h1></body></html>",
+      "plain_content": "Welcome to our service!",
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "sendgrid-template"
+    }
+  },
+  "expected": {
+    "twin_id": "sendgrid",
+    "twin_version": "0.1.0",
+    "operation": "templates.create",
+    "status": "success",
+    "output": {
+      "id": "d-467532",
+      "name": "Welcome Email",
+      "subject": "Welcome to our service!",
+      "html_content": "<html><body><h1>Welcome!</h1></body></html>",
+      "plain_content": "Welcome to our service!",
+      "generation": "dynamic",
+      "created_at": "2025-02-10T16:00:00.000Z",
+      "created_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400010,
+      "latency_ms": 10,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "sendgrid-template",
+      "provider": "sendgrid",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["sendgrid", "smoke", "template"]
+}

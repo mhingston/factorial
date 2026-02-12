@@ -1,0 +1,52 @@
+{
+  "scenario_id": "scn-stripe-rate-limit",
+  "suite": "regression",
+  "description": "Test Stripe rate limit simulation through reference twin.",
+  "request": {
+    "twin_id": "stripe",
+    "operation": "customers.create",
+    "scenario_id": "stripe-rate-limit",
+    "seed": "phase-a-seed-011",
+    "input": {
+      "email": "test@example.com",
+      "name": "Test Customer",
+      "actor": "platform-bot",
+      "simulate": "rate_limited"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "stripe-rate-limit"
+    }
+  },
+  "expected": {
+    "twin_id": "stripe",
+    "twin_version": "0.1.0",
+    "operation": "customers.create",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "rate_limited",
+      "class": "rate_limit",
+      "message": "Rate limited by stripe twin.",
+      "retryable": true,
+      "details": { "retry_after_ms": 60000 }
+    },
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400002,
+      "latency_ms": 2,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "stripe-rate-limit",
+      "provider": "stripe"
+    }
+  },
+  "expected_failure_mode": "rate_limit",
+  "tags": ["stripe", "regression", "rate-limit"]
+}

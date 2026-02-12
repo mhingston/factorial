@@ -1,0 +1,60 @@
+digraph IntegrationWorkflow {
+  graph [goal="Integrate all subagent workstreams and verify"]
+  rankdir=TB
+  
+  start [shape=Mdiamond, label="Start Integration"]
+  exit [shape=Msquare, label="Integration Complete"]
+  
+  // Merge all branches
+  merge_branches [type="shell",
+                  label="Merge Subagent Branches",
+                  command="git merge sa001-branch sa002-branch sa003-branch sa004-branch sa005-branch --no-ff -m 'Integrate factory enhancement subagents'"]
+  
+  // Install dependencies
+  install_deps [type="shell",
+                label="Install Dependencies",
+                command="npm install"]
+  
+  // Build
+  build [type="shell",
+         label="Build Project",
+         command="npm run build"]
+  
+  // Run lint
+  lint [type="quality.gate",
+        label="Lint Check",
+        gate_type="lint",
+        gate_command="npm run lint"]
+  
+  // Run typecheck
+  typecheck [type="quality.gate",
+             label="Typecheck",
+             gate_type="typecheck",
+             gate_command="npm run typecheck"]
+  
+  // Run unit tests
+  unit_tests [type="quality.gate",
+              label="Unit Tests",
+              gate_type="tests",
+              gate_command="npm run test:run"]
+  
+  // Run golden tests
+  golden_tests [type="quality.gate",
+                label="Golden Tests",
+                gate_type="tests",
+                gate_command="npm run test:golden"]
+  
+  // Generate combined evidence
+  generate_evidence [type="shell",
+                     label="Generate Evidence",
+                     command="node scripts/generate-factory-enhancement-evidence.js"]
+  
+  // Verify evidence
+  verify_evidence [type="quality.gate",
+                   label="Verify Evidence",
+                   gate_type="custom",
+                   gate_command="node scripts/verify-factory-enhancement-evidence.js"]
+  
+  // Sequential execution with quality gates
+  start -> merge_branches -> install_deps -> build -> lint -> typecheck -> unit_tests -> golden_tests -> generate_evidence -> verify_evidence -> exit
+}

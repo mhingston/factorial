@@ -1,0 +1,116 @@
+{
+  "report_version": "1.0",
+  "spec_compliance": "SA-002",
+  "timestamp": "2026-02-12T13:45:00Z",
+  "providers": {
+    "openai": {
+      "reasoning_tokens_supported": true,
+      "reasoning_text_supported": false,
+      "evidence": "usage.completion_tokens_details.reasoning_tokens",
+      "implementation": "packages/core/src/llm/reasoning-extraction.ts:extractOpenAIReasoning",
+      "notes": "OpenAI exposes reasoning token counts but not the reasoning content itself. Used by o1 models."
+    },
+    "anthropic": {
+      "reasoning_tokens_supported": true,
+      "reasoning_text_supported": true,
+      "evidence": "thinking content blocks in response.content",
+      "implementation": "packages/core/src/llm/reasoning-extraction.ts:extractAnthropicReasoning",
+      "notes": "Anthropic provides explicit thinking blocks. Token count is estimated from character count (~4 chars/token). Supports both visible thinking and redacted thinking blocks."
+    },
+    "gemini": {
+      "reasoning_tokens_supported": true,
+      "reasoning_text_supported": true,
+      "evidence": "usageMetadata.thoughtsTokenCount and thought parts",
+      "implementation": "packages/core/src/llm/reasoning-extraction.ts:extractGeminiReasoning",
+      "notes": "Gemini exposes both token counts and thought content in response parts with thought=true marker."
+    }
+  },
+  "implementation_status": {
+    "type_extensions": {
+      "status": "complete",
+      "files": [
+        "packages/core/src/types/index.ts:LlmCompleteResult",
+        "packages/core/src/types/index.ts:LlmStreamEvent",
+        "packages/core/src/types/index.ts:ReasoningData"
+      ]
+    },
+    "extraction_functions": {
+      "status": "complete",
+      "files": [
+        "packages/core/src/llm/reasoning-extraction.ts"
+      ],
+      "test_coverage": "packages/core/src/llm/reasoning-extraction.test.ts (20 tests)"
+    },
+    "adapter_integration": {
+      "status": "complete",
+      "files": [
+        "packages/core/src/llm/index.ts:completeApi",
+        "packages/core/src/llm/index.ts:streamApiText",
+        "packages/core/src/llm/index.ts:extractReasoningFromResponse"
+      ]
+    },
+    "artifact_writers": {
+      "status": "complete",
+      "files": [
+        "packages/core/src/handlers/builtin.ts:CodergenHandler"
+      ],
+      "artifact_format": "reasoning.md with markdown header"
+    },
+    "economics_integration": {
+      "status": "complete",
+      "files": [
+        "packages/core/src/economics/index.ts:TokenUsage",
+        "packages/core/src/economics/index.ts:CostCalculation",
+        "packages/core/src/economics/index.ts:calculateCost",
+        "packages/core/src/economics/index.ts:parseUsage",
+        "packages/core/src/economics/index.ts:buildEconomicsReport"
+      ],
+      "notes": "Reasoning tokens billed at output token rate"
+    }
+  },
+  "test_results": {
+    "total_tests": 20,
+    "passed": 20,
+    "failed": 0,
+    "coverage_areas": [
+      "OpenAI reasoning token extraction",
+      "Anthropic thinking block extraction",
+      "Gemini thought extraction",
+      "Redacted thinking handling",
+      "Token estimation",
+      "Edge cases (empty, missing data)"
+    ]
+  },
+  "schema_extensions": {
+    "LlmCompleteResult": [
+      "reasoning?: string",
+      "reasoningTokens?: number"
+    ],
+    "LlmStreamEvent": [
+      "reasoningDelta?: string"
+    ],
+    "TokenUsage": [
+      "reasoningTokens?: number"
+    ],
+    "CostCalculation": [
+      "reasoningCostUsd: number",
+      "reasoningTokens: number"
+    ],
+    "EconomicsReport": [
+      "summary.totalReasoningTokens",
+      "byProvider[].reasoningTokens",
+      "byPhase[].reasoningTokens",
+      "byScenarioCategory[].reasoningTokens"
+    ]
+  },
+  "handoff_readiness": {
+    "sa_003_caching": "Uses cache_read_tokens/cache_write_tokens fields reserved for SA-003",
+    "sa_005_multimodal": "Extends same type system with reasoning fields",
+    "integration": "All adapter changes complete and tested"
+  },
+  "validation": {
+    "typecheck": "pass",
+    "lint": "pending",
+    "tests": "20/20 passed"
+  }
+}

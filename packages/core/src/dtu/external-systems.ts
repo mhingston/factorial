@@ -50,10 +50,14 @@ export class ExternalSystemManager {
 
   constructor(
     circuitBreakerRegistry: CircuitBreakerRegistry = globalCircuitBreakerRegistry,
-    maxAuditLogSize = 10000
+    maxAuditLogSize?: number
   ) {
     this.circuitBreakerRegistry = circuitBreakerRegistry;
-    this.maxAuditLogSize = maxAuditLogSize;
+    // Allow configuration via environment variable, with sensible defaults
+    const envMaxSize = process.env.EXTERNAL_SYSTEM_AUDIT_LOG_MAX_SIZE
+      ? parseInt(process.env.EXTERNAL_SYSTEM_AUDIT_LOG_MAX_SIZE, 10)
+      : undefined;
+    this.maxAuditLogSize = maxAuditLogSize ?? envMaxSize ?? 10000;
   }
 
   registerAdapter(adapter: ExternalSystemAdapter): void {
@@ -229,6 +233,14 @@ export class ExternalSystemManager {
 
   getAuditLog(): ExternalSystemAuditLog[] {
     return [...this.auditLog];
+  }
+
+  getAuditLogSize(): number {
+    return this.auditLog.length;
+  }
+
+  getMaxAuditLogSize(): number {
+    return this.maxAuditLogSize;
   }
 
   getAuditLogForOperation(operationId: string): ExternalSystemAuditLog[] {

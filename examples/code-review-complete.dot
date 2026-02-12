@@ -1,0 +1,172 @@
+# Complete Code Review Workflow
+# Production-ready code review with quality gates and confidence scoring
+
+digraph CodeReviewComplete {
+    graph [goal="Comprehensive code review with quality assurance",
+           promotion_stage="prod",
+           quality_profile="regulated",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Initial static analysis
+    lint [type="quality.gate",
+          gate_type="lint",
+          gate_command="npm run lint:strict",
+          label="Lint",
+          failure_target="fix_static"]
+    
+    typecheck [type="quality.gate",
+               gate_type="typecheck",
+               gate_command="npm run typecheck",
+               label="Type Check",
+               failure_target="fix_static"]
+    
+    format_check [type="quality.gate",
+                  gate_type="custom",
+                  gate_command="npm run format:check",
+                  label="Format",
+                  failure_target="fix_static"]
+    
+    # Security scanning
+    security_scan [type="quality.gate",
+                   gate_type="security",
+                   gate_command="npm audit --audit-level=moderate",
+                   label="Security",
+                   failure_target="fix_security"]
+    
+    # Run tests
+    unit_tests [type="quality.gate",
+                gate_type="tests",
+                gate_command="npm run test:unit -- --coverage",
+                label="Unit Tests",
+                failure_target="fix_tests"]
+    
+    integration_tests [type="quality.gate",
+                       gate_type="tests",
+                       gate_command="npm run test:integration",
+                       label="Integration Tests",
+                       failure_target="fix_tests"]
+    
+    # AI Code Review - Correctness
+    review_correctness [type="judge.rubric",
+                        judge_rubric_path="./rubrics/correctness.md",
+                        score_threshold=0.8,
+                        score_weights='{"logic":0.5,"edge_cases":0.3,"error_handling":0.2}',
+                        label="Review: Correctness"]
+    
+    # AI Code Review - Performance
+    review_performance [type="judge.rubric",
+                        judge_rubric_path="./rubrics/performance.md",
+                        score_threshold=0.7,
+                        score_weights='{"complexity":0.4,"resources":0.3,"scalability":0.3}',
+                        label="Review: Performance"]
+    
+    # AI Code Review - Maintainability
+    review_maintainability [type="judge.rubric",
+                            judge_rubric_path="./rubrics/maintainability.md",
+                            score_threshold=0.75,
+                            score_weights='{"readability":0.4,"documentation":0.3,"test_coverage":0.3}',
+                            label="Review: Maintainability"]
+    
+    # AI Code Review - Security
+    review_security [type="judge.rubric",
+                     judge_rubric_path="./rubrics/security.md",
+                     score_threshold=0.85,
+                     score_weights='{"vulnerabilities":0.5,"data_handling":0.3,"authz":0.2}',
+                     label="Review: Security"]
+    
+    # Calculate overall confidence score
+    # (This would be done in context by the rubric scores)
+    
+    # Confidence gate - auto-approve or escalate
+    confidence_gate [type="confidence.gate",
+                     confidence_signal_path="judge.review_security.score",
+                     escalation_threshold=0.8,
+                     escalation_target="senior_review",
+                     label="Confidence Gate"]
+    
+    # Build verification
+    build [type="quality.gate",
+           gate_type="custom",
+           gate_command="npm run build:prod",
+           label="Build",
+           failure_target="fix_build"]
+    
+    # Success - generate final report
+    final_report [prompt="All quality gates passed! Generate comprehensive review report:
+
+**Review Summary:**
+1. Code Quality Score: [average of rubric scores]
+2. Test Coverage: [from unit tests]
+3. Security Status: [from security scans]
+4. Performance Grade: [from performance review]
+
+**Detailed Findings:**
+- Correctness: [summary]
+- Performance: [summary]
+- Maintainability: [summary]
+- Security: [summary]
+
+**Recommendations:**
+1. [if any improvements suggested]
+2. [action items]
+
+**Approval Status:** APPROVED
+
+The code meets all quality standards for production deployment.",
+                  label="Final Report"]
+    
+    # Failure recovery paths
+    fix_static [prompt="Fix static analysis issues:
+1. Run `npm run lint:fix`
+2. Run `npm run format`
+3. Fix any TypeScript errors
+4. Ensure no console.log statements
+5. Check for unused imports/variables",
+                label="Fix Static"]
+    
+    fix_security [prompt="Fix security vulnerabilities:
+1. Update dependencies: `npm audit fix`
+2. Review any manual security findings
+3. Check for hardcoded secrets
+4. Verify input validation
+5. Check authentication/authorization logic",
+                  label="Fix Security"]
+    
+    fix_tests [prompt="Fix test failures:
+1. Review test output for failures
+2. Fix broken tests or update expectations
+3. Add missing test coverage
+4. Ensure tests are deterministic
+5. Check for flaky tests",
+               label="Fix Tests"]
+    
+    fix_build [prompt="Fix build errors:
+1. Check TypeScript compilation errors
+2. Verify all imports resolve
+3. Check for circular dependencies
+4. Verify environment configuration
+5. Test build locally",
+               label="Fix Build"]
+    
+    senior_review [shape=hexagon,
+                   type="wait.human",
+                   label="Senior Review"]
+    
+    # Main success flow
+    start -> lint -> typecheck -> format_check -> security_scan -> unit_tests -> integration_tests
+    integration_tests -> review_correctness -> review_performance -> review_maintainability -> review_security
+    review_security -> confidence_gate -> build -> final_report -> exit
+    
+    # Failure loops
+    fix_static -> lint
+    fix_security -> security_scan
+    fix_tests -> unit_tests
+    fix_build -> build
+    
+    # Escalation
+    confidence_gate -> senior_review [label="Low Confidence"]
+    senior_review -> build
+}

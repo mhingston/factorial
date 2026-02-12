@@ -1,0 +1,39 @@
+# Document Q&A Workflow
+# Answers questions about a PDF document (research paper, report, etc.)
+
+digraph DocumentQA {
+    graph [goal="Answer questions about a research paper",
+           rankdir=LR]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # First, process the document to extract key information
+    # Uses Anthropic or Gemini for PDF support
+    summarize [prompt="Read and analyze this research paper. Provide:
+    1. Executive summary (2-3 paragraphs)
+    2. Key findings and contributions
+    3. Methodology overview
+    4. Main conclusions
+    
+    Be comprehensive but concise.",
+               label="Summarize Paper",
+               document_input="./papers/ai-research.pdf",
+               llm_provider="anthropic",
+               llm_model="claude-3-5-sonnet-20241022"]
+    
+    # Answer specific questions based on the document
+    answer_q1 [prompt="What methodology did the authors use? Explain the approach, dataset, and evaluation metrics in detail.",
+               label="Q1: Methodology"]
+    
+    answer_q2 [prompt="What are the limitations of this research? Discuss constraints, assumptions, and potential weaknesses.",
+               label="Q2: Limitations"]
+    
+    answer_q3 [prompt="How does this work compare to prior approaches? Highlight key differences and improvements.",
+               label="Q3: Comparison"]
+    
+    # Human can ask follow-up questions
+    follow_up [shape=hexagon, type="wait.human", label="Ask Follow-up"]
+    
+    start -> summarize -> answer_q1 -> answer_q2 -> answer_q3 -> follow_up -> exit
+}

@@ -311,6 +311,14 @@ export class AwsS3TwinStub implements TwinContract {
   }
 }
 
+/**
+ * Generates a deterministic suffix from a string input for DTU testing.
+ * Uses a simple hash algorithm (multiplier 37, modulo 1,000,000).
+ *
+ * Note: This is designed for deterministic testing only. The simple hash
+ * with limited range may produce collisions for different inputs, which
+ * is acceptable for test scenarios but not for production use.
+ */
 function deterministicSuffix(value: string): string {
   let hash = 0;
   for (const char of value) {

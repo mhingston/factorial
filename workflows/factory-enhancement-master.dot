@@ -1,0 +1,54 @@
+digraph FactoryEnhancementMaster {
+  graph [goal="Complete factory enhancement via subagent delegation"]
+  rankdir=TB
+  
+  start [shape=Mdiamond, label="Start Factory Enhancement"]
+  exit [shape=Msquare, label="Complete"]
+  
+  // Phase 1: Spawn independent subagents (parallel)
+  phase1 [type="parallel",
+          label="Phase 1: Spawn Independent",
+          worktrees="false",
+          subagents="[SA-001,SA-002,SA-004,SA-005]"]
+  
+  // Phase 2: Spawn dependent subagent (sequential)
+  phase2 [type="tool",
+          label="Phase 2: Spawn SA-003",
+          tool_name="spawn_agent",
+          task="Spawn SA-003 (Anthropic caching) after SA-002 completion",
+          subagent_workflow="./spawn-dependent-subagents.dot"]
+  
+  // Phase 3: Wait for all
+  phase3 [type="tool",
+          label="Phase 3: Wait for All",
+          tool_name="wait_for_all",
+          agent_ids_context_key="[sa001_agent_id,sa002_agent_id,sa003_agent_id,sa004_agent_id,sa005_agent_id]"]
+  
+  // Phase 4: Integration
+  phase4 [type="tool",
+          label="Phase 4: Integration",
+          tool_name="run_workflow",
+          workflow_path="./integration-workflow.dot"]
+  
+  // Phase 5: Convergence Review
+  phase5 [type="judge.rubric",
+          label="Phase 5: Convergence Review",
+          judge_rubric_path="./convergence-rubric.md",
+          score_threshold="0.9"]
+  
+  // Phase 6: Documentation
+  phase6 [type="tool",
+          label="Phase 6: Update Documentation",
+          tool_name="spawn_agent",
+          task="Update all documentation: docs/spec-conformance-matrix.md (mark deltas closed), docs/companion-spec-scope-contract.md (update capability status), README.md (add examples), AGENTS.md (document patterns).",
+          max_turns="50"]
+  
+  // Final verification
+  final_verify [type="quality.gate",
+                label="Final Verification",
+                gate_type="custom",
+                gate_command="npm run check:pr-compound && npm run claims:audit"]
+  
+  // Sequential phases
+  start -> phase1 -> phase2 -> phase3 -> phase4 -> phase5 -> phase6 -> final_verify -> exit
+}

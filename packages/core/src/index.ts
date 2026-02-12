@@ -10,7 +10,10 @@ export * from './lint/index.js';
 export * from './stylesheet/index.js';
 export * from './llm/index.js';
 export * from './handlers/builtin.js';
+export * from './interviewers/index.js';
 export * from './dtu/index.js';
+export * from './satisfaction/index.js';
+export * from './subagents/index.js';
 
 // Re-export commonly used types
 export type { 

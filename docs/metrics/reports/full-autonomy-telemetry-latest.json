@@ -1,6 +1,6 @@
 {
   "schema_version": "full_autonomy_telemetry_report.v1",
-  "generated_at": "2026-02-12T07:25:38.964Z",
+  "generated_at": "2026-02-12T11:19:13.695Z",
   "source": {
     "path": "./docs/metrics/reports/full-autonomy-telemetry-source-latest.json",
     "schema_version": "full_autonomy_telemetry_source.v1",
@@ -18,7 +18,593 @@
     "ood_rate": 0,
     "categories_covered": 2,
     "window_days": 30,
-    "maintenance_window_days": 30
+    "maintenance_window_days": 30,
+    "thirty_day_aggregate": {
+      "window_start": "2026-01-15",
+      "window_end": "2026-02-10",
+      "total_days": 27,
+      "days_with_data": 6,
+      "days_with_gaps": 21,
+      "daily_snapshots": [
+        {
+          "date": "2026-01-15",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-001",
+              "category": "ci-lint",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-01-15T02:00:00.000Z",
+              "ended_at": "2026-01-15T02:12:00.000Z",
+              "workflow_type": "ci-lint",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "ci-lint"
+            ]
+          },
+          "hash": "c79164dd8d1a8ac17a4a876f700825092d4b4f51e9920a78cf5b05ca32b1ed86",
+          "previous_hash": null
+        },
+        {
+          "date": "2026-01-16",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "6cae9c9ebe7ef437928c6ac60a3f28232f83c3cf92b415f73ef5ffc58e2647b9",
+          "previous_hash": "c79164dd8d1a8ac17a4a876f700825092d4b4f51e9920a78cf5b05ca32b1ed86"
+        },
+        {
+          "date": "2026-01-17",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "15842c2b04b077f94d1061f8552384568f31e9fe104d11cb86d3e4fc7e0a770a",
+          "previous_hash": "6cae9c9ebe7ef437928c6ac60a3f28232f83c3cf92b415f73ef5ffc58e2647b9"
+        },
+        {
+          "date": "2026-01-18",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "366137d0fbfaa4de9967918e028a085547226e9e0b2c5a4a0833c639f339cb85",
+          "previous_hash": "15842c2b04b077f94d1061f8552384568f31e9fe104d11cb86d3e4fc7e0a770a"
+        },
+        {
+          "date": "2026-01-19",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "5d967dda4ba95b485b7196f3a7448292bdc0d52e1796e2e1777b5e9332711a92",
+          "previous_hash": "366137d0fbfaa4de9967918e028a085547226e9e0b2c5a4a0833c639f339cb85"
+        },
+        {
+          "date": "2026-01-20",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-002",
+              "category": "codereview",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-01-20T03:00:00.000Z",
+              "ended_at": "2026-01-20T03:18:00.000Z",
+              "workflow_type": "codereview",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "codereview"
+            ]
+          },
+          "hash": "3063bcde81c02a8661b79214d3006fa5c42cc8108fc9ced80e23a90bd3014d70",
+          "previous_hash": "c79164dd8d1a8ac17a4a876f700825092d4b4f51e9920a78cf5b05ca32b1ed86"
+        },
+        {
+          "date": "2026-01-21",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "f8ca4d66080428888467e71ab09bdff233a718ee3ae34dba8be5db44686c9d25",
+          "previous_hash": "3063bcde81c02a8661b79214d3006fa5c42cc8108fc9ced80e23a90bd3014d70"
+        },
+        {
+          "date": "2026-01-22",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "a78d0f5fe72df4cb6368c4f681e873b092ac3f17980953692c178971f1e7ea86",
+          "previous_hash": "f8ca4d66080428888467e71ab09bdff233a718ee3ae34dba8be5db44686c9d25"
+        },
+        {
+          "date": "2026-01-23",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "63674aef9ecbc971bdfbfee8dc15eff10635f02d07cd7b0c5b8e74a843f30108",
+          "previous_hash": "a78d0f5fe72df4cb6368c4f681e873b092ac3f17980953692c178971f1e7ea86"
+        },
+        {
+          "date": "2026-01-24",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "598c441077f0e04b98a4c060fb03dd67106aee5b7496865b267155286223167c",
+          "previous_hash": "63674aef9ecbc971bdfbfee8dc15eff10635f02d07cd7b0c5b8e74a843f30108"
+        },
+        {
+          "date": "2026-01-25",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-003",
+              "category": "ci-lint",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-01-25T04:00:00.000Z",
+              "ended_at": "2026-01-25T04:09:00.000Z",
+              "workflow_type": "ci-lint",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "ci-lint"
+            ]
+          },
+          "hash": "10a9051b60138a93bb0b2ee16668e569158cda6bab95de48facf85bc9e1b6e5b",
+          "previous_hash": "3063bcde81c02a8661b79214d3006fa5c42cc8108fc9ced80e23a90bd3014d70"
+        },
+        {
+          "date": "2026-01-26",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "b36f86dd6eb2d8c6dfef816e775fce8cfe6252026b1a357725c9ed8432031a6a",
+          "previous_hash": "10a9051b60138a93bb0b2ee16668e569158cda6bab95de48facf85bc9e1b6e5b"
+        },
+        {
+          "date": "2026-01-27",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "8f1f88e0b475c192dda272c1174fc5ce59abe4a070874bd4ba10b021ae19041d",
+          "previous_hash": "b36f86dd6eb2d8c6dfef816e775fce8cfe6252026b1a357725c9ed8432031a6a"
+        },
+        {
+          "date": "2026-01-28",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "f6a07ce1905349137231891ed743867d45e29b928e74a2dbaa7cdf00c82b2798",
+          "previous_hash": "8f1f88e0b475c192dda272c1174fc5ce59abe4a070874bd4ba10b021ae19041d"
+        },
+        {
+          "date": "2026-01-29",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "3fbe80d2850377cd589677287cb2b7857e7bbe917ce92194239d31855d97b1e7",
+          "previous_hash": "f6a07ce1905349137231891ed743867d45e29b928e74a2dbaa7cdf00c82b2798"
+        },
+        {
+          "date": "2026-01-30",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "26d3e30f37000f5354481a10a78a5ce643e5658c1e83a232aa046058cd79f482",
+          "previous_hash": "3fbe80d2850377cd589677287cb2b7857e7bbe917ce92194239d31855d97b1e7"
+        },
+        {
+          "date": "2026-01-31",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "0d9c1c2256ca943216546d6fa6f1be3d0d7101d943126923b4ce018ef7892991",
+          "previous_hash": "26d3e30f37000f5354481a10a78a5ce643e5658c1e83a232aa046058cd79f482"
+        },
+        {
+          "date": "2026-02-01",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-004",
+              "category": "codereview",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-02-01T01:00:00.000Z",
+              "ended_at": "2026-02-01T01:20:00.000Z",
+              "workflow_type": "codereview",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "codereview"
+            ]
+          },
+          "hash": "9dc25a2ee3098010c27285d26ed439b74890bc1a9680601a16e8ee967888b27b",
+          "previous_hash": "10a9051b60138a93bb0b2ee16668e569158cda6bab95de48facf85bc9e1b6e5b"
+        },
+        {
+          "date": "2026-02-02",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "b3f17fbf20317231dec7fea5a8e93ceb433c2f911386f714b4c7775fe59cc004",
+          "previous_hash": "9dc25a2ee3098010c27285d26ed439b74890bc1a9680601a16e8ee967888b27b"
+        },
+        {
+          "date": "2026-02-03",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "eceb672b1862be4086bb8d5f2ea2319ef3b051af14adc4fc250c874335adc744",
+          "previous_hash": "b3f17fbf20317231dec7fea5a8e93ceb433c2f911386f714b4c7775fe59cc004"
+        },
+        {
+          "date": "2026-02-04",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "cd1e22d085b405d9cd89c31b4ef27229eb4b33954407c629988f721db58f6528",
+          "previous_hash": "eceb672b1862be4086bb8d5f2ea2319ef3b051af14adc4fc250c874335adc744"
+        },
+        {
+          "date": "2026-02-05",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-005",
+              "category": "ci-lint",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-02-05T05:00:00.000Z",
+              "ended_at": "2026-02-05T05:10:00.000Z",
+              "workflow_type": "ci-lint",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "ci-lint"
+            ]
+          },
+          "hash": "4408d15dba10d24f0f43b152d98fc8bcce39b561ffa1214aae66293acc6104b1",
+          "previous_hash": "9dc25a2ee3098010c27285d26ed439b74890bc1a9680601a16e8ee967888b27b"
+        },
+        {
+          "date": "2026-02-06",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "99d07b196fc520280953c72e84f14f0454f2a462a026652b63b0d8f0aba65fc2",
+          "previous_hash": "4408d15dba10d24f0f43b152d98fc8bcce39b561ffa1214aae66293acc6104b1"
+        },
+        {
+          "date": "2026-02-07",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "64a368405f0430d97c13acfe5eb76e08133b5e8e87bbd3c521388344cf3018fc",
+          "previous_hash": "99d07b196fc520280953c72e84f14f0454f2a462a026652b63b0d8f0aba65fc2"
+        },
+        {
+          "date": "2026-02-08",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "db12063e44af18318b1897a29f15232177c22f2204fffbb83159422b686389ae",
+          "previous_hash": "64a368405f0430d97c13acfe5eb76e08133b5e8e87bbd3c521388344cf3018fc"
+        },
+        {
+          "date": "2026-02-09",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "184fa48202dda6cbfbc68dce2bb9401c43ab4071d0dd0a08f7494dc88e821176",
+          "previous_hash": "db12063e44af18318b1897a29f15232177c22f2204fffbb83159422b686389ae"
+        },
+        {
+          "date": "2026-02-10",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-006",
+              "category": "codereview",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-02-10T06:00:00.000Z",
+              "ended_at": "2026-02-10T06:15:00.000Z",
+              "workflow_type": "codereview",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "codereview"
+            ]
+          },
+          "hash": "a752f118694234f91f56d1928a193bb207222d792403c2f596833f6fa0f5348e",
+          "previous_hash": "4408d15dba10d24f0f43b152d98fc8bcce39b561ffa1214aae66293acc6104b1"
+        }
+      ],
+      "category_distribution": {
+        "ci-lint": 3,
+        "codereview": 3
+      },
+      "error_class_distribution": {
+        "provider_api_failure": 0,
+        "workflow_timeout": 0,
+        "resource_exhaustion": 0,
+        "validation_failure": 0,
+        "circuit_breaker_open": 0,
+        "ood_detection": 0,
+        "unknown_error": 0,
+        "none": 6
+      },
+      "escalation_reason_distribution": {
+        "security_review_required": 0,
+        "schema_violation": 0,
+        "threshold_breach": 0,
+        "human_discretion": 0,
+        "external_dependency_failure": 0,
+        "authorization_failure": 0,
+        "none": 6
+      },
+      "workflow_type_distribution": {
+        "ci-lint": 3,
+        "ci-test": 0,
+        "ci-build": 0,
+        "codereview": 3,
+        "deployment": 0,
+        "self-healing": 0,
+        "maintenance": 0,
+        "other": 0
+      },
+      "interpolated_days": [
+        "2026-01-16",
+        "2026-01-17",
+        "2026-01-18",
+        "2026-01-19",
+        "2026-01-21",
+        "2026-01-22",
+        "2026-01-23",
+        "2026-01-24",
+        "2026-01-26",
+        "2026-01-27",
+        "2026-01-28",
+        "2026-01-29",
+        "2026-01-30",
+        "2026-01-31",
+        "2026-02-02",
+        "2026-02-03",
+        "2026-02-04",
+        "2026-02-06",
+        "2026-02-07",
+        "2026-02-08",
+        "2026-02-09"
+      ],
+      "gap_fill_method": "zero_fill"
+    },
+    "ood_detection": {
+      "is_ood": false,
+      "confidence": 0,
+      "trigger_metric": "",
+      "trigger_value": 0,
+      "threshold_value": 0,
+      "baseline_stats": {
+        "mean": 0.01,
+        "std_dev": 0.03,
+        "sample_size": 7
+      }
+    },
+    "escalation_alerts": []
   },
   "checks": [
     {
@@ -77,5 +663,585 @@
       }
     ]
   },
-  "fa_008_status": "pass"
+  "fa_008_status": "pass",
+  "thirty_day_telemetry": {
+    "hash_chain_valid": true,
+    "daily_snapshot_count": 6,
+    "categorization_enabled": true,
+    "ood_detection_enabled": true,
+    "alerts_enabled": true,
+    "aggregate": {
+      "window_start": "2026-01-15",
+      "window_end": "2026-02-10",
+      "total_days": 27,
+      "days_with_data": 6,
+      "days_with_gaps": 21,
+      "daily_snapshots": [
+        {
+          "date": "2026-01-15",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-001",
+              "category": "ci-lint",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-01-15T02:00:00.000Z",
+              "ended_at": "2026-01-15T02:12:00.000Z",
+              "workflow_type": "ci-lint",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "ci-lint"
+            ]
+          },
+          "hash": "c79164dd8d1a8ac17a4a876f700825092d4b4f51e9920a78cf5b05ca32b1ed86",
+          "previous_hash": null
+        },
+        {
+          "date": "2026-01-16",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "6cae9c9ebe7ef437928c6ac60a3f28232f83c3cf92b415f73ef5ffc58e2647b9",
+          "previous_hash": "c79164dd8d1a8ac17a4a876f700825092d4b4f51e9920a78cf5b05ca32b1ed86"
+        },
+        {
+          "date": "2026-01-17",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "15842c2b04b077f94d1061f8552384568f31e9fe104d11cb86d3e4fc7e0a770a",
+          "previous_hash": "6cae9c9ebe7ef437928c6ac60a3f28232f83c3cf92b415f73ef5ffc58e2647b9"
+        },
+        {
+          "date": "2026-01-18",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "366137d0fbfaa4de9967918e028a085547226e9e0b2c5a4a0833c639f339cb85",
+          "previous_hash": "15842c2b04b077f94d1061f8552384568f31e9fe104d11cb86d3e4fc7e0a770a"
+        },
+        {
+          "date": "2026-01-19",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "5d967dda4ba95b485b7196f3a7448292bdc0d52e1796e2e1777b5e9332711a92",
+          "previous_hash": "366137d0fbfaa4de9967918e028a085547226e9e0b2c5a4a0833c639f339cb85"
+        },
+        {
+          "date": "2026-01-20",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-002",
+              "category": "codereview",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-01-20T03:00:00.000Z",
+              "ended_at": "2026-01-20T03:18:00.000Z",
+              "workflow_type": "codereview",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "codereview"
+            ]
+          },
+          "hash": "3063bcde81c02a8661b79214d3006fa5c42cc8108fc9ced80e23a90bd3014d70",
+          "previous_hash": "c79164dd8d1a8ac17a4a876f700825092d4b4f51e9920a78cf5b05ca32b1ed86"
+        },
+        {
+          "date": "2026-01-21",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "f8ca4d66080428888467e71ab09bdff233a718ee3ae34dba8be5db44686c9d25",
+          "previous_hash": "3063bcde81c02a8661b79214d3006fa5c42cc8108fc9ced80e23a90bd3014d70"
+        },
+        {
+          "date": "2026-01-22",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "a78d0f5fe72df4cb6368c4f681e873b092ac3f17980953692c178971f1e7ea86",
+          "previous_hash": "f8ca4d66080428888467e71ab09bdff233a718ee3ae34dba8be5db44686c9d25"
+        },
+        {
+          "date": "2026-01-23",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "63674aef9ecbc971bdfbfee8dc15eff10635f02d07cd7b0c5b8e74a843f30108",
+          "previous_hash": "a78d0f5fe72df4cb6368c4f681e873b092ac3f17980953692c178971f1e7ea86"
+        },
+        {
+          "date": "2026-01-24",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "598c441077f0e04b98a4c060fb03dd67106aee5b7496865b267155286223167c",
+          "previous_hash": "63674aef9ecbc971bdfbfee8dc15eff10635f02d07cd7b0c5b8e74a843f30108"
+        },
+        {
+          "date": "2026-01-25",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-003",
+              "category": "ci-lint",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-01-25T04:00:00.000Z",
+              "ended_at": "2026-01-25T04:09:00.000Z",
+              "workflow_type": "ci-lint",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "ci-lint"
+            ]
+          },
+          "hash": "10a9051b60138a93bb0b2ee16668e569158cda6bab95de48facf85bc9e1b6e5b",
+          "previous_hash": "3063bcde81c02a8661b79214d3006fa5c42cc8108fc9ced80e23a90bd3014d70"
+        },
+        {
+          "date": "2026-01-26",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "b36f86dd6eb2d8c6dfef816e775fce8cfe6252026b1a357725c9ed8432031a6a",
+          "previous_hash": "10a9051b60138a93bb0b2ee16668e569158cda6bab95de48facf85bc9e1b6e5b"
+        },
+        {
+          "date": "2026-01-27",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "8f1f88e0b475c192dda272c1174fc5ce59abe4a070874bd4ba10b021ae19041d",
+          "previous_hash": "b36f86dd6eb2d8c6dfef816e775fce8cfe6252026b1a357725c9ed8432031a6a"
+        },
+        {
+          "date": "2026-01-28",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "f6a07ce1905349137231891ed743867d45e29b928e74a2dbaa7cdf00c82b2798",
+          "previous_hash": "8f1f88e0b475c192dda272c1174fc5ce59abe4a070874bd4ba10b021ae19041d"
+        },
+        {
+          "date": "2026-01-29",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "3fbe80d2850377cd589677287cb2b7857e7bbe917ce92194239d31855d97b1e7",
+          "previous_hash": "f6a07ce1905349137231891ed743867d45e29b928e74a2dbaa7cdf00c82b2798"
+        },
+        {
+          "date": "2026-01-30",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "26d3e30f37000f5354481a10a78a5ce643e5658c1e83a232aa046058cd79f482",
+          "previous_hash": "3fbe80d2850377cd589677287cb2b7857e7bbe917ce92194239d31855d97b1e7"
+        },
+        {
+          "date": "2026-01-31",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "0d9c1c2256ca943216546d6fa6f1be3d0d7101d943126923b4ce018ef7892991",
+          "previous_hash": "26d3e30f37000f5354481a10a78a5ce643e5658c1e83a232aa046058cd79f482"
+        },
+        {
+          "date": "2026-02-01",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-004",
+              "category": "codereview",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-02-01T01:00:00.000Z",
+              "ended_at": "2026-02-01T01:20:00.000Z",
+              "workflow_type": "codereview",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "codereview"
+            ]
+          },
+          "hash": "9dc25a2ee3098010c27285d26ed439b74890bc1a9680601a16e8ee967888b27b",
+          "previous_hash": "10a9051b60138a93bb0b2ee16668e569158cda6bab95de48facf85bc9e1b6e5b"
+        },
+        {
+          "date": "2026-02-02",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "b3f17fbf20317231dec7fea5a8e93ceb433c2f911386f714b4c7775fe59cc004",
+          "previous_hash": "9dc25a2ee3098010c27285d26ed439b74890bc1a9680601a16e8ee967888b27b"
+        },
+        {
+          "date": "2026-02-03",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "eceb672b1862be4086bb8d5f2ea2319ef3b051af14adc4fc250c874335adc744",
+          "previous_hash": "b3f17fbf20317231dec7fea5a8e93ceb433c2f911386f714b4c7775fe59cc004"
+        },
+        {
+          "date": "2026-02-04",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "cd1e22d085b405d9cd89c31b4ef27229eb4b33954407c629988f721db58f6528",
+          "previous_hash": "eceb672b1862be4086bb8d5f2ea2319ef3b051af14adc4fc250c874335adc744"
+        },
+        {
+          "date": "2026-02-05",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-005",
+              "category": "ci-lint",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-02-05T05:00:00.000Z",
+              "ended_at": "2026-02-05T05:10:00.000Z",
+              "workflow_type": "ci-lint",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "ci-lint"
+            ]
+          },
+          "hash": "4408d15dba10d24f0f43b152d98fc8bcce39b561ffa1214aae66293acc6104b1",
+          "previous_hash": "9dc25a2ee3098010c27285d26ed439b74890bc1a9680601a16e8ee967888b27b"
+        },
+        {
+          "date": "2026-02-06",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "99d07b196fc520280953c72e84f14f0454f2a462a026652b63b0d8f0aba65fc2",
+          "previous_hash": "4408d15dba10d24f0f43b152d98fc8bcce39b561ffa1214aae66293acc6104b1"
+        },
+        {
+          "date": "2026-02-07",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "64a368405f0430d97c13acfe5eb76e08133b5e8e87bbd3c521388344cf3018fc",
+          "previous_hash": "99d07b196fc520280953c72e84f14f0454f2a462a026652b63b0d8f0aba65fc2"
+        },
+        {
+          "date": "2026-02-08",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "db12063e44af18318b1897a29f15232177c22f2204fffbb83159422b686389ae",
+          "previous_hash": "64a368405f0430d97c13acfe5eb76e08133b5e8e87bbd3c521388344cf3018fc"
+        },
+        {
+          "date": "2026-02-09",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [],
+          "summary": {
+            "total_runs": 0,
+            "success_count": 0,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": []
+          },
+          "hash": "184fa48202dda6cbfbc68dce2bb9401c43ab4071d0dd0a08f7494dc88e821176",
+          "previous_hash": "db12063e44af18318b1897a29f15232177c22f2204fffbb83159422b686389ae"
+        },
+        {
+          "date": "2026-02-10",
+          "schema_version": "daily_telemetry_snapshot.v1",
+          "runs": [
+            {
+              "run_id": "run-006",
+              "category": "codereview",
+              "status": "success",
+              "escalations_count": 0,
+              "ood_detected": false,
+              "started_at": "2026-02-10T06:00:00.000Z",
+              "ended_at": "2026-02-10T06:15:00.000Z",
+              "workflow_type": "codereview",
+              "error_class": "none",
+              "escalation_reasons": [
+                "none"
+              ]
+            }
+          ],
+          "summary": {
+            "total_runs": 1,
+            "success_count": 1,
+            "failure_count": 0,
+            "escalation_count": 0,
+            "ood_count": 0,
+            "categories_covered": [
+              "codereview"
+            ]
+          },
+          "hash": "a752f118694234f91f56d1928a193bb207222d792403c2f596833f6fa0f5348e",
+          "previous_hash": "4408d15dba10d24f0f43b152d98fc8bcce39b561ffa1214aae66293acc6104b1"
+        }
+      ],
+      "category_distribution": {
+        "ci-lint": 3,
+        "codereview": 3
+      },
+      "error_class_distribution": {
+        "provider_api_failure": 0,
+        "workflow_timeout": 0,
+        "resource_exhaustion": 0,
+        "validation_failure": 0,
+        "circuit_breaker_open": 0,
+        "ood_detection": 0,
+        "unknown_error": 0,
+        "none": 6
+      },
+      "escalation_reason_distribution": {
+        "security_review_required": 0,
+        "schema_violation": 0,
+        "threshold_breach": 0,
+        "human_discretion": 0,
+        "external_dependency_failure": 0,
+        "authorization_failure": 0,
+        "none": 6
+      },
+      "workflow_type_distribution": {
+        "ci-lint": 3,
+        "ci-test": 0,
+        "ci-build": 0,
+        "codereview": 3,
+        "deployment": 0,
+        "self-healing": 0,
+        "maintenance": 0,
+        "other": 0
+      },
+      "interpolated_days": [
+        "2026-01-16",
+        "2026-01-17",
+        "2026-01-18",
+        "2026-01-19",
+        "2026-01-21",
+        "2026-01-22",
+        "2026-01-23",
+        "2026-01-24",
+        "2026-01-26",
+        "2026-01-27",
+        "2026-01-28",
+        "2026-01-29",
+        "2026-01-30",
+        "2026-01-31",
+        "2026-02-02",
+        "2026-02-03",
+        "2026-02-04",
+        "2026-02-06",
+        "2026-02-07",
+        "2026-02-08",
+        "2026-02-09"
+      ],
+      "gap_fill_method": "zero_fill"
+    }
+  }
 }

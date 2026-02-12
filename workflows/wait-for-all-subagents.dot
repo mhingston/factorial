@@ -1,0 +1,78 @@
+digraph WaitForAllSubagents {
+  graph [goal="Wait for all 5 subagents to complete"]
+  rankdir=TB
+  
+  start [shape=Mdiamond, label="Start Waiting"]
+  exit [shape=Msquare, label="All Subagents Complete"]
+  
+  // Wait for SA-001
+  wait_sa001 [type="tool",
+              label="Wait for SA-001",
+              tool_name="wait",
+              agent_id_context_key="sa001_agent_id",
+              timeout_ms="600000"]
+  
+  // Wait for SA-002
+  wait_sa002 [type="tool",
+              label="Wait for SA-002",
+              tool_name="wait",
+              agent_id_context_key="sa002_agent_id",
+              timeout_ms="600000"]
+  
+  // Wait for SA-003
+  wait_sa003 [type="tool",
+              label="Wait for SA-003",
+              tool_name="wait",
+              agent_id_context_key="sa003_agent_id",
+              timeout_ms="600000"]
+  
+  // Wait for SA-004
+  wait_sa004 [type="tool",
+              label="Wait for SA-004",
+              tool_name="wait",
+              agent_id_context_key="sa004_agent_id",
+              timeout_ms="600000"]
+  
+  // Wait for SA-005
+  wait_sa005 [type="tool",
+              label="Wait for SA-005",
+              tool_name="wait",
+              agent_id_context_key="sa005_agent_id",
+              timeout_ms="600000"]
+  
+  // Collect all results
+  collect_results [type="builtin",
+                   label="Collect Results",
+                   action="aggregate_context",
+                   aggregate_keys="[sa001_result,sa002_result,sa003_result,sa004_result,sa005_result]",
+                   output_key="all_subagent_results"]
+  
+  // Verify all succeeded
+  verify_all [type="conditional",
+              label="All Succeeded?",
+              condition="context.all_subagent_results.every(r => r.success === true)"]
+  
+  // Checkpoint results
+  checkpoint_results [type="builtin",
+                      label="Checkpoint Results",
+                      action="write_manifest",
+                      manifest_path="logs/subagent-results.json"]
+  
+  // Handle failures
+  handle_failures [type="builtin",
+                   label="Handle Failures",
+                   action="fail",
+                   failure_reason_context_key="failed_subagents"]
+  
+  // Parallel wait (fan-out then fan-in)
+  start -> wait_sa001 -> collect_results
+  start -> wait_sa002 -> collect_results
+  start -> wait_sa003 -> collect_results
+  start -> wait_sa004 -> collect_results
+  start -> wait_sa005 -> collect_results
+  
+  collect_results -> verify_all
+  verify_all -> checkpoint_results [label="All Passed"]
+  verify_all -> handle_failures [label="Some Failed"]
+  checkpoint_results -> exit
+}

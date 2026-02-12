@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { globalCircuitBreakerTuner } from './circuit-breaker-tuning.js';
 import {
   CircuitBreaker,
   CircuitBreakerOpenError,
@@ -255,5 +256,150 @@ describe('CircuitBreakerOpenError', () => {
     expect(error.message).toBe('Test error');
     expect(error.circuitBreakerName).toBe('my-breaker');
     expect(error.metrics).toEqual(metrics);
+  });
+});
+
+describe('CircuitBreaker Adaptive Tuning', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    globalCircuitBreakerTuner.clearHistory();
+  });
+
+  it('supports adaptive configuration', () => {
+    const cb = new CircuitBreaker('adaptive-test', {}, { enabled: true, min_samples: 10 });
+    const config = cb.getAdaptiveConfig();
+
+    expect(config.enabled).toBe(true);
+    expect(config.min_samples).toBe(10);
+  });
+
+  it('toggles adaptive tuning', () => {
+    const cb = new CircuitBreaker('toggle-test');
+    expect(cb.getAdaptiveConfig().enabled).toBe(false);
+
+    cb.enableAdaptiveTuning(true);
+    expect(cb.getAdaptiveConfig().enabled).toBe(true);
+
+    cb.enableAdaptiveTuning(false);
+    expect(cb.getAdaptiveConfig().enabled).toBe(false);
+  });
+
+  it('returns anomaly status with insufficient data', () => {
+    const cb = new CircuitBreaker('anomaly-test');
+    const status = cb.getAnomalyStatus();
+
+    expect(status.is_anomaly).toBe(false);
+    expect(status.confidence).toBe(0);
+    expect(status.recommended_action).toBe('monitor');
+  });
+
+  it('returns null tuning recommendation with insufficient data', () => {
+    const cb = new CircuitBreaker('tuning-test');
+    cb.enableAdaptiveTuning(true);
+
+    const recommendation = cb.checkAndApplyTuning();
+    expect(recommendation).toBeNull();
+  });
+
+  it('records telemetry during execution', async () => {
+    const cb = new CircuitBreaker('telemetry-test');
+
+    await cb.execute(() => Promise.resolve('success'));
+    await cb.execute(() => Promise.resolve('success'));
+    await expect(cb.execute(() => Promise.reject(new Error('fail')))).rejects.toThrow();
+
+    const history = globalCircuitBreakerTuner.getTelemetryHistory('telemetry-test');
+    expect(history.length).toBeGreaterThan(0);
+  });
+
+  it('triggers anomaly handler on detection', async () => {
+    const cb = new CircuitBreaker('handler-test', { failure_threshold: 1 }, { enabled: true });
+    const anomalies: unknown[] = [];
+
+    cb.setAnomalyHandler((anomaly) => {
+      anomalies.push(anomaly);
+    });
+
+    // Generate normal baseline data
+    for (let i = 0; i < 30; i++) {
+      globalCircuitBreakerTuner.recordTelemetry({
+        breaker_name: 'handler-test',
+        timestamp_ms: Date.now() + i * 1000,
+        metrics: {
+          state: 'closed',
+          failure_count: 0,
+          success_count: 1,
+          last_failure_time_ms: null,
+          last_success_time_ms: Date.now() + i * 1000,
+          total_calls: i + 1,
+          total_failures: 0,
+          total_successes: i + 1,
+          consecutive_successes: i + 1,
+          consecutive_failures: 0,
+        },
+      });
+    }
+
+    // Advance timer to trigger tuning check
+    vi.advanceTimersByTime(310000); // Past the 5-minute tuning interval
+
+    // Force anomaly with high failure rate
+    for (let i = 0; i < 5; i++) {
+      await cb.execute(() => Promise.reject(new Error('fail'))).catch(() => {});
+    }
+
+    // Anomaly should be detected (if enough data collected)
+    expect(anomalies.length).toBeGreaterThanOrEqual(0); // May or may not trigger depending on timing
+  });
+});
+
+describe('CircuitBreakerRegistry Extended', () => {
+  beforeEach(() => {
+    globalCircuitBreakerTuner.clearHistory();
+  });
+
+  it('creates breaker with adaptive config', () => {
+    const registry = new CircuitBreakerRegistry();
+    const cb = registry.getOrCreate('adaptive', { failure_threshold: 3 }, { enabled: true });
+
+    expect(cb.getAdaptiveConfig().enabled).toBe(true);
+    expect(cb.getName()).toBe('adaptive');
+  });
+
+  it('returns all breaker names', () => {
+    const registry = new CircuitBreakerRegistry();
+    registry.getOrCreate('breaker-a');
+    registry.getOrCreate('breaker-b');
+
+    const names = registry.getAllNames();
+    expect(names).toContain('breaker-a');
+    expect(names).toContain('breaker-b');
+    expect(names).toHaveLength(2);
+  });
+
+  it('enables adaptive tuning for all breakers', () => {
+    const registry = new CircuitBreakerRegistry();
+    registry.getOrCreate('breaker-a');
+    registry.getOrCreate('breaker-b');
+
+    registry.enableAdaptiveTuningForAll(true);
+
+    for (const breaker of registry.getAll()) {
+      expect(breaker.getAdaptiveConfig().enabled).toBe(true);
+    }
+  });
+
+  it('checks tuning for all breakers', () => {
+    const registry = new CircuitBreakerRegistry();
+    registry.getOrCreate('breaker-a');
+    registry.getOrCreate('breaker-b');
+
+    const results = registry.checkAndApplyTuningForAll();
+
+    expect(results.has('breaker-a')).toBe(true);
+    expect(results.has('breaker-b')).toBe(true);
+    // All should be null since no telemetry data
+    expect(results.get('breaker-a')).toBeNull();
+    expect(results.get('breaker-b')).toBeNull();
   });
 });

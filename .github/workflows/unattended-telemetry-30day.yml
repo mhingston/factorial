@@ -1,0 +1,263 @@
+name: Unattended Telemetry - 30-Day Collection
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Number of days to aggregate (default: 30)'
+        required: false
+        default: '30'
+        type: string
+      categorize:
+        description: 'Enable run categorization'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  TELEMETRY_STORAGE_PATH: './logs/unattended_telemetry'
+  REPORT_PATH: './docs/metrics/reports/full-autonomy-telemetry-latest.json'
+  SOURCE_PATH: './docs/metrics/reports/full-autonomy-telemetry-source-latest.json'
+
+jobs:
+  collect-daily-telemetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Restore telemetry storage
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TELEMETRY_STORAGE_PATH }}
+          key: unattended-telemetry-${{ github.run_id }}
+          restore-keys: |
+            unattended-telemetry-
+
+      - name: Collect daily telemetry
+        id: collect
+        run: |
+          DAYS="${{ github.event.inputs.days || '30' }}"
+          CATEGORIZE_FLAG="${{ github.event.inputs.categorize == 'true' && '--categorize' || '' }}"
+
+          echo "Collecting ${DAYS}-day telemetry aggregate..."
+          npm run self-host:full-autonomy-telemetry -- \
+            --source ${{ env.SOURCE_PATH }} \
+            --report ${{ env.REPORT_PATH }} \
+            --days ${DAYS} \
+            ${CATEGORIZE_FLAG}
+
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Generate telemetry summary
+        if: always()
+        run: |
+          if [ -f "${{ env.REPORT_PATH }}" ]; then
+            echo "=== Telemetry Report Summary ==="
+            node -e "
+              const report = require('${{ env.REPORT_PATH }}');
+              console.log('Schema Version:', report.schema_version);
+              console.log('Generated At:', report.generated_at);
+              console.log('FA-008 Status:', report.fa_008_status);
+              console.log('Total Runs:', report.summary.total_runs);
+              console.log('Zero Escalation Rate:', report.summary.zero_escalation_rate);
+              console.log('OOD Rate:', report.summary.ood_rate);
+              if (report.thirty_day_telemetry) {
+                console.log('Hash Chain Valid:', report.thirty_day_telemetry.hash_chain_valid);
+                console.log('Daily Snapshots:', report.thirty_day_telemetry.daily_snapshot_count);
+              }
+            " || true
+          else
+            echo "Report not found at ${{ env.REPORT_PATH }}"
+          fi
+
+      - name: Check for escalation alerts
+        if: always()
+        run: |
+          if [ -f "${{ env.REPORT_PATH }}" ]; then
+            ALERTS=$(node -e "
+              const report = require('${{ env.REPORT_PATH }}');
+              const alerts = report.summary.escalation_alerts || [];
+              console.log(JSON.stringify(alerts));
+            " 2>/dev/null || echo "[]")
+
+            CRITICAL_COUNT=$(echo "$ALERTS" | node -e "
+              const alerts = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+              console.log(alerts.filter(a => a.severity === 'critical').length);
+            " 2>/dev/null || echo "0")
+
+            WARNING_COUNT=$(echo "$ALERTS" | node -e "
+              const alerts = JSON.parse(require('fs').readFileSync(0, 'utf-8'));
+              console.log(alerts.filter(a => a.severity === 'warning').length);
+            " 2>/dev/null || echo "0")
+
+            echo "Escalation Alerts:"
+            echo "  Critical: $CRITICAL_COUNT"
+            echo "  Warning: $WARNING_COUNT"
+
+            if [ "$CRITICAL_COUNT" -gt 0 ]; then
+              echo "::error::Critical escalation alerts detected!"
+              exit 1
+            fi
+          fi
+
+      - name: Check OOD detection
+        if: always()
+        run: |
+          if [ -f "${{ env.REPORT_PATH }}" ]; then
+            OOD_DETECTED=$(node -e "
+              const report = require('${{ env.REPORT_PATH }}');
+              const ood = report.summary.ood_detection;
+              console.log(ood && ood.is_ood ? 'true' : 'false');
+            " 2>/dev/null || echo "false")
+
+            if [ "$OOD_DETECTED" = "true" ]; then
+              echo "::warning::Out-of-distribution detection triggered!"
+              node -e "
+                const report = require('${{ env.REPORT_PATH }}');
+                const ood = report.summary.ood_detection;
+                console.log('OOD Trigger:', ood.trigger_metric);
+                console.log('Trigger Value:', ood.trigger_value);
+                console.log('Threshold:', ood.threshold_value);
+                console.log('Confidence:', ood.confidence);
+              " || true
+            else
+              echo "OOD Detection: Normal"
+            fi
+          fi
+
+      - name: Upload telemetry report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-autonomy-telemetry-report
+          path: ${{ env.REPORT_PATH }}
+
+      - name: Cache telemetry storage
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TELEMETRY_STORAGE_PATH }}
+          key: unattended-telemetry-${{ github.run_id }}
+          restore-keys: |
+            unattended-telemetry-
+
+  verify-30-day-window:
+    runs-on: ubuntu-latest
+    needs: collect-daily-telemetry
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download telemetry report
+        uses: actions/download-artifact@v4
+        with:
+          name: full-autonomy-telemetry-report
+          path: ./downloaded-reports/
+
+      - name: Verify 30-day window requirement
+        run: |
+          node -e "
+            const report = require('./downloaded-reports/full-autonomy-telemetry-latest.json');
+            const aggregate = report.summary.thirty_day_aggregate;
+
+            if (!aggregate) {
+              console.error('ERROR: No 30-day aggregate found in report');
+              process.exit(1);
+            }
+
+            console.log('30-Day Aggregate Verification:');
+            console.log('  Window Start:', aggregate.window_start);
+            console.log('  Window End:', aggregate.window_end);
+            console.log('  Total Days:', aggregate.total_days);
+            console.log('  Days with Data:', aggregate.days_with_data);
+            console.log('  Days with Gaps:', aggregate.days_with_gaps);
+
+            if (aggregate.total_days < 30) {
+              console.error('ERROR: Window is less than 30 days');
+              process.exit(1);
+            }
+
+            if (aggregate.days_with_gaps > 5) {
+              console.error('ERROR: Too many gaps in data (>5 days)');
+              process.exit(1);
+            }
+
+            if (aggregate.days_with_data < 25) {
+              console.error('ERROR: Insufficient data days (<25)');
+              process.exit(1);
+            }
+
+            console.log('PASSED: 30-day window verification');
+          "
+
+      - name: Verify hash chain integrity
+        run: |
+          node -e "
+            const report = require('./downloaded-reports/full-autonomy-telemetry-latest.json');
+            const hashChainValid = report.thirty_day_telemetry?.hash_chain_valid;
+
+            if (hashChainValid === false) {
+              console.error('ERROR: Hash chain integrity check failed');
+              process.exit(1);
+            }
+
+            if (hashChainValid === true) {
+              console.log('PASSED: Hash chain integrity verified');
+            } else {
+              console.log('SKIPPED: Hash chain verification not performed');
+            }
+          "
+
+      - name: Verify categorization completeness
+        run: |
+          node -e "
+            const report = require('./downloaded-reports/full-autonomy-telemetry-latest.json');
+            const aggregate = report.summary.thirty_day_aggregate;
+
+            if (!aggregate) {
+              console.log('SKIPPED: No aggregate data');
+              process.exit(0);
+            }
+
+            const workflowTypes = Object.keys(aggregate.workflow_type_distribution || {});
+            const errorClasses = Object.keys(aggregate.error_class_distribution || {});
+            const escalationReasons = Object.keys(aggregate.escalation_reason_distribution || {});
+
+            console.log('Categorization Verification:');
+            console.log('  Workflow Types:', workflowTypes.length);
+            console.log('  Error Classes:', errorClasses.length);
+            console.log('  Escalation Reasons:', escalationReasons.length);
+
+            if (workflowTypes.length === 0) {
+              console.error('ERROR: No workflow type categorization');
+              process.exit(1);
+            }
+
+            console.log('PASSED: Categorization verified');
+          "

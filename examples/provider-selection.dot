@@ -1,0 +1,53 @@
+# Provider Selection Example
+# Shows how to use different providers with their native tool profiles
+
+digraph ProviderSelection {
+    graph [goal="Demonstrate provider-native tool profiles",
+           rankdir=LR]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # OpenAI with apply_patch format
+    edit_openai [prompt="Update the file to add error handling:
+    - Add try-catch blocks
+    - Add input validation
+    - Add logging
+    
+    Use the apply_patch format for file modifications.",
+                 label="Edit with OpenAI",
+                 llm_provider="openai",
+                 llm_model="gpt-4o"]
+    
+    # Anthropic with old_string/new_string format
+    edit_anthropic [prompt="Update the file to add error handling:
+    - Add try-catch blocks
+    - Add input validation
+    - Add logging
+    
+    Use the old_string/new_string format for precise replacements.",
+                    label="Edit with Anthropic",
+                    llm_provider="anthropic",
+                    llm_model="claude-3-5-sonnet-20241022"]
+    
+    # Gemini with native conventions
+    edit_gemini [prompt="Update the file to add error handling:
+    - Add try-catch blocks
+    - Add input validation
+    - Add logging",
+                 label="Edit with Gemini",
+                 llm_provider="gemini",
+                 llm_model="gemini-2.0-flash-exp"]
+    
+    # Compare results
+    compare [prompt="Compare the three implementations:
+    1. Code quality assessment
+    2. Error handling thoroughness
+    3. Documentation/comments
+    4. Best practices adherence
+    
+    Declare a winner and explain why.",
+             label="Compare Results"]
+    
+    start -> edit_openai -> edit_anthropic -> edit_gemini -> compare -> exit
+}

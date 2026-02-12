@@ -1,0 +1,48 @@
+# Audio Transcription and Analysis
+# Transcribes meeting recordings and extracts action items
+
+digraph AudioTranscription {
+    graph [goal="Transcribe meeting and extract action items",
+           rankdir=LR]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Transcribe the audio file
+    # Note: Currently only Gemini supports audio input
+    transcribe [prompt="Transcribe this meeting recording verbatim. Include:
+    1. Speaker identification (Speaker A, Speaker B, etc.)
+    2. Timestamps for key moments
+    3. Indicate unclear or inaudible sections with [inaudible]
+    
+    Format as a clean transcript.",
+                label="Transcribe Audio",
+                audio_input="./recordings/team-meeting.m4a",
+                llm_provider="gemini",
+                llm_model="gemini-2.0-flash-exp"]
+    
+    # Summarize key discussion points
+    summarize [prompt="Based on the meeting transcript, provide:
+    1. Executive summary (3-5 bullet points)
+    2. Key discussion topics
+    3. Decisions made
+    4. Open questions or issues raised",
+               label="Summarize Discussion"]
+    
+    # Extract action items
+    extract_actions [prompt="Extract all action items from the meeting. For each item:
+    1. Task description
+    2. Owner (if mentioned)
+    3. Due date (if mentioned)
+    4. Priority (high/medium/low)
+    
+    Format as a structured action items list.",
+                     label="Extract Action Items",
+                     output_mode="json",
+                     output_schema='{"type":"object","properties":{"action_items":{"type":"array","items":{"type":"object","properties":{"task":{"type":"string"},"owner":{"type":"string"},"due_date":{"type":"string"},"priority":{"type":"string"}}}}}}']
+    
+    # Human review
+    review [shape=hexagon, type="wait.human", label="Review & Edit"]
+    
+    start -> transcribe -> summarize -> extract_actions -> review -> exit
+}

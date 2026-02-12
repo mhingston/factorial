@@ -238,6 +238,71 @@ observe [type="stack.observe", prompt="Observe current state"]
 steer [type="stack.steer", prompt="Provide steering guidance"]
 ```
 
+## Subagent Tool Nodes
+
+### spawn_agent (Tool)
+**Shape:** `parallelogram` or `box`
+
+Spawn a lightweight subagent for parallel task execution.
+
+**Attributes:**
+- `tool_name`: `"spawn_agent"` (required)
+- `task`: Description of work to complete (required)
+- `model`: Optional model override
+- `tools`: Optional array of allowed tools
+
+```dot
+spawn [shape=parallelogram, type="tool", tool_name="spawn_agent", task="Research topic"]
+```
+
+**Use for:**
+- Parallel exploration of independent tasks
+- Context offloading (heavy research, fresh context window)
+- Tool isolation (limit available tools per subagent)
+
+### wait (Tool)
+**Shape:** `parallelogram` or `box`
+
+Wait for subagent completion and return summarized result.
+
+**Attributes:**
+- `tool_name`: `"wait"` (required)
+- `agent_id_context_key`: Context key containing agent ID
+- `timeout_ms`: Optional timeout (default: 300000 = 5 min)
+
+```dot
+wait [shape=parallelogram, type="tool", tool_name="wait", agent_id_context_key="agent_id"]
+```
+
+**Returns:** Summarized result to keep parent context clean
+
+### send_input (Tool)
+**Shape:** `parallelogram` or `box`
+
+Send steering input to a running subagent.
+
+**Attributes:**
+- `tool_name`: `"send_input"` (required)
+- `agent_id`: Target agent ID
+- `message`: Steering message
+
+```dot
+steer [shape=parallelogram, type="tool", tool_name="send_input", agent_id="agent-123", message="Focus on security aspects"]
+```
+
+### close_agent (Tool)
+**Shape:** `parallelogram` or `box`
+
+Forcefully terminate a subagent.
+
+**Attributes:**
+- `tool_name`: `"close_agent"` (required)
+- `agent_id`: Target agent ID
+
+```dot
+close [shape=parallelogram, type="tool", tool_name="close_agent", agent_id="agent-123"]
+```
+
 ## Tool and External Nodes
 
 ### tool

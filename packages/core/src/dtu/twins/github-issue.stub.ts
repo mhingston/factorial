@@ -355,6 +355,14 @@ export class GitHubIssueTwinStub implements TwinContract {
   }
 }
 
+/**
+ * Generates a deterministic number from a string input for DTU testing.
+ * Uses a simple hash algorithm (multiplier 31, modulo 1,000,000).
+ *
+ * Note: This is designed for deterministic testing only. The simple hash
+ * with limited range may produce collisions for different inputs, which
+ * is acceptable for test scenarios but not for production use.
+ */
 function deterministicNumber(value: string): number {
   let hash = 0;
   for (const char of value) {

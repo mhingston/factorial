@@ -1,0 +1,39 @@
+digraph SpawnDependentSubagents {
+  graph [goal="Spawn SA-003 after SA-002 completion"]
+  rankdir=TB
+  
+  start [shape=Mdiamond, label="Start Dependent Delegation"]
+  exit [shape=Msquare, label="SA-003 Spawned"]
+  
+  // Wait for SA-002 to complete
+  wait_sa002 [type="tool",
+              label="Wait for SA-002",
+              tool_name="wait",
+              agent_id_context_key="sa002_agent_id",
+              timeout_ms="300000"]
+  
+  // Verify SA-002 success
+  verify_sa002 [type="conditional",
+                label="SA-002 Success?",
+                condition="context.sa002_status === 'completed' && context.sa002_success === true"]
+  
+  // Spawn SA-003: Anthropic Prompt Caching (Depends on SA-002)
+  spawn_sa003 [type="tool",
+               label="Spawn SA-003",
+               tool_name="spawn_agent",
+               task="Implement specialized Anthropic adapter with automatic prompt caching. Implement cache_control injection strategies (system-only, system-plus-early, aggressive). Update cost calculation for 90% cache discount. Follow docs/plans/subagent-sa003-anthropic-caching.md. Generate anthropic-caching-effectiveness-latest.json evidence. Depends on SA-002 type extensions.",
+               allowed_tools="[read_file,write_file,edit_file,shell,grep,glob]",
+               max_turns="100"]
+  
+  // Handle SA-002 failure
+  handle_failure [type="builtin",
+                  label="SA-002 Failed",
+                  action="fail",
+                  failure_reason="SA-002 (reasoning tokens) must complete successfully before SA-003 can start"]
+  
+  // Flow
+  start -> wait_sa002 -> verify_sa002
+  verify_sa002 -> spawn_sa003 [label="Success"]
+  verify_sa002 -> handle_failure [label="Failed"]
+  spawn_sa003 -> exit
+}

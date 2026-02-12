@@ -1,0 +1,56 @@
+{
+  "scenario_id": "scn-postgres-transaction",
+  "suite": "smoke",
+  "description": "Execute SQL transaction through Postgres twin and verify deterministic success payload.",
+  "request": {
+    "twin_id": "postgres",
+    "operation": "sql.transaction",
+    "scenario_id": "postgres-transaction",
+    "seed": "phase-a-seed-013",
+    "input": {
+      "operations": [
+        { "sql": "INSERT INTO users (name) VALUES ($1)", "params": ["Alice"] },
+        { "sql": "INSERT INTO logs (action) VALUES ($1)", "params": ["create_user"] }
+      ],
+      "actor": "platform-bot",
+      "simulate": "none"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "postgres-transaction"
+    }
+  },
+  "expected": {
+    "twin_id": "postgres",
+    "twin_version": "0.1.0",
+    "operation": "sql.transaction",
+    "status": "success",
+    "output": {
+      "results": [
+        { "index": 0, "row_count": 1, "status": "success" },
+        { "index": 1, "row_count": 1, "status": "success" }
+      ],
+      "operation_count": 2,
+      "committed_at": "2025-02-10T16:00:00.000Z",
+      "committed_by": "platform-bot"
+    },
+    "error": null,
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400015,
+      "latency_ms": 15,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "postgres-transaction",
+      "provider": "postgres",
+      "parity_profile": "dtu-complete"
+    }
+  },
+  "tags": ["postgres", "smoke", "transaction"]
+}

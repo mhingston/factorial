@@ -1,0 +1,30 @@
+// Scenario Template: {{SCENARIO_NAME}}
+// Created: {{DATE}}
+// Difficulty: {{DIFFICULTY}}
+// Category: {{CATEGORY}}
+
+digraph scenario {
+  // Node attributes
+  node [shape=box, style="filled,rounded"];
+  
+  // Scenario start
+  start [label="Start", fillcolor="#90EE90"];
+  
+  // Main operation node
+  operation [label="{{OPERATION}}", fillcolor="#87CEEB"];
+  
+  // Expected outcome verification
+  verify [label="Verify", fillcolor="#FFD700"];
+  
+  // Scenario end
+  end [label="End", fillcolor="#FFB6C1"];
+  
+  // Edges
+  start -> operation;
+  operation -> verify;
+  verify -> end;
+  
+  // Graph attributes
+  label="{{SCENARIO_NAME}}";
+  labelloc=t;
+}

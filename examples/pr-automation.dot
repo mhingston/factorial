@@ -1,0 +1,170 @@
+# PR Automation Workflow
+# Automates PR review, testing, and merging with safety checks
+
+digraph PRAutomation {
+    graph [goal="Automated PR review and merge pipeline",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="PR Created"]
+    exit [shape=Msquare, label="Complete"]
+    
+    # Parse PR description and changes
+    analyze_pr [prompt="Analyze this Pull Request:
+
+**PR Details:**
+- Title: [from context]
+- Description: [from context]
+- Files Changed: [from context]
+- Author: [from context]
+
+**Analysis:**
+1. What is the purpose of this PR?
+2. What areas of the codebase are affected?
+3. Are there any high-risk changes?
+4. Does it require special review attention?
+5. Are there any deployment considerations?
+
+Provide a risk assessment (low/medium/high) and recommend review path.",
+                label="Analyze PR"]
+    
+    # Risk-based routing
+    # Low risk: auto-review
+    # Medium risk: standard review
+    # High risk: thorough review with human gate
+    
+    # For this example, we'll use standard flow
+    
+    # Run automated checks
+    check_conflicts [prompt="Check for merge conflicts:
+1. Verify branch is up to date with main
+2. Check for conflicting files
+3. Identify if conflicts are in critical paths
+
+Report: conflicts found (yes/no), resolution difficulty",
+                     label="Check Conflicts"]
+    
+    # Run CI pipeline
+    ci_lint [type="quality.gate",
+             gate_type="lint",
+             gate_command="npm run lint",
+             label="CI: Lint"]
+    
+    ci_test [type="quality.gate",
+             gate_type="tests",
+             gate_command="npm run test:ci",
+             label="CI: Tests"]
+    
+    ci_build [type="quality.gate",
+              gate_type="custom",
+              gate_command="npm run build",
+              label="CI: Build"]
+    
+    # AI review
+    ai_review [type="judge.rubric",
+               judge_rubric_path="./rubrics/pr-review.md",
+               score_threshold=0.7,
+               score_weights='{"correctness":0.3,"quality":0.3,"testing":0.2,"documentation":0.2}',
+               label="AI Review"]
+    
+    # Check if auto-merge eligible
+    merge_check [prompt="Determine if this PR is eligible for auto-merge:
+
+**Criteria:**
+1. ✅ All CI checks passed
+2. ✅ AI review score >= 0.7
+3. ✅ No merge conflicts
+4. ✅ Not a high-risk change
+5. ✅ PR size is reasonable (<500 lines)
+
+**Decision:**
+- If all criteria met: RECOMMEND AUTO-MERGE
+- If criteria not met: REQUIRE HUMAN REVIEW
+
+Provide reasoning for the decision.",
+                 label="Merge Check"]
+    
+    # Decision gate
+    gate [type="confidence.gate",
+          confidence_signal_path="judge.ai_review.score",
+          escalation_threshold=0.75,
+          escalation_target="human_review",
+          label="Auto-Merge Gate"]
+    
+    # Auto-merge path
+    auto_merge [prompt="PR approved for auto-merge!
+
+**Actions:**
+1. Merge PR to main branch
+2. Tag the release
+3. Trigger deployment pipeline
+4. Update changelog
+5. Notify team
+
+**Post-Merge:**
+- Monitor production for 30 minutes
+- Watch error rates and performance
+- Be ready to rollback if issues arise",
+                label="Auto-Merge"]
+    
+    # Human review path
+    human_review [shape=hexagon,
+                  type="wait.human",
+                  label="Human Review"]
+    
+    human_decision [prompt="Human reviewer has made a decision.
+
+**Possible Outcomes:**
+1. APPROVE - Merge the PR
+2. REQUEST CHANGES - Provide feedback
+3. REJECT - Close the PR
+
+Based on the decision, generate appropriate actions:
+- If approved: proceed to merge
+- If changes requested: create task list
+- If rejected: document reasoning",
+                    label="Process Decision"]
+    
+    # Manual merge after human review
+    manual_merge [prompt="PR approved by human reviewer.
+
+**Actions:**
+1. Merge PR to main branch
+2. Tag the release
+3. Trigger deployment pipeline
+4. Document review decision
+5. Update team
+
+**Note:** This PR required human intervention due to:
+- [reason from review]",
+                  label="Manual Merge"]
+    
+    # Notification
+    notify [prompt="Send PR completion notification:
+
+**To:** PR author, reviewers, team channel
+
+**Subject:** PR #[number] Merged
+
+**Body:**
+- PR Title: [title]
+- Author: [author]
+- Review Time: [time]
+- AI Review Score: [score]
+- Merge Type: [auto/manual]
+- Changes: [summary]
+
+**Next Steps:**
+[deployment status or follow-up tasks]",
+            label="Notify Team"]
+    
+    # Main flow
+    start -> analyze_pr -> check_conflicts -> ci_lint -> ci_test -> ci_build -> ai_review -> merge_check -> gate
+    
+    # Auto-merge path
+    gate -> auto_merge [label="Auto-Approved (≥0.75)"]
+    auto_merge -> notify -> exit
+    
+    # Human review path
+    gate -> human_review [label="Needs Review (<0.75)"]
+    human_review -> human_decision -> manual_merge -> notify -> exit
+}

@@ -82,6 +82,27 @@ node [prompt="Instructions", llm_provider="openai", llm_model="gpt-4o-mini"]
 - `output_schema_path`: Path to schema file
 - `output_mode`: `auto`, `json`, or `tool`
 
+### Multi-Modal Input
+```dot
+node [prompt="Analyze this", image_input="./screenshot.png"]
+node [prompt="Summarize paper", document_input="./paper.pdf"]
+node [prompt="Transcribe", audio_input="./meeting.m4a", llm_provider="gemini"]
+```
+
+**Multi-modal attributes:**
+- `image_input`: Path to image file (PNG, JPEG, GIF, WEBP)
+- `document_input`: Path to document (PDF, TXT, MD)
+- `audio_input`: Path to audio file (WAV, MP3, M4A) - Gemini only
+
+### Anthropic Caching
+```dot
+node [llm_provider="anthropic", enable_caching="true", cache_strategy="system-plus-early"]
+```
+
+**Caching attributes:**
+- `enable_caching`: `true` to enable prompt caching
+- `cache_strategy`: `system-only`, `system-plus-early`, or `aggressive`
+
 ### Quality Gates
 ```dot
 lint [type="quality.gate", gate_type="lint", gate_command="npm run lint"]
@@ -148,6 +169,23 @@ analyze [type="failure.analyze",
 - `none`: No retry
 - `standard`: Simple retry
 - `targeted`: Route by failure class
+
+### Subagent Tools (Parallel Execution)
+```dot
+spawn [type="tool", tool_name="spawn_agent", task="Research topic A"]
+wait [type="tool", tool_name="wait"]
+```
+
+**Available tools:**
+- `spawn_agent`: Spawn lightweight subagent for independent task
+- `wait`: Wait for subagent completion with summarization
+- `send_input`: Send steering input to running agent
+- `close_agent`: Forcefully terminate agent
+
+**Use when:**
+- Exploring large codebases (offload to subagent, get summary)
+- Parallel independent research tasks
+- Isolating tool access by capability
 
 ### Budget and Timeouts
 ```dot
@@ -294,6 +332,58 @@ digraph RetryPattern {
     analyze -> attempt [label="transient"]
     analyze -> revise [label="quality_gap"]
     revise -> attempt
+}
+```
+
+### Pattern 6: Multi-Modal Image Analysis
+```dot
+digraph ImageAnalysis {
+    graph [goal="Analyze UI screenshot"]
+    start [shape=Mdiamond]
+    exit [shape=Msquare]
+    
+    analyze [prompt="Describe the UI elements and their layout",
+             image_input="./screenshot.png",
+             llm_provider="openai"]
+    
+    start -> analyze -> exit
+}
+```
+
+### Pattern 7: Document Q&A
+```dot
+digraph DocumentQA {
+    graph [goal="Answer questions about research paper"]
+    start [shape=Mdiamond]
+    exit [shape=Msquare]
+    
+    summarize [prompt="Summarize the key findings",
+               document_input="./paper.pdf",
+               llm_provider="anthropic"]
+    
+    answer [prompt="What methodology did the authors use?"]
+    
+    start -> summarize -> answer -> exit
+}
+```
+
+### Pattern 8: Parallel Subagent Research
+```dot
+digraph ParallelResearch {
+    graph [goal="Research multiple topics in parallel"]
+    start [shape=Mdiamond]
+    exit [shape=Msquare]
+    
+    spawn_a [type="tool", tool_name="spawn_agent", task="Research authentication methods"]
+    spawn_b [type="tool", tool_name="spawn_agent", task="Research encryption options"]
+    
+    wait [type="tool", tool_name="wait_for_all"]
+    
+    synthesize [prompt="Compare authentication vs encryption approaches"]
+    
+    start -> spawn_a -> wait
+    start -> spawn_b -> wait
+    wait -> synthesize -> exit
 }
 ```
 

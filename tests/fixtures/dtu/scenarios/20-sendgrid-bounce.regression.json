@@ -1,0 +1,53 @@
+{
+  "scenario_id": "scn-sendgrid-bounce",
+  "suite": "regression",
+  "description": "Test SendGrid bounce simulation through reference twin.",
+  "request": {
+    "twin_id": "sendgrid",
+    "operation": "email.send",
+    "scenario_id": "sendgrid-bounce",
+    "seed": "phase-a-seed-020",
+    "input": {
+      "to": "bounce@example.com",
+      "from": "sender@example.com",
+      "subject": "Test Bounce",
+      "actor": "platform-bot",
+      "simulate": "bounced"
+    },
+    "timing": {
+      "requested_at_ms": 1739222400000,
+      "timeout_ms": 5000
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "sendgrid-bounce"
+    }
+  },
+  "expected": {
+    "twin_id": "sendgrid",
+    "twin_version": "0.1.0",
+    "operation": "email.send",
+    "status": "error",
+    "output": null,
+    "error": {
+      "code": "internal_error",
+      "class": "transient",
+      "message": "Email address bounced.",
+      "retryable": false,
+      "details": { "bounce_type": "hard_bounce" }
+    },
+    "timing": {
+      "started_at_ms": 1739222400000,
+      "completed_at_ms": 1739222400005,
+      "latency_ms": 5,
+      "deterministic": true
+    },
+    "metadata": {
+      "suite": "dtu-complete",
+      "scenario": "sendgrid-bounce",
+      "provider": "sendgrid"
+    }
+  },
+  "expected_failure_mode": "malformed_payload",
+  "tags": ["sendgrid", "regression", "bounce"]
+}

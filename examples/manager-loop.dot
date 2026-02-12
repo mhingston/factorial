@@ -1,0 +1,91 @@
+# Manager Loop with Subagent Delegation
+# Supervisor pattern delegating to child workflows
+
+digraph ManagerLoop {
+    graph [goal="Supervise subagent execution with observe/steer/wait cycle",
+           rankdir=TB]
+    
+    start [shape=Mdiamond, label="Start"]
+    exit [shape=Msquare, label="Exit"]
+    
+    # Manager delegates to child workflow
+    # In this case, using local child execution
+    
+    manager [shape=house,
+             type="stack.manager_loop",
+             stack_child_dotfile="./child-workflow.dot",
+             manager_actions="delegate,observe,steer,wait",
+             manager_poll_interval="5000",
+             manager_max_cycles="50",
+             manager_stop_condition="ctx.child.status === 'completed' || ctx.child.status === 'failed'",
+             manager_require_lock="true",
+             manager_local_child_execution="true",
+             label="Manager"]
+    
+    # The child workflow would be in ./child-workflow.dot
+    # Example child workflow structure:
+    #
+    # digraph ChildWorkflow {
+    #   start [shape=Mdiamond]
+    #   exit [shape=Msquare]
+    #   
+    #   task1 [prompt="Do initial analysis"]
+    #   task2 [prompt="Generate recommendations"]
+    #   
+    #   start -> task1 -> task2 -> exit
+    # }
+    
+    # After child completes, manager can do final processing
+    finalize [prompt="Child workflow completed.
+
+**Child Status:** [from context]
+**Child Outcome:** [from context]
+**Lock Decision:** [from context - resolved/reopen]
+
+Generate final summary:
+1. What the child workflow accomplished
+2. Key findings or outputs
+3. Any issues encountered
+4. Recommended next steps
+5. Whether to accept (resolved) or retry (reopen) the work",
+              label="Finalize"]
+    
+    # Lock decision gate
+    # If child lock is 'reopen', fail the workflow
+    lock_check [type="conditional",
+                label="Lock Check"]
+    
+    # Success path
+    success [prompt="Work completed and accepted!
+
+**Summary:**
+- Child workflow executed successfully
+- Lock decision: RESOLVED
+- All objectives met
+
+Proceed to exit.",
+             label="Success"]
+    
+    # Failure/retry path
+    reopen [prompt="Work needs to be reopened.
+
+**Reason:** [from context]
+**Lock Decision:** REOPEN
+
+**Next Steps:**
+1. Document issues found
+2. Create follow-up tasks
+3. Assign for rework
+4. Schedule retry
+
+This workflow will exit with failure status.",
+            label="Reopen"]
+    
+    start -> manager -> finalize -> lock_check
+    
+    lock_check -> success [label="resolved", condition="ctx.child.lock_decision === 'resolved'"]
+    lock_check -> reopen [label="reopen", condition="ctx.child.lock_decision === 'reopen'"]
+    
+    success -> exit
+    reopen -> exit
+}

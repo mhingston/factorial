@@ -313,3 +313,31 @@ jobs:
         env:
           WORKTREE_PARITY_REQUIRE_HEAD: "1"
         run: npm run test:worktree
+
+  evidence-freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Evidence Freshness
+        run: |
+          npm run evidence:freshness -- \
+            --max-age-hours 168 \
+            --report ./logs/evidence_freshness_ci/report.json
+
+      - name: Upload Evidence Freshness Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-freshness-report
+          path: logs/evidence_freshness_ci/report.json
