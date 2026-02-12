@@ -313,33 +313,50 @@ Execution order (do not reorder unless blocked):
   - [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md)
 
 ### OP-001: Cross-doc claim synchronization ratchet (operational follow-up)
+- Status: Done (2026-02-12)
 - Goal:
   - Prevent declaration drift across claim-bearing docs while keeping updates auditable and fail-closed.
-- Required scope:
-  - Extend drift checks to enforce synchronized declarations across:
-    - `ROADMAP.md` (current/next level and active queue language).
-    - `docs/spec-conformance-matrix.md` (active delta closure declarations).
-    - `docs/companion-spec-scope-contract.md` (scope/claim status wording).
-    - `docs/self-hosting-maturity-ladder.md` (declared level and promotion-gate wording).
-  - Fail CI closed when declarations diverge without synchronized updates and refreshed evidence artifacts.
-  - Keep checks deterministic and fixture-backed.
-- Exit criteria:
-  - Drift is rejected with actionable mismatch diagnostics.
+- Completed scope:
+  - Enhanced `scripts/claims-consistency-audit.js` with actionable drift diagnostics:
+    - Field-level mismatch detection with expected/observed values
+    - Location tracking for all drift occurrences
+    - Diagnostics arrays in CLM-002 through CLM-006 checks
+  - CI already fails closed when audit returns non-zero (`.github/workflows/ci.yml`)
+  - Checks synchronized declarations across:
+    - `ROADMAP.md` (current/next level and active queue language)
+    - `docs/spec-conformance-matrix.md` (active delta closure declarations)
+    - `docs/companion-spec-scope-contract.md` (scope/claim status wording)
+    - `docs/self-hosting-maturity-ladder.md` (declared level and promotion-gate wording)
+    - `docs/roadmap/active-handoff.md` (operational queue)
+- Exit criteria: ✅
+  - Drift is rejected with actionable mismatch diagnostics (field, expected, observed, locations).
   - Standard roadmap claim updates require synchronized edits across the claim set.
-  - Guardrail runs in the default contributor loop (`npm run docs:freshness` and/or `npm run claims:audit`).
+  - Guardrail runs in CI (`npm run claims:audit`).
+- Completion artifacts:
+  - Plan: `docs/plans/op-001-cross-doc-claim-synchronization.md`
+  - Review: `docs/reviews/op-001-op-002-completion-review.md`
 
 ### OP-002: Reviewable confidence-tuning recommendation publication loop (operational follow-up)
+- Status: Done (2026-02-12)
 - Goal:
   - Strengthen self-improvement by publishing deterministic recommendations without automatic policy mutation.
-- Required scope:
-  - Publish cadence-based recommendation artifacts derived from `confidence_result.json` via `confidence-tune`.
-  - Link recommendations into plan/review/compound artifacts as explicit lock-decision inputs.
-  - Enforce recommendation-only behavior: no automatic threshold or route updates.
-  - Record adoption/rejection decisions in review artifacts for traceability.
-- Exit criteria:
-  - Deterministic recommendation artifacts are produced and linked from active convergence work.
-  - Lock decisions (`resolved|reopen`) remain human-governed with recommendation context attached.
-  - No unattended threshold mutation path exists outside reviewed and merged changes.
+- Completed scope:
+  - Publication command: `npm run confidence:publish` (wires `scripts/confidence-tune-publish.js`)
+  - Report schema: `confidence_tune_publication_report.v1` with:
+    - Quantile-based threshold recommendations (p50/p90) for target escalation rate
+    - Route candidate ranking by frequency
+    - Sample sufficiency tracking (`ready` vs `insufficient_samples`)
+    - Explicit policy constraints: `recommendation_only: true`, `requires_human_lock_review: true`, `auto_apply_supported: false`
+  - Multi-logs-root aggregation for historical artifact collection
+  - Comprehensive test suite: `packages/cli/src/confidence-tune-publish.test.ts`
+- Exit criteria: ✅
+  - Deterministic recommendation artifacts are produced via `npm run confidence:publish`.
+  - Lock decisions remain human-governed (policy: `requires_human_lock_review: true`).
+  - No unattended threshold mutation path (`auto_apply_supported: false`).
+- Completion artifacts:
+  - Plan: `docs/plans/op-002-confidence-recommendation-publication.md`
+  - Review: `docs/reviews/op-001-op-002-completion-review.md`
+  - Solution: `docs/solutions/confidence-publication-pattern.md`
 
 ### Session Rules for Any Agent Picking Up This Roadmap
 - Before coding:
@@ -486,12 +503,13 @@ Execution order (do not reorder unless blocked):
 | `BK-015` | Unattended-run outcome and economics telemetry | Done | Closed via deterministic unattended telemetry report contract (`self_host_unattended_telemetry_report.v1`), strict source schema/freshness checks, and fail-closed CI unattended telemetry lane — see completion report. |
 | `BK-016` | Documentation freshness guardrails | Done | Closed via deterministic `docs_freshness_report.v1` contract, fixture-backed drift tests, and fail-closed CI docs-freshness lane — see completion report. |
 | `BK-017` | Markdown compaction and context-window guardrails | Done | Closed via docs size-budget checks (`DF-005`), compact handoff/archive guardrails (`DF-006`), and roadmap artifact-list compaction into archive docs — see completion report. |
+| `OP-001` | Cross-doc claim synchronization ratchet | Done | Closed via drift diagnostics with field-level mismatch detection, actionable error messages, and fail-closed CI claims-consistency gate — see completion report. |
+| `OP-002` | Reviewable confidence-tuning recommendation loop | Done | Closed via `npm run confidence:publish` command, `confidence_tune_publication_report.v1` schema with recommendation-only policy, and comprehensive test coverage — see completion report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| `OP-001` | Cross-doc claim synchronization ratchet | Planned | CI fails closed when roadmap/spec matrix/scope contract/maturity declarations drift without synchronized updates and evidence refresh. |
-| `OP-002` | Reviewable confidence-tuning recommendation loop | Planned | Deterministic recommendation artifact is published on cadence and consumed as explicit review input to lock-governed convergence (no auto-apply path). |
+| None | Active operational queue is empty after OP-001/OP-002 completion | N/A | All planned operational follow-ups completed. |
 
 ### Later
 | ID | Item | Status | Notes |

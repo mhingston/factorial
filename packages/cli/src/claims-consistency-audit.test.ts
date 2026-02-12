@@ -30,6 +30,8 @@ describe('Claims consistency audit script', () => {
         join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'companion.compliant.md'),
         '--maturity',
         join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'maturity.compliant.md'),
+        '--handoff',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'handoff.compliant.md'),
         '--report',
         reportPath,
       ],
@@ -67,6 +69,8 @@ describe('Claims consistency audit script', () => {
         join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'companion.mismatch-current-level.md'),
         '--maturity',
         join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'maturity.compliant.md'),
+        '--handoff',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'handoff.compliant.md'),
         '--report',
         reportPath,
       ],
@@ -83,6 +87,42 @@ describe('Claims consistency audit script', () => {
       ? summary.failed_check_ids.map(value => String(value))
       : [];
     expect(failedCheckIds).toContain('CLM-002');
+  });
+
+  it('fails when operational follow-up queue IDs drift between roadmap and active handoff', async () => {
+    const tempRoot = await mkdtemp(join(tmpdir(), 'attractor-claims-audit-op-queue-fail-'));
+    const reportPath = join(tempRoot, 'claims-report.json');
+
+    const result = await run(
+      [
+        process.execPath,
+        join(ROOT_DIR, 'scripts', 'claims-consistency-audit.js'),
+        '--roadmap',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'roadmap.operational-queue.compliant.md'),
+        '--matrix',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'spec-matrix.compliant.md'),
+        '--companion',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'companion.compliant.md'),
+        '--maturity',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'maturity.compliant.md'),
+        '--handoff',
+        join(ROOT_DIR, 'tests', 'fixtures', 'claims-audit', 'handoff.operational-queue.mismatch.md'),
+        '--report',
+        reportPath,
+      ],
+      ROOT_DIR,
+    );
+
+    expect(result.code).toBe(1);
+
+    const report = JSON.parse(await readFile(reportPath, 'utf-8')) as Record<string, unknown>;
+    const summary = (report.summary ?? {}) as Record<string, unknown>;
+    expect(summary.overall_status).toBe('fail');
+
+    const failedCheckIds = Array.isArray(summary.failed_check_ids)
+      ? summary.failed_check_ids.map(value => String(value))
+      : [];
+    expect(failedCheckIds).toContain('CLM-006');
   });
 });
 

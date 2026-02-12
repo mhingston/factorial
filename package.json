@@ -51,7 +51,8 @@
     "self-host:flake": "node ./scripts/self-host-flake-replay.js",
     "self-host:autonomous": "node ./scripts/self-host-autonomous-report.js",
     "self-host:agent-audit": "node ./scripts/self-host-agent-audit-report.js",
-    "self-host:unattended-telemetry": "node ./scripts/self-host-unattended-telemetry-report.js"
+    "self-host:unattended-telemetry": "node ./scripts/self-host-unattended-telemetry-report.js",
+    "confidence:publish": "node ./scripts/confidence-tune-publish.js"
   },
   "keywords": [
     "ai",
