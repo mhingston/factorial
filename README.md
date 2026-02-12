@@ -8,7 +8,13 @@
 
 Factorial is a DOT-based workflow orchestrator for multi-stage AI pipelines. Write your workflow as a Graphviz graph, run it with built-in quality gates, human approvals, and parallel execution.
 
-> **Reference Implementation**: Factorial is based off of [StrongDM AI attractor](https://factory.strongdm.ai/products/attractor) (a non-interactive coding agent), with additional enhancements for self-hosting maturity, DTU validation, and deterministic governance.
+> **Reference Implementation**: Factorial is based on the [StrongDM AI Attractor](https://factory.strongdm.ai/products/attractor) (a non-interactive coding agent), with additional enhancements for self-hosting maturity, DTU validation, and deterministic governance.
+
+- **Deterministic Runs**: Same inputs produce the same outputs and artifacts
+- **Governance-Ready**: Quality gates, human escalation, and audit trails
+- **Production-Grade**: Retry, checkpoints, resume, and replay out of the box
+- **Parallelizable**: Fan-out/fan-in with git worktree isolation
+- **Multi-Provider**: Optimized tooling for OpenAI, Anthropic, and Gemini
 
 ```dot
 digraph CodeReview {
@@ -26,19 +32,7 @@ digraph CodeReview {
 }
 ```
 
-## Why Factorial?
-
-- **Workflows as Graphs**: Version-control your AI pipelines as DOT files
-- **Production-Ready**: Built-in retry, checkpointing, resume, and replay
-- **Quality Gates**: Lint, test, typecheck, and rubric-based AI evaluation
-- **Human-in-the-Loop**: Automatic escalation when confidence is low
-- **Parallel Execution**: Fan-out/fan-in with git worktree isolation
-- **Deterministic**: Same input always produces same output + artifacts
-- **Multi-Modal**: Analyze images, documents, and audio in workflows
-- **Provider-Optimized**: Native tool profiles for OpenAI, Anthropic, Gemini
-- **Cost-Effective**: Anthropic prompt caching reduces costs by 50-90%
-
-## Installation
+## Quick Start
 
 ```bash
 npm install @mhingston5/factorial
@@ -50,8 +44,6 @@ For API backend (default), also install your provider:
 ```bash
 npm install @ai-sdk/openai  # or @ai-sdk/anthropic, @ai-sdk/google
 ```
-
-## Quick Start
 
 ### 1. Create a Workflow
 
@@ -103,6 +95,13 @@ const result = await attractor.run();
 console.log(`Status: ${result.status}`);
 ```
 
+## Core Concepts
+
+- **Workflows as Graphs**: Version-control AI pipelines as DOT files
+- **Quality Gates**: Lint, test, typecheck, and rubric-based evaluation
+- **Human-in-the-Loop**: Confidence-based escalation with `wait.human`
+- **Artifacts**: Structured logs, manifests, and replay metadata per node
+
 ## Examples Gallery
 
 Starter workflows:
@@ -122,25 +121,88 @@ Multi-modal:
 - `examples/document-qa.dot` - PDF/document Q&A
 - `examples/audio-transcription.dot` - Audio transcription (Gemini)
 
-Provider and caching:
-- `examples/provider-selection.dot` - Per-node provider selection
-- `examples/anthropic-caching.dot` - Prompt caching for cost reduction
-
 Subagents and delegation:
 - `examples/lightweight-subagent.dot` - Lightweight subagent pattern
 - `examples/parallel-research.dot` - Parallel subagent research
 - `examples/manager-loop.dot` - Manager loop supervisor pattern
 
-Automation:
+Automation and engineering loop:
 - `examples/pr-automation.dot` - PR review + merge pipeline
-
-Engineering loop:
 - `examples/engineering-loop-parent.dot` - Plan/Work/Review/Compound parent loop
 - `examples/engineering-loop-child.dot` - Child loop with bounded tasks
 
 See all examples in `examples/`.
 
-## AI Workflow Builder
+## CLI Commands
+
+Run and inspect:
+
+| Command | Purpose |
+|---------|---------|
+| `run` | Execute a workflow |
+| `validate` | Parse + lint without executing |
+| `visualize` | Output graph as JSON |
+| `manifest` | Inspect run metadata |
+| `resume` | Continue from checkpoint |
+| `replay` | Re-run from manifest with fixed config |
+
+Quality and governance:
+
+| Command | Purpose |
+|---------|---------|
+| `confidence-tune` | Tune escalation thresholds from history |
+| `check:freshness` | Validate artifact freshness |
+| `compound-weekly` | Generate weekly compound metrics |
+
+DTU and scenarios:
+
+| Command | Purpose |
+|---------|---------|
+| `dtu-run` | Run Digital Twin Universe scenarios |
+| `dtu-curate` | Create and manage DTU scenario fixtures |
+| `dtu:list-twins` | List DTU twins and operations |
+| `metrics:satisfaction` | Score DTU scenario satisfaction |
+| `scenarios:curate` | Scenario catalog TUI + promotion |
+| `scenarios:check-freshness` | Holdout scenario freshness gate |
+
+Reliability and autonomy:
+
+| Command | Purpose |
+|---------|---------|
+| `telemetry:aggregate` | Aggregate full-autonomy telemetry |
+| `workflow:self-modify` | Validate self-mod proposals + PRs |
+| `cross-repo:validate` | Cross-repo coordination validation |
+| `distributed:consensus-test` | Distributed consensus testing |
+| `circuit-breaker:tune` | Circuit breaker tuning report |
+| `metrics:economics` | Summarize token economics from logs |
+
+Event consumers can subscribe to the execution stream documented in
+[Execution Event Stream](docs/execution-event-stream.md).
+
+## Configuration
+
+Create `config.json` for defaults:
+
+```json
+{
+  "logs_root": "./logs",
+  "llm_backend": "api",
+  "default_provider": "openai",
+  "providers": {
+    "openai": {
+      "api_key_env": "OPENAI_API_KEY",
+      "default_model": "gpt-4o-mini"
+    }
+  },
+  "checkpoint_interval": 1
+}
+```
+
+**Backends:**
+- `api` (default) - Vercel AI SDK with provider libraries
+- `cli` - Execute external commands directly
+
+## Workflow Builder Skill
 
 Factorial includes a comprehensive AI skill for building DOT workflows:
 
@@ -178,36 +240,7 @@ Useful for:
 - **Deterministic CI** - Ensure consistent execution in automated tests
 - **Batch processing** - Pre-configure approval chains
 
-## CLI Commands
-
-| Command | Purpose |
-|---------|---------|
-| `run` | Execute a workflow |
-| `validate` | Parse + lint without executing |
-| `replay` | Re-run from manifest with fixed config |
-| `resume` | Continue from checkpoint |
-| `visualize` | Output graph as JSON |
-| `manifest` | Inspect run metadata |
-| `confidence-tune` | Tune escalation thresholds from history |
-| `compound-weekly` | Generate metrics reports (includes cost-per-PR proxy) |
-| `metrics:economics` | Summarize token economics from logs |
-| `metrics:satisfaction` | Score DTU scenario satisfaction |
-| `check:freshness` | Validate artifact freshness |
-| `dtu-run` | Run Digital Twin Universe scenarios |
-| `dtu-curate` | Create and manage DTU scenario fixtures |
-| `dtu:list-twins` | List DTU twins and operations |
-| `scenarios:curate` | Scenario catalog TUI + promotion |
-| `scenarios:check-freshness` | Holdout scenario freshness gate |
-| `telemetry:aggregate` | Aggregate full-autonomy telemetry |
-| `workflow:self-modify` | Validate self-mod proposals + PRs |
-| `cross-repo:validate` | Cross-repo coordination validation |
-| `distributed:consensus-test` | Distributed consensus testing |
-| `circuit-breaker:tune` | Circuit breaker tuning report |
-
-Event consumers can subscribe to the execution stream documented in
-[Execution Event Stream](docs/execution-event-stream.md).
-
-## New Features
+## Feature Highlights
 
 ### Multi-Modal Support (Images, Documents, Audio)
 
@@ -227,11 +260,11 @@ digraph ImageAnalysis {
 
 ### Provider-Native Tool Profiles
 
-Factorial now uses provider-optimized tool formats for better performance:
+Factorial uses provider-optimized tool formats for better performance:
 
 - **OpenAI**: Uses `apply_patch` v4a format for file modifications
-- **Anthropic**: Uses `old_string`/`new_string` exact-match editing
-- **Gemini**: Uses native search-and-replace conventions
+- **Anthropic**: Uses `edit_file` with exact-match `old_string`/`new_string` editing
+- **Gemini**: Uses `edit_file` with exact-match `old_string`/`new_string` editing
 
 ```dot
 digraph ProviderExample {
@@ -265,23 +298,13 @@ digraph CachingExample {
 
 ### Reasoning Token Tracking
 
-Track hidden reasoning costs separately from visible output:
+Reasoning token counts are captured when providers report them. Inspect the raw usage payloads in the API response artifacts:
 
 ```bash
-# After execution, check reasoning artifacts
-ls logs/<node_id>/reasoning.md
+ls logs/<node_id>/api_response.json
 ```
 
-Reasoning tokens are tracked separately in economics reports:
-```json
-{
-  "usage": {
-    "input_tokens": 1000,
-    "output_tokens": 500,
-    "reasoning_tokens": 200
-  }
-}
-```
+Reasoning tokens appear in provider-specific fields (for example, OpenAI's `completion_tokens_details.reasoning_tokens`).
 
 ### Lightweight Subagent Tools
 
@@ -331,7 +354,6 @@ See [Node Types Reference](skills/factorial-workflow-builder/references/node-typ
 ## Example: Code Review Workflow
 
 ```dot
-digraph CodeReview {
   graph [goal="Review code with quality checks"]
   
   start [shape=Mdiamond]
@@ -363,30 +385,7 @@ digraph CodeReview {
 More examples in [`examples/`](./examples/):
 See the Examples Gallery above for categorized workflows.
 
-## Configuration
-
-Create `config.json` for defaults:
-
-```json
-{
-  "logs_root": "./logs",
-  "llm_backend": "api",
-  "default_provider": "openai",
-  "providers": {
-    "openai": {
-      "api_key_env": "OPENAI_API_KEY",
-      "default_model": "gpt-4o-mini"
-    }
-  },
-  "checkpoint_interval": 1
-}
-```
-
-**Backends:**
-- `api` (default) - Vercel AI SDK with provider libraries
-- `cli` - Execute external commands directly
-
-## Key Features
+## Key Features (Details)
 
 <details>
 <summary><b>Deterministic Execution</b></summary>
@@ -414,7 +413,6 @@ Enforce standards before proceeding:
 Process images, documents, and audio in workflows:
 
 ```dot
-digraph MultiModal {
   analyze_image [prompt="Describe this UI", image_input="./ui.png"]
   read_pdf [prompt="Summarize findings", document_input="./paper.pdf"]
   transcribe [prompt="Transcribe meeting", audio_input="./meeting.m4a", llm_provider="gemini"]
@@ -432,8 +430,8 @@ digraph MultiModal {
 Optimized tool formats for each provider:
 
 - **OpenAI**: `apply_patch` v4a format for edits
-- **Anthropic**: `old_string`/`new_string` exact-match editing
-- **Gemini**: Native conventions
+- **Anthropic**: `edit_file` exact-match editing (`old_string`/`new_string`)
+- **Gemini**: `edit_file` exact-match editing (`old_string`/`new_string`)
 
 Set per-node: `llm_provider="openai"` | `"anthropic"` | `"gemini"`
 </details>
@@ -453,13 +451,13 @@ Strategies: `system-only`, `system-plus-early`, `aggressive`
 <details>
 <summary><b>Reasoning Token Tracking</b></summary>
 
-Track reasoning costs separately:
+Reasoning token counts are captured when providers report them. Inspect the raw usage payloads in the API response artifacts:
 
 ```bash
-ls logs/<node_id>/reasoning.md  # View reasoning content
+ls logs/<node_id>/api_response.json
 ```
 
-Economics reports include `reasoning_tokens` field for cost analysis.
+Reasoning tokens appear in provider-specific fields (for example, OpenAI's `completion_tokens_details.reasoning_tokens`).
 </details>
 
 <details>
@@ -468,7 +466,6 @@ Economics reports include `reasoning_tokens` field for cost analysis.
 Spawn parallel subagents for independent tasks:
 
 ```dot
-digraph Parallel {
   spawn [type="tool", tool_name="spawn_agent", task="Research topic"]
   wait [type="tool", tool_name="wait"]
 }
@@ -483,10 +480,11 @@ Tools: `spawn_agent`, `wait`, `send_input`, `close_agent`
 For parallel branches that modify files:
 
 ```dot
-parallel [type="parallel", worktree_isolation="true"]
-variant_a [cli_command="generate python"]
-variant_b [cli_command="generate typescript"]
-merge [type="parallel.fan_in", merge_strategy="consensus"]
+  parallel [type="parallel", worktree_isolation="true"]
+  variant_a [cli_command="generate python"]
+  variant_b [cli_command="generate typescript"]
+  merge [type="parallel.fan_in", merge_strategy="consensus"]
+}
 ```
 
 Each branch runs in isolated git worktree, merged at fan-in.
