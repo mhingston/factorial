@@ -8,7 +8,7 @@
 
 Factorial is a DOT-based workflow orchestrator for multi-stage AI pipelines. Write your workflow as a Graphviz graph, run it with built-in quality gates, human approvals, and parallel execution.
 
-> **Reference Implementation**: Factorial is base off of [StrongDM AI attractor](https://factory.strongdm.ai/products/attractor) (a non-interactive coding agent), with additional enhancements for self-hosting maturity, DTU validation, and deterministic governance.
+> **Reference Implementation**: Factorial is based off of [StrongDM AI attractor](https://factory.strongdm.ai/products/attractor) (a non-interactive coding agent), with additional enhancements for self-hosting maturity, DTU validation, and deterministic governance.
 
 ```dot
 digraph CodeReview {
