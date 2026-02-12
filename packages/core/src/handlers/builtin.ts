@@ -6,6 +6,7 @@ import { ExecutionCancelledError } from '../engine/index.js';
 import type { ExecutionEngine } from '../engine/index.js';
 import { createDefaultLlmAdapter } from '../llm/index.js';
 import type { Context, Graph, Handler, LlmAdapter, Node, Outcome } from '../types/index.js';
+import { WorktreeManager, type WorktreeMergeStrategy } from '../worktree/index.js';
 
 /**
  * Start handler - no-op entry point
@@ -2180,6 +2181,40 @@ export class ParallelHandler implements Handler {
     const errorPolicy = (node.attributes.error_policy as string) || 'continue';
     const mergePolicy = (node.attributes.merge_policy as string) || 'none';
     const maxParallel = Number.parseInt((node.attributes.max_parallel as string) || '4', 10);
+    
+    // Worktree isolation support
+    const worktreeIsolation = asBoolean(node.attributes.worktree_isolation) ?? false;
+    const worktreeBasePath = asNonEmptyString(node.attributes.worktree_base_path) ?? join(logsRoot, '.factorial', 'worktrees');
+    const worktreeAllowDirty = asBoolean(node.attributes.worktree_allow_dirty) ?? false;
+    
+    let worktreeManager: WorktreeManager | undefined;
+    
+    if (worktreeIsolation) {
+      const repoRoot = parentEngine.getCwd() ?? process.cwd();
+      worktreeManager = new WorktreeManager({ basePath: worktreeBasePath, repoRoot });
+      
+      // Validate git repository
+      const isGitRepo = await worktreeManager.isGitRepository();
+      if (!isGitRepo) {
+        return {
+          status: 'FAIL',
+          failure_reason: 'worktree_isolation requires execution within a git repository',
+          context_updates: {},
+        };
+      }
+      
+      // Check for uncommitted changes
+      if (!worktreeAllowDirty) {
+        const hasChanges = await worktreeManager.hasUncommittedChanges();
+        if (hasChanges) {
+          return {
+            status: 'FAIL',
+            failure_reason: 'Uncommitted changes detected. Commit or stash changes before using worktree_isolation, or set worktree_allow_dirty=true',
+            context_updates: {},
+          };
+        }
+      }
+    }
     const quorum = Number.parseFloat((node.attributes.quorum as string) || '0.5');
     const kValue = Number.parseInt((node.attributes.k as string) || '1', 10);
     const quorumThreshold = Number.isFinite(quorum) && quorum > 0 ? quorum : 0.5;
@@ -2233,7 +2268,29 @@ export class ParallelHandler implements Handler {
           controllers.set(branch.to, controller);
           const branchContext = context.clone();
           const branchLogsRoot = `${logsRoot}/parallel/${node.id}/${branch.to}`;
-          const branchEngine = await parentEngine.createBranchEngine(branchContext, branchLogsRoot);
+          
+          // Create worktree if isolation is enabled
+          let worktreePath: string | undefined;
+          if (worktreeManager) {
+            try {
+              const worktreeInfo = await worktreeManager.createWorktree(branch.to);
+              worktreePath = worktreeInfo.path;
+              await branchContext.set(`parallel.worktree.${branch.to}.path`, worktreePath);
+              await branchContext.set(`parallel.worktree.${branch.to}.created_at`, worktreeInfo.createdAt);
+            } catch (error) {
+              return {
+                status: 'FAIL' as StageStatus,
+                score: 0,
+                branch_id: branch.to,
+                branch_label: branch.label || branch.to,
+                branch_weight: branch.weight ?? 0,
+                result_index: index,
+                failure_reason: error instanceof Error ? error.message : 'Failed to create worktree',
+              };
+            }
+          }
+          
+          const branchEngine = await parentEngine.createBranchEngine(branchContext, branchLogsRoot, worktreePath);
           const outcome = await branchEngine.runFromNode(branch.to, controller.signal);
 
           if (outcome.status === 'SUCCESS') {
@@ -2255,10 +2312,17 @@ export class ParallelHandler implements Handler {
             branch_label: branch.label || branch.to,
             branch_weight: branch.weight ?? 0,
             result_index: index,
+            worktree_path: worktreePath,
           };
         })
       )
     );
+    
+    // Store worktree manager in context for fan_in to use
+    if (worktreeManager) {
+      await context.set('parallel.worktree.manager', worktreeBasePath);
+      await context.set('parallel.worktree.branches', branches.map(b => b.to));
+    }
 
     // Evaluate join policy
     const effectiveResults = errorPolicy === 'ignore'
@@ -2457,6 +2521,40 @@ export class FanInHandler implements Handler {
         selectedOutput = selected.output ?? selected.context ?? null;
       }
 
+      // Worktree merge support
+      const worktreeMergeStrategy = (asNonEmptyString(node.attributes.worktree_merge_strategy) ?? 'fail') as WorktreeMergeStrategy;
+      const worktreeBasePath = await context.get<string>('parallel.worktree.manager');
+      const worktreeMergeResults: Array<{ branch_id: string; success: boolean; conflicts?: string[]; error?: string }> = [];
+      
+      if (worktreeBasePath) {
+        const branchIdsJson = await context.get<string>('parallel.worktree.branches');
+        const branchIds: string[] = branchIdsJson ? JSON.parse(branchIdsJson) : [];
+        const repoRoot = process.cwd();
+        const worktreeManager = new WorktreeManager({ basePath: worktreeBasePath, repoRoot });
+        
+        for (const branchId of branchIds) {
+          const mergeResult = await worktreeManager.mergeWorktree(branchId, worktreeMergeStrategy);
+          worktreeMergeResults.push({
+            branch_id: branchId,
+            success: mergeResult.success,
+            conflicts: mergeResult.conflicts,
+            error: mergeResult.error,
+          });
+          
+          if (!mergeResult.success && worktreeMergeStrategy === 'fail') {
+            return {
+              status: 'FAIL',
+              failure_reason: `Worktree merge failed for branch ${branchId}: ${mergeResult.error}`,
+              context_updates: {
+                'parallel.fan_in.worktree_merge_results': worktreeMergeResults,
+              },
+            };
+          }
+        }
+        
+        await worktreeManager.cleanupAll();
+      }
+
       const stageDir = join(logsRoot, node.id);
       await mkdir(stageDir, { recursive: true });
       const artifactPath = join(stageDir, 'fan_in_decision.json');
@@ -2484,6 +2582,8 @@ export class FanInHandler implements Handler {
         },
         selected_output: selectedOutput,
         consensus_count: consensusCount,
+        worktree_merge_strategy: worktreeBasePath ? worktreeMergeStrategy : undefined,
+        worktree_merge_results: worktreeMergeResults.length > 0 ? worktreeMergeResults : undefined,
         timestamp: new Date().toISOString(),
       });
 

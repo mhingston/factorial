@@ -266,6 +266,10 @@ When `llm_backend` is `cli`, codergen nodes run external commands instead of `ge
 - `manager_stop_condition`: Optional condition expression evaluated each cycle
 - `manager_require_lock`: Require child lock decision (`resolved|reopen`) on close
 - `manager_local_child_execution`: When `true`, run delegated child via local adapter hook (requires `manager_actions` includes `delegate`)
+- `worktree_isolation`: Enable git worktree isolation for parallel branches (`true` or `false`)
+- `worktree_base_path`: Custom base path for worktree directories (default: `<logs_root>/.factorial/worktrees`)
+- `worktree_allow_dirty`: Allow worktree creation with uncommitted changes (`true` or `false`)
+- `worktree_merge_strategy`: Strategy for merging worktrees at fan_in (`fail`, `ours`, `theirs`)
 
 ## Graph Attributes
 
@@ -537,6 +541,62 @@ What this check verifies:
 - run/resume execution succeeds from both primary checkout and a detached worktree,
 - logs, checkpoints, and run manifests are produced in both contexts,
 - normalized manifest outputs match across primary checkout vs worktree execution.
+
+## Parallel Worktree Isolation
+
+For parallel branches that modify the filesystem (e.g., code generation), Factorial supports **git worktree isolation**. Each branch runs in its own isolated worktree, preventing file collisions.
+
+```dot
+digraph ParallelCodegen {
+  graph [goal="Generate code variants in parallel"]
+  rankdir=LR
+
+  start [shape=Mdiamond]
+  exit  [shape=Msquare]
+
+  parallel [
+    shape=component
+    type="parallel"
+    worktree_isolation="true"
+    worktree_allow_dirty="false"
+  ]
+
+  variant_a [label="Generate Python", cli_command="echo 'python code' > impl.py"]
+  variant_b [label="Generate TypeScript", cli_command="echo 'typescript code' > impl.ts"]
+
+  merge [
+    shape=tripleoctagon
+    type="parallel.fan_in"
+    merge_strategy="consensus"
+    worktree_merge_strategy="fail"
+  ]
+
+  start -> parallel
+  parallel -> variant_a
+  parallel -> variant_b
+  variant_a -> merge
+  variant_b -> merge
+  merge -> exit
+}
+```
+
+**How it works:**
+1. At `parallel` (fan_out), worktrees are created from the current HEAD
+2. Each branch executes in its isolated worktree directory
+3. At `parallel.fan_in`, worktrees are merged back using the specified strategy:
+   - `fail`: Fail if any conflicts exist (default)
+   - `ours`: Accept main branch version for conflicts
+   - `theirs`: Accept worktree version for conflicts
+4. Worktrees are cleaned up after successful merge
+
+**Requirements:**
+- Must run inside a git repository
+- Requires git >= 2.5
+- Working tree must be clean (unless `worktree_allow_dirty=true`)
+
+**Artifacts:**
+- Worktrees created under `<logs_root>/.factorial/worktrees/<branch_id>/`
+- Merge results recorded in `fan_in_decision.json`
 
 ## Compound Engineering Operating System
 

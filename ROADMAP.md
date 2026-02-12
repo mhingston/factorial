@@ -83,10 +83,6 @@ External-spec alignment follow-up (captured 2026-02-12):
 - Current declared level is `provider-backed`; promotion criteria for `autonomous` remain objective and auditable.
 - Active BK backlog queue is currently empty after `BK-017`; docs freshness gate remains active operational enforcement (`npm run docs:freshness`).
 
-Outstanding operational follow-up (captured 2026-02-12):
-- `OP-001` (planned): tighten cross-doc claim synchronization by extending drift checks so roadmap/scope/matrix/maturity declarations cannot diverge without fail-closed CI evidence.
-- `OP-002` (planned): publish periodic, deterministic `confidence-tune` recommendation artifacts as reviewable inputs (not auto-apply) to the existing lock-decision workflow.
-
 Claims consistency anchors (BK-013):
 - Declared current level: `provider-backed`
 - Declared next level: `autonomous`
@@ -503,8 +499,6 @@ Execution order (do not reorder unless blocked):
 | `BK-015` | Unattended-run outcome and economics telemetry | Done | Closed via deterministic unattended telemetry report contract (`self_host_unattended_telemetry_report.v1`), strict source schema/freshness checks, and fail-closed CI unattended telemetry lane — see completion report. |
 | `BK-016` | Documentation freshness guardrails | Done | Closed via deterministic `docs_freshness_report.v1` contract, fixture-backed drift tests, and fail-closed CI docs-freshness lane — see completion report. |
 | `BK-017` | Markdown compaction and context-window guardrails | Done | Closed via docs size-budget checks (`DF-005`), compact handoff/archive guardrails (`DF-006`), and roadmap artifact-list compaction into archive docs — see completion report. |
-| `OP-001` | Cross-doc claim synchronization ratchet | Done | Closed via drift diagnostics with field-level mismatch detection, actionable error messages, and fail-closed CI claims-consistency gate — see completion report. |
-| `OP-002` | Reviewable confidence-tuning recommendation loop | Done | Closed via `npm run confidence:publish` command, `confidence_tune_publication_report.v1` schema with recommendation-only policy, and comprehensive test coverage — see completion report. |
 
 ### Next
 | ID | Item | Status | Exit criteria |

@@ -87,6 +87,8 @@ export class ExecutionEngine extends EventEmitter {
   private maxRestarts = 0;
   private runSegments: RunSegmentRecord[] = [];
 
+  private cwd?: string;
+
   constructor(
     graph: Graph,
     config: RunConfig,
@@ -94,6 +96,7 @@ export class ExecutionEngine extends EventEmitter {
       context?: Context; 
       handlerRegistry?: HandlerRegistry;
       loopDetectionConfig?: Partial<LoopDetectionConfig>;
+      cwd?: string;
     } = {}
   ) {
     super();
@@ -104,6 +107,7 @@ export class ExecutionEngine extends EventEmitter {
     this.checkpointManager = new CheckpointManager(config.logs_root);
     this.handlerRegistry = options.handlerRegistry ?? new HandlerRegistry();
     this.loopDetector = new LoopDetector(options.loopDetectionConfig);
+    this.cwd = options.cwd;
   }
 
   /**
@@ -116,12 +120,20 @@ export class ExecutionEngine extends EventEmitter {
   /**
    * Create a branch engine for parallel execution
    */
-  async createBranchEngine(context: Context, logsRoot: string): Promise<ExecutionEngine> {
+  async createBranchEngine(context: Context, logsRoot: string, cwd?: string): Promise<ExecutionEngine> {
     const branchConfig: RunConfig = { ...this.config, logs_root: logsRoot };
     return new ExecutionEngine(this.graph, branchConfig, {
       context,
       handlerRegistry: this.handlerRegistry,
+      cwd,
     });
+  }
+
+  /**
+   * Get the working directory for this engine
+   */
+  getCwd(): string | undefined {
+    return this.cwd;
   }
 
   /**

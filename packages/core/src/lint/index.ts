@@ -60,6 +60,7 @@ export function createDefaultLintEngine(): LintEngine {
   engine.addRule(new PromotionProfileRule());
   engine.addRule(new HandlerConfigRule());
   engine.addRule(new TypeKnownRule());
+  engine.addRule(new WorktreeIsolationRule());
   return engine;
 }
 
@@ -1215,6 +1216,64 @@ function parseJsonObject(value: unknown): Record<string, unknown> | null {
     return null;
   } catch {
     return null;
+  }
+}
+
+class WorktreeIsolationRule implements LintRule {
+  id = 'worktree_isolation_config';
+
+  run(graph: Graph): Diagnostic[] {
+    const diagnostics: Diagnostic[] = [];
+    
+    for (const node of graph.nodes.values()) {
+      const effectiveType = node.type || SHAPE_TO_TYPE[node.shape];
+      
+      // Validate parallel.fan_out worktree attributes
+      if (effectiveType === 'parallel') {
+        const worktreeIsolation = node.attributes.worktree_isolation;
+        if (worktreeIsolation !== undefined) {
+          const boolValue = parseBoolean(worktreeIsolation);
+          if (boolValue === undefined) {
+            diagnostics.push({
+              level: 'error',
+              code: 'WORKTREE_ISOLATION_INVALID',
+              message: 'worktree_isolation must be a boolean (true or false).',
+              nodeId: node.id,
+            });
+          }
+        }
+        
+        const worktreeAllowDirty = node.attributes.worktree_allow_dirty;
+        if (worktreeAllowDirty !== undefined) {
+          const boolValue = parseBoolean(worktreeAllowDirty);
+          if (boolValue === undefined) {
+            diagnostics.push({
+              level: 'error',
+              code: 'WORKTREE_ALLOW_DIRTY_INVALID',
+              message: 'worktree_allow_dirty must be a boolean (true or false).',
+              nodeId: node.id,
+            });
+          }
+        }
+      }
+      
+      // Validate parallel.fan_in worktree merge attributes
+      if (effectiveType === 'parallel.fan_in') {
+        const worktreeMergeStrategy = asTrimmedLowerString(node.attributes.worktree_merge_strategy);
+        if (worktreeMergeStrategy !== undefined && worktreeMergeStrategy !== '') {
+          if (!['fail', 'ours', 'theirs'].includes(worktreeMergeStrategy)) {
+            diagnostics.push({
+              level: 'error',
+              code: 'WORKTREE_MERGE_STRATEGY_INVALID',
+              message: `Invalid worktree_merge_strategy "${worktreeMergeStrategy}". Expected fail, ours, or theirs.`,
+              nodeId: node.id,
+            });
+          }
+        }
+      }
+    }
+    
+    return diagnostics;
   }
 }
 

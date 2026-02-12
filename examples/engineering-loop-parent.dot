@@ -1,0 +1,56 @@
+digraph EngineeringLoopParent {
+  graph [goal="Parent workflow managing engineering loop for feature work", rankdir=TB]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  init [
+    shape=box,
+    label="Initialize",
+    type="codergen",
+    prompt="Set up engineering loop context with selected issue IDs",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  manager [
+    shape=house,
+    type="stack.manager_loop",
+    label="Engineering Manager",
+    stack_child_dotfile="./engineering-loop-child.dot",
+    manager_actions="observe,steer",
+    manager_poll_interval="0",
+    manager_max_cycles="10",
+    manager_require_lock="true",
+    manager_stop_condition="context.stack.child.lock_decision=resolved"
+  ]
+
+  gate [shape=diamond, label="Lock Decision?"]
+
+  compound [
+    shape=box,
+    label="Compound Learnings",
+    type="codergen",
+    prompt="Create solution doc per docs/templates/compound.md summarizing learnings from this batch",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  fix [
+    shape=box,
+    label="Address Reopened Issues",
+    type="codergen",
+    prompt="Address the reopened issues from verification. Review the failure reasons and implement fixes.",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  start -> init -> manager -> gate
+  gate -> compound [label="resolved", condition="context.stack.child.lock_decision=resolved"]
+  gate -> fix [label="reopen", condition="context.stack.child.lock_decision=reopen"]
+  compound -> exit
+  fix -> manager
+}

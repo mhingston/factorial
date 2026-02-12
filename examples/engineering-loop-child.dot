@@ -1,0 +1,135 @@
+digraph EngineeringLoopChild {
+  graph [goal="Execute engineering loop phases for selected issue batch", rankdir=TB]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  plan [
+    shape=box,
+    label="Create Plan",
+    type="codergen",
+    prompt="Create plan per docs/templates/plan.md for selected issues",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  implement [
+    shape=box,
+    label="Implement",
+    type="codergen",
+    prompt="Implement changes scoped to selected issue IDs",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  implementation_gate [shape=diamond, label="Implementation OK?"]
+
+  review [
+    shape=box,
+    label="Review",
+    type="judge.rubric",
+    prompt="Review implementation against plan",
+    judge_rubric_path="docs/templates/review.md",
+    score_threshold="0.0",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  synthesize [
+    shape=component,
+    label="Synthesize",
+    type="parallel"
+  ]
+
+  rank_p1 [
+    shape=box,
+    label="Rank P1 Findings",
+    type="codergen",
+    prompt="Extract all P1 blocking findings",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  rank_p2 [
+    shape=box,
+    label="Rank P2 Findings",
+    type="codergen",
+    prompt="Extract P2 findings",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  rank_p3 [
+    shape=box,
+    label="Rank P3 Findings",
+    type="codergen",
+    prompt="Extract P3 findings",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  fan_in [
+    shape=tripleoctagon,
+    label="Select Batch",
+    type="parallel.fan_in",
+    merge_strategy="best_score",
+    merge_tiebreak="weight"
+  ]
+
+  verify [
+    shape=box,
+    label="Verify",
+    type="quality.gate",
+    gate_type="custom",
+    gate_command="printf 'verification-passed'",
+    pass_condition="outcome=success",
+    failure_target="fix_issues"
+  ]
+
+  lock [
+    shape=hexagon,
+    label="Consensus Lock",
+    type="wait.human",
+    prompt="Review verification results and make lock decision"
+  ]
+
+  fix [
+    shape=box,
+    label="Fix Issues",
+    type="codergen",
+    prompt="Address the issues marked for fixing",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  fix_issues [
+    shape=box,
+    label="Fix Verification Issues",
+    type="codergen",
+    prompt="Fix issues found during verification",
+    auto_status="true",
+    llm_provider="github",
+    llm_model="gpt-4o-mini"
+  ]
+
+  start -> plan -> implement -> implementation_gate
+  implementation_gate -> fix [label="Failed", condition="outcome=fail"]
+  implementation_gate -> review -> synthesize
+  synthesize -> rank_p1 -> fan_in
+  synthesize -> rank_p2 -> fan_in
+  synthesize -> rank_p3 -> fan_in
+  fan_in -> verify
+  verify -> lock [label="pass", condition="outcome=success"]
+  verify -> fix_issues [label="fail", condition="outcome=fail"]
+  fix_issues -> review
+  lock -> exit [label="Approve", condition="outcome=success"]
+  lock -> fix [label="Request Changes", condition="outcome=fail"]
+  fix -> review
+}

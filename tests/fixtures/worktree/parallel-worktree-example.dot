@@ -1,0 +1,44 @@
+digraph WorktreeIsolationExample {
+  graph [
+    goal="Example: Parallel code generation with worktree isolation"
+    rankdir=LR
+  ]
+
+  start [shape=Mdiamond, label="Start"]
+  exit  [shape=Msquare, label="Exit"]
+
+  parallel [
+    shape=component
+    type="parallel"
+    label="Fan Out"
+    worktree_isolation="true"
+    worktree_allow_dirty="false"
+  ]
+
+  gen_python [
+    shape=box
+    label="Generate Python"
+    prompt="Write a Python function to calculate factorial"
+  ]
+
+  gen_typescript [
+    shape=box
+    label="Generate TypeScript"
+    prompt="Write a TypeScript function to calculate factorial"
+  ]
+
+  merge [
+    shape=tripleoctagon
+    type="parallel.fan_in"
+    label="Fan In"
+    merge_strategy="consensus"
+    worktree_merge_strategy="ours"
+  ]
+
+  start -> parallel
+  parallel -> gen_python
+  parallel -> gen_typescript
+  gen_python -> merge
+  gen_typescript -> merge
+  merge -> exit
+}
