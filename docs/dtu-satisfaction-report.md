@@ -22,6 +22,11 @@ This document describes the deterministic satisfaction report emitted by `factor
     "regression": { "total": 0, "satisfied": 0, "unsatisfied": 0, "pass_rate": 0 },
     "holdout": { "total": 0, "satisfied": 0, "unsatisfied": 0, "pass_rate": 0 }
   },
+  "scenario_class_distribution": {
+    "success": { "total": 0, "satisfied": 0, "unsatisfied": 0, "pass_rate": 0 },
+    "retryable_failure": { "total": 0, "satisfied": 0, "unsatisfied": 0, "pass_rate": 0 },
+    "terminal_failure": { "total": 0, "satisfied": 0, "unsatisfied": 0, "pass_rate": 0 }
+  },
   "holdout_rate": 0,
   "drift_delta": {
     "pass_rate": 0,
@@ -58,12 +63,23 @@ This document describes the deterministic satisfaction report emitted by `factor
     {
       "scenario_id": "example",
       "suite": "smoke",
+      "scenario_class": "success",
       "status": "satisfied",
+      "satisfaction_score": 1,
+      "satisfaction_details": {
+        "value": 1,
+        "components": {
+          "status_match": 1,
+          "structure_match": 1,
+          "content_match": 1
+        },
+        "details": ["Full parity match"]
+      },
       "reason": "response parity matched fixture expectation",
       "expected_failure_mode": "rate_limit",
-      "request": { "system": "", "user": "", "metadata": {} },
-      "expected": { "status": "success", "payload": {} },
-      "actual": { "status": "success", "payload": {} }
+      "request": { "twin_id": "", "operation": "", "scenario_id": "", "seed": "", "input": {}, "timing": { "requested_at_ms": 0, "timeout_ms": 0 }, "metadata": {} },
+      "expected": { "twin_id": "", "twin_version": "", "operation": "", "status": "success", "output": {}, "error": null, "timing": { "started_at_ms": 0, "completed_at_ms": 0, "latency_ms": 0, "deterministic": true }, "metadata": {} },
+      "actual": { "twin_id": "", "twin_version": "", "operation": "", "status": "success", "output": {}, "error": null, "timing": { "started_at_ms": 0, "completed_at_ms": 0, "latency_ms": 0, "deterministic": true }, "metadata": {} }
     }
   ]
 }
@@ -74,6 +90,9 @@ This document describes the deterministic satisfaction report emitted by `factor
 - `drift_delta` compares the current report to an optional baseline report.
 - `failure_mode_coverage` is true when at least one satisfied scenario exercises that failure mode.
 - `not_found` covers missing resources in external twins (e.g. repo not found).
+- `scenario_class_distribution` counts satisfied/unsatisfied totals for success vs retryable/terminal failures.
+- `scenario_class` is inferred from the expected response when omitted in fixtures (success vs retryable/terminal errors).
+- `satisfaction_score` and `satisfaction_details` use probabilistic parity (0-1) rather than strict equality.
 - `satisfaction_distribution` provides probabilistic scoring (0-1) instead of binary pass/fail:
   - **Score components**: status_match (50%), structure_match (30%), content_match (20%)
   - **Status thresholds**: satisfied (≥0.8), marginal (0.5-0.8), unsatisfied (<0.5)

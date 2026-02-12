@@ -1,0 +1,111 @@
+{
+  "schema_version": "full_autonomy_readiness_report.v1",
+  "generated_at": "2026-02-12T00:00:00.000Z",
+  "report_path": "docs/metrics/reports/full-autonomy-readiness-latest.json",
+  "summary": {
+    "total_gates": 9,
+    "passed": 9,
+    "failed": 0,
+    "missing": 0,
+    "overall_status": "pass",
+    "required_gate_ids": [
+      "FA-001",
+      "FA-002",
+      "FA-003",
+      "FA-004",
+      "FA-005",
+      "FA-006",
+      "FA-007",
+      "FA-008",
+      "FA-009"
+    ],
+    "passed_gate_ids": [
+      "FA-001",
+      "FA-002",
+      "FA-003",
+      "FA-004",
+      "FA-005",
+      "FA-006",
+      "FA-007",
+      "FA-008",
+      "FA-009"
+    ],
+    "failed_gate_ids": [],
+    "missing_gate_ids": []
+  },
+  "checks": [
+    {
+      "id": "FA-001",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/external-system-operations-latest.json"
+      ]
+    },
+    {
+      "id": "FA-002",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/circuit-breaker-tuning-latest.json"
+      ]
+    },
+    {
+      "id": "FA-003",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/self-modification-latest.json"
+      ]
+    },
+    {
+      "id": "FA-004",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/config-optimization-latest.json"
+      ]
+    },
+    {
+      "id": "FA-005",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/codegen-validation-latest.json"
+      ]
+    },
+    {
+      "id": "FA-006",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/distributed-consensus-latest.json"
+      ]
+    },
+    {
+      "id": "FA-007",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/cross-repo-coordination-latest.json"
+      ]
+    },
+    {
+      "id": "FA-008",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/full-autonomy-telemetry-latest.json"
+      ]
+    },
+    {
+      "id": "FA-009",
+      "status": "pass",
+      "summary": "Evidence report is present with pass status.",
+      "evidence_paths": [
+        "docs/metrics/reports/self-healing-latest.json"
+      ]
+    }
+  ],
+  "readiness_status": "pass"
+}

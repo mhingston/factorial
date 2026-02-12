@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+  AVAILABLE_SCENARIO_CLASSES,
   AVAILABLE_SUITES,
   type ScenarioTemplate,
   createScenario,
@@ -72,6 +73,7 @@ describe('scenario-curation', () => {
       expect(entries).toHaveLength(1);
       expect(entries[0].scenario_id).toBe('01-test');
       expect(entries[0].suite).toBe('smoke');
+      expect(entries[0].scenario_class).toBe('success');
       expect(entries[0].twin_id).toBe('jira.issue');
     });
 
@@ -158,6 +160,7 @@ describe('scenario-curation', () => {
       const template: ScenarioTemplate = {
         scenario_id: 'test-scenario',
         suite: 'smoke',
+        scenario_class: 'success',
         description: 'A test scenario',
         twin_id: 'jira.issue',
         operation: 'issues.create',
@@ -174,6 +177,28 @@ describe('scenario-curation', () => {
       expect(result.valid).toBe(true);
       expect(result.errors).toEqual([]);
       expect(result.fixture).toBeDefined();
+    });
+
+    it('rejects scenario_class incompatible with expected_status', async () => {
+      const template: ScenarioTemplate = {
+        scenario_id: 'test-scenario',
+        suite: 'smoke',
+        scenario_class: 'terminal_failure',
+        description: 'A test scenario',
+        twin_id: 'jira.issue',
+        operation: 'issues.create',
+        input: {
+          project_key: 'TEST',
+          summary: 'Test issue',
+          actor: 'tester',
+        },
+        expected_status: 'success',
+        tags: ['test'],
+      };
+
+      const result = await validateScenarioTemplate(template);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.includes('scenario_class'))).toBe(true);
     });
 
     it('rejects invalid twin_id', async () => {
@@ -332,6 +357,12 @@ describe('scenario-curation', () => {
       expect(AVAILABLE_SUITES).toContain('smoke');
       expect(AVAILABLE_SUITES).toContain('regression');
       expect(AVAILABLE_SUITES).toContain('holdout');
+    });
+
+    it('AVAILABLE_SCENARIO_CLASSES contains all classes', () => {
+      expect(AVAILABLE_SCENARIO_CLASSES).toContain('success');
+      expect(AVAILABLE_SCENARIO_CLASSES).toContain('retryable_failure');
+      expect(AVAILABLE_SCENARIO_CLASSES).toContain('terminal_failure');
     });
   });
 });

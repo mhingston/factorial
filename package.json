@@ -55,13 +55,18 @@
     "self-host:external-systems": "node ./scripts/self-host-external-systems.js",
     "self-host:circuit-breaker-test": "node ./scripts/self-host-circuit-breaker-test.js",
     "self-host:self-mod": "node ./scripts/self-host-self-mod.js",
+    "self-host:self-mod-production": "node ./scripts/self-host-self-mod-production.js",
     "self-host:optimize": "node ./scripts/self-host-optimize.js",
     "self-host:codegen-validation": "node ./scripts/self-host-codegen-validation.js",
     "self-host:distributed": "node ./scripts/self-host-distributed.js",
+    "self-host:distributed-consensus": "node ./scripts/self-host-distributed.js --mode consensus",
     "self-host:cross-repo-test": "node ./scripts/self-host-cross-repo-test.js",
     "self-host:full-autonomy-telemetry": "node ./scripts/self-host-full-autonomy-telemetry.js",
     "self-host:self-healing": "node ./scripts/self-host-self-healing.js",
-    "confidence:publish": "node ./scripts/confidence-tune-publish.js"
+    "full-autonomy:readiness": "node ./scripts/full-autonomy-readiness-rollup.js",
+    "confidence:publish": "node ./scripts/confidence-tune-publish.js",
+    "evidence:freshness": "node ./scripts/evidence-freshness.js",
+    "evidence:report-freshness": "node ./scripts/evidence-freshness.js --report ./logs/evidence_freshness/report.json"
   },
   "keywords": [
     "ai",
@@ -106,6 +111,7 @@
     "@types/async-lock": "^1.4.2",
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^2.1.9",
+    "execa": "^9.0.0",
     "typescript": "^5.3.0",
     "vitest": "^2.0.0"
   },

@@ -1,0 +1,182 @@
+{
+  "schema_version": "external_system_operations_report.v1",
+  "generated_at": "2026-02-12T16:10:47.667Z",
+  "summary": {
+    "total_operations": 62,
+    "successful": 58,
+    "failed": 4,
+    "degraded": 0,
+    "circuit_open": 0,
+    "rollbacks_performed": 2
+  },
+  "systems": [
+    {
+      "system_id": "github-api",
+      "total_operations": 21,
+      "successful": 20,
+      "failed": 1,
+      "degraded": 0,
+      "circuit_breaker_state": "closed",
+      "circuit_breaker_metrics": {
+        "state": "closed",
+        "failure_count": 0,
+        "success_count": 20,
+        "last_failure_time_ms": null,
+        "last_success_time_ms": 1770912646020,
+        "total_calls": 20,
+        "total_failures": 0,
+        "total_successes": 20,
+        "consecutive_successes": 20,
+        "consecutive_failures": 0
+      }
+    },
+    {
+      "system_id": "aws-s3",
+      "total_operations": 21,
+      "successful": 20,
+      "failed": 1,
+      "degraded": 0,
+      "circuit_breaker_state": "closed",
+      "circuit_breaker_metrics": {
+        "state": "closed",
+        "failure_count": 0,
+        "success_count": 20,
+        "last_failure_time_ms": null,
+        "last_success_time_ms": 1770912646643,
+        "total_calls": 20,
+        "total_failures": 0,
+        "total_successes": 20,
+        "consecutive_successes": 20,
+        "consecutive_failures": 0
+      }
+    },
+    {
+      "system_id": "stripe-api",
+      "total_operations": 20,
+      "successful": 18,
+      "failed": 2,
+      "degraded": 0,
+      "circuit_breaker_state": "closed",
+      "circuit_breaker_metrics": {
+        "state": "closed",
+        "failure_count": 0,
+        "success_count": 20,
+        "last_failure_time_ms": null,
+        "last_success_time_ms": 1770912647666,
+        "total_calls": 20,
+        "total_failures": 0,
+        "total_successes": 20,
+        "consecutive_successes": 20,
+        "consecutive_failures": 0
+      }
+    }
+  ],
+  "audit_trail_sample": [
+    {
+      "log_id": "log-1770912647206-krg731zvb",
+      "timestamp_ms": 1770912647206,
+      "operation_id": "op-stripe-api-10",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647257-p6uxy6h50",
+      "timestamp_ms": 1770912647257,
+      "operation_id": "op-stripe-api-11",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647308-1dteuc8oh",
+      "timestamp_ms": 1770912647308,
+      "operation_id": "op-stripe-api-12",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647359-d33bj9s1z",
+      "timestamp_ms": 1770912647359,
+      "operation_id": "op-stripe-api-13",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647410-2b87ev1ux",
+      "timestamp_ms": 1770912647410,
+      "operation_id": "op-stripe-api-14",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647462-vflu9d1rc",
+      "timestamp_ms": 1770912647462,
+      "operation_id": "op-stripe-api-15",
+      "system_id": "stripe-api",
+      "status": "failure",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647513-qtr5kfg02",
+      "timestamp_ms": 1770912647513,
+      "operation_id": "op-stripe-api-16",
+      "system_id": "stripe-api",
+      "status": "failure",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647564-ssufjmo84",
+      "timestamp_ms": 1770912647564,
+      "operation_id": "op-stripe-api-17",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647615-h8yp2pnzg",
+      "timestamp_ms": 1770912647615,
+      "operation_id": "op-stripe-api-18",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    },
+    {
+      "log_id": "log-1770912647666-qb3hfikwl",
+      "timestamp_ms": 1770912647666,
+      "operation_id": "op-stripe-api-19",
+      "system_id": "stripe-api",
+      "status": "success",
+      "rollback_performed": false
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "idempotency_keys_present",
+        "passed": true,
+        "message": "All operations have non-empty operation IDs in audit trail"
+      },
+      {
+        "name": "audit_trail_complete",
+        "passed": true,
+        "message": "Expected at least 60 operations, got 62"
+      },
+      {
+        "name": "circuit_breakers_functional",
+        "passed": true,
+        "message": "All systems have circuit breaker metrics"
+      },
+      {
+        "name": "rollback_available",
+        "passed": true,
+        "message": "Rollback-capable systems are registered"
+      }
+    ]
+  },
+  "fa_001_status": "pass"
+}

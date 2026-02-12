@@ -19,12 +19,16 @@ import {
 export const scenarioSuiteSchema = z.enum(['smoke', 'regression', 'holdout']);
 export type ScenarioSuite = z.infer<typeof scenarioSuiteSchema>;
 
+export const scenarioClassSchema = z.enum(['success', 'retryable_failure', 'terminal_failure']);
+export type ScenarioClass = z.infer<typeof scenarioClassSchema>;
+
 export const failureModeSchema = z.enum([
   'rate_limit',
   'auth_failure',
   'timeout',
   'malformed_payload',
   'partial_outage',
+  'not_found',
 ]);
 
 export type FailureMode = z.infer<typeof failureModeSchema>;
@@ -32,6 +36,7 @@ export type FailureMode = z.infer<typeof failureModeSchema>;
 export const dtuScenarioFixtureSchema = z.object({
   scenario_id: z.string().min(1),
   suite: scenarioSuiteSchema,
+  scenario_class: scenarioClassSchema.optional(),
   description: z.string().min(1),
   request: twinInvocationRequestSchema,
   expected: twinInvocationResponseSchema,
@@ -44,6 +49,7 @@ export type DtuScenarioFixture = z.infer<typeof dtuScenarioFixtureSchema>;
 export interface ScenarioRunResult {
   scenario_id: string;
   suite: ScenarioSuite;
+  scenario_class: ScenarioClass;
   status: 'satisfied' | 'unsatisfied' | 'marginal';
   satisfaction_score: number;
   satisfaction_details: SatisfactionScore;
@@ -67,6 +73,7 @@ export interface DtuSatisfactionReport {
   fixtures_root: string;
   totals: ScenarioTotals;
   suites: Record<ScenarioSuite, ScenarioTotals>;
+  scenario_class_distribution: Record<ScenarioClass, ScenarioTotals>;
   holdout_rate: number;
   drift_delta: {
     pass_rate: number;
@@ -124,10 +131,12 @@ export async function runDtuScenarioHarness(
     const satisfactionScore = satisfactionDetails.value;
     const status = probabilisticStatus(satisfactionScore);
     const satisfied = isDeepStrictEqual(actual, fixture.expected);
+    const scenarioClass = fixture.scenario_class ?? inferScenarioClass(fixture.expected);
 
     results.push({
       scenario_id: fixture.scenario_id,
       suite: fixture.suite,
+      scenario_class: scenarioClass,
       status,
       satisfaction_score: satisfactionScore,
       satisfaction_details: satisfactionDetails,
@@ -145,6 +154,16 @@ export async function runDtuScenarioHarness(
     holdout: summarize(results.filter(result => result.suite === 'holdout')),
   };
 
+  const scenarioClassSummary: Record<ScenarioClass, ScenarioTotals> = {
+    success: summarize(results.filter(result => result.scenario_class === 'success')),
+    retryable_failure: summarize(
+      results.filter(result => result.scenario_class === 'retryable_failure')
+    ),
+    terminal_failure: summarize(
+      results.filter(result => result.scenario_class === 'terminal_failure')
+    ),
+  };
+
   const totals = summarize(results);
   const holdoutRate = suitesSummary.holdout.pass_rate;
   const failureCoverage = summarizeFailureCoverage(results);
@@ -157,6 +176,7 @@ export async function runDtuScenarioHarness(
     fixtures_root: resolve(options.fixtures_root),
     totals,
     suites: suitesSummary,
+    scenario_class_distribution: scenarioClassSummary,
     holdout_rate: holdoutRate,
     drift_delta: {
       pass_rate: roundRate(totals.pass_rate - (options.baseline?.totals.pass_rate ?? totals.pass_rate)),
@@ -189,6 +209,7 @@ function summarizeFailureCoverage(results: ScenarioRunResult[]): Record<FailureM
     timeout: false,
     malformed_payload: false,
     partial_outage: false,
+    not_found: false,
   };
 
   for (const result of results) {
@@ -199,6 +220,14 @@ function summarizeFailureCoverage(results: ScenarioRunResult[]): Record<FailureM
   }
 
   return coverage;
+}
+
+export function inferScenarioClass(expected: TwinInvocationResponse): ScenarioClass {
+  if (expected.status === 'success') {
+    return 'success';
+  }
+
+  return expected.error.retryable ? 'retryable_failure' : 'terminal_failure';
 }
 
 function roundRate(value: number): number {

@@ -1,0 +1,202 @@
+{
+  "schema_version": "circuit_breaker_tuning_report.v1",
+  "generated_at": "2026-02-12T16:07:48.348Z",
+  "fa_002_status": "pass",
+  "summary": {
+    "total_tests": 10,
+    "passed": 10,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "test": "opens_after_threshold",
+      "passed": true,
+      "metrics": {
+        "state": "open",
+        "failure_count": 3,
+        "success_count": 0,
+        "last_failure_time_ms": 1770912467998,
+        "last_success_time_ms": null,
+        "total_calls": 3,
+        "total_failures": 3,
+        "total_successes": 0,
+        "consecutive_successes": 0,
+        "consecutive_failures": 3
+      },
+      "events": [
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912467998,
+          "previous_state": "closed",
+          "new_state": "open"
+        }
+      ]
+    },
+    {
+      "test": "half_open_after_timeout",
+      "passed": true,
+      "state": "half_open",
+      "events": [
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912467998,
+          "previous_state": "closed",
+          "new_state": "open"
+        },
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468150,
+          "previous_state": "open",
+          "new_state": "half_open"
+        }
+      ]
+    },
+    {
+      "test": "closes_after_success_threshold",
+      "passed": true,
+      "state": "closed",
+      "consecutive_successes": 0,
+      "events": [
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468151,
+          "previous_state": "closed",
+          "new_state": "open"
+        },
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468212,
+          "previous_state": "open",
+          "new_state": "half_open"
+        },
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468212,
+          "previous_state": "half_open",
+          "new_state": "closed"
+        }
+      ]
+    },
+    {
+      "test": "reopens_on_failure_in_half_open",
+      "passed": true,
+      "state": "open",
+      "events": [
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468212,
+          "previous_state": "closed",
+          "new_state": "open"
+        },
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468273,
+          "previous_state": "open",
+          "new_state": "half_open"
+        },
+        {
+          "type": "state_change",
+          "timestamp_ms": 1770912468274,
+          "previous_state": "half_open",
+          "new_state": "open"
+        }
+      ]
+    },
+    {
+      "test": "limits_half_open_calls",
+      "passed": true,
+      "rejected": true,
+      "rejections": 1
+    },
+    {
+      "test": "escalation_trigger_detection",
+      "passed": true,
+      "consecutive_failures": 2,
+      "total_failures": 2,
+      "total_successes": 0,
+      "should_escalate": true
+    },
+    {
+      "test": "registry_isolation",
+      "passed": true,
+      "service_a_state": "open",
+      "service_b_state": "closed",
+      "same_instance": true,
+      "all_metrics": [
+        {
+          "name": "service-a",
+          "state": "open",
+          "metrics": {
+            "state": "open",
+            "failure_count": 2,
+            "success_count": 0,
+            "last_failure_time_ms": 1770912468347,
+            "last_success_time_ms": null,
+            "total_calls": 2,
+            "total_failures": 2,
+            "total_successes": 0,
+            "consecutive_successes": 0,
+            "consecutive_failures": 2
+          }
+        },
+        {
+          "name": "service-b",
+          "state": "closed",
+          "metrics": {
+            "state": "closed",
+            "failure_count": 0,
+            "success_count": 1,
+            "last_failure_time_ms": null,
+            "last_success_time_ms": 1770912468347,
+            "total_calls": 1,
+            "total_failures": 0,
+            "total_successes": 1,
+            "consecutive_successes": 1,
+            "consecutive_failures": 0
+          }
+        }
+      ]
+    },
+    {
+      "test": "adaptive_tuning_baseline",
+      "passed": true,
+      "has_baseline": true,
+      "anomaly_detected": true,
+      "anomaly_confidence": 1,
+      "anomaly_type": "spike",
+      "recommended_action": "escalate"
+    },
+    {
+      "test": "threshold_optimization",
+      "passed": true,
+      "has_recommendation": true,
+      "rationale_count": 3,
+      "confidence": 0.5,
+      "risk_level": "medium"
+    },
+    {
+      "test": "adaptive_breaker_telemetry",
+      "passed": true,
+      "adaptive_enabled": true,
+      "telemetry_recorded": true,
+      "anomaly_status": false
+    }
+  ],
+  "requirements_validated": {
+    "automatic_degradation": true,
+    "human_escalation_triggers": true,
+    "failure_isolation": true,
+    "recovery_mechanism": true,
+    "adaptive_tuning": true,
+    "threshold_optimization": true,
+    "anomaly_detection": true
+  },
+  "tuning_capabilities": {
+    "baseline_establishment": true,
+    "anomaly_detection": true,
+    "threshold_optimization": true,
+    "pattern_recognition": true,
+    "cascading_failure_detection": true,
+    "human_escalation_integration": true
+  }
+}

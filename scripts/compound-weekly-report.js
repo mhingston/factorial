@@ -101,15 +101,33 @@ function readJsonIfPresent(path) {
   }
 }
 
-function extractCostPerPrProxy(telemetry) {
+function asFiniteNumber(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  return null;
+}
+
+function extractTelemetryMetrics(telemetry) {
   if (!telemetry || typeof telemetry !== 'object') {
     return null;
   }
   if (telemetry.schema_version !== 'self_host_unattended_telemetry_report.v1') {
     return null;
   }
-  const value = telemetry.metrics?.cost_per_merged_pr_proxy;
-  return typeof value === 'number' ? value : null;
+  const metrics = telemetry.metrics ?? {};
+  return {
+    costPerMergedPrProxy: asFiniteNumber(metrics.cost_per_merged_pr_proxy),
+    mergedPrs: asFiniteNumber(metrics.merged_prs),
+    revertedPrCount: asFiniteNumber(metrics.reverted_pr_count),
+    churnedPrCount: asFiniteNumber(metrics.churned_pr_count),
+    totalChurnCommits: asFiniteNumber(metrics.total_churn_commits),
+    revertRate: asFiniteNumber(metrics.revert_rate),
+    churnPrRate: asFiniteNumber(metrics.churn_pr_rate),
+    averageChurnCommitsPerMergedPr: asFiniteNumber(
+      metrics.average_churn_commits_per_merged_pr
+    ),
+  };
 }
 
 function resolveReportOutput(start, end, explicitOutput) {
@@ -151,6 +169,12 @@ function buildReport({
   recurrenceRate,
   reopenRate,
   costPerMergedPrProxy,
+  revertedPrCount,
+  churnedPrCount,
+  totalChurnCommits,
+  revertRate,
+  churnPrRate,
+  averageChurnCommitsPerMergedPr,
   telemetryPath,
 }) {
   return [
@@ -163,11 +187,29 @@ function buildReport({
     `- cost_per_merged_pr_proxy: ${
       costPerMergedPrProxy === null ? 'N/A' : costPerMergedPrProxy
     } (source: ${telemetryPath})`,
+    `- reverted_pr_count: ${revertedPrCount === null ? 'N/A' : revertedPrCount} (source: ${telemetryPath})`,
+    `- churned_pr_count: ${churnedPrCount === null ? 'N/A' : churnedPrCount} (source: ${telemetryPath})`,
+    `- total_churn_commits: ${totalChurnCommits === null ? 'N/A' : totalChurnCommits} (source: ${telemetryPath})`,
+    `- revert_rate: ${revertRate} (source: ${telemetryPath})`,
+    `- churn_pr_rate: ${churnPrRate} (source: ${telemetryPath})`,
+    `- average_churn_commits_per_merged_pr: ${
+      averageChurnCommitsPerMergedPr === null ? 'N/A' : averageChurnCommitsPerMergedPr
+    } (source: ${telemetryPath})`,
     `- verifier_agreement_rate: N/A (no independent duplicate verifier runs recorded)`,
     `- review_artifacts_counted: ${reviewFiles.length}`,
     `- Notes / actions: Generated from git history and review artifacts via scripts/compound-weekly-report.js.`,
     '',
   ].join('\n');
+}
+
+function formatTelemetryRate(rate, numerator, denominator) {
+  if (typeof numerator === 'number' && typeof denominator === 'number') {
+    return formatRate(numerator, denominator);
+  }
+  if (rate === null) {
+    return 'N/A';
+  }
+  return `${(rate * 100).toFixed(1)}%`;
 }
 
 function main() {
@@ -234,7 +276,24 @@ function main() {
   const reopenRate = formatRate(reopenCount, lockDecisions.length);
 
   const telemetryState = readJsonIfPresent(telemetryPath);
-  const costPerMergedPrProxy = extractCostPerPrProxy(telemetryState.parsed);
+  const telemetryMetrics = extractTelemetryMetrics(telemetryState.parsed);
+  const costPerMergedPrProxy = telemetryMetrics?.costPerMergedPrProxy ?? null;
+  const mergedPrs = telemetryMetrics?.mergedPrs ?? null;
+  const revertedPrCount = telemetryMetrics?.revertedPrCount ?? null;
+  const churnedPrCount = telemetryMetrics?.churnedPrCount ?? null;
+  const totalChurnCommits = telemetryMetrics?.totalChurnCommits ?? null;
+  const revertRate = formatTelemetryRate(
+    telemetryMetrics?.revertRate ?? null,
+    revertedPrCount,
+    mergedPrs
+  );
+  const churnPrRate = formatTelemetryRate(
+    telemetryMetrics?.churnPrRate ?? null,
+    churnedPrCount,
+    mergedPrs
+  );
+  const averageChurnCommitsPerMergedPr =
+    telemetryMetrics?.averageChurnCommitsPerMergedPr ?? null;
 
   const report = buildReport({
     start,
@@ -245,6 +304,12 @@ function main() {
     recurrenceRate,
     reopenRate,
     costPerMergedPrProxy,
+    revertedPrCount,
+    churnedPrCount,
+    totalChurnCommits,
+    revertRate,
+    churnPrRate,
+    averageChurnCommitsPerMergedPr,
     telemetryPath,
   });
 

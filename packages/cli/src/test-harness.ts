@@ -23,6 +23,10 @@ const __dirname = dirname(__filename);
 
 export const ROOT_DIR = resolve(join(__dirname, '..', '..', '..'));
 export const CLI_ENTRY = join(ROOT_DIR, 'dist', 'packages', 'cli', 'src', 'index.js');
+const REQUIRED_BUILD_FILES = [
+  CLI_ENTRY,
+  join(ROOT_DIR, 'dist', 'packages', 'core', 'src', 'dtu', 'full-autonomy-readiness.js'),
+];
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const BUILD_SENTINEL = join(ROOT_DIR, 'dist', '.cli-build-ready-for-tests.json');
@@ -171,7 +175,7 @@ async function isBuildLockStale(): Promise<boolean> {
 }
 
 async function materializeSentinelForPreexistingBuild(): Promise<void> {
-  if (!(await pathExists(CLI_ENTRY))) {
+  if (!(await hasRequiredBuildFiles())) {
     return;
   }
 
@@ -187,11 +191,16 @@ async function materializeSentinelForPreexistingBuild(): Promise<void> {
 }
 
 async function hasReadyBuild(): Promise<boolean> {
-  const [entryExists, sentinelExists] = await Promise.all([
-    pathExists(CLI_ENTRY),
+  const [sentinelExists, requiredFilesExist] = await Promise.all([
     pathExists(BUILD_SENTINEL),
+    hasRequiredBuildFiles(),
   ]);
-  return entryExists && sentinelExists;
+  return sentinelExists && requiredFilesExist;
+}
+
+async function hasRequiredBuildFiles(): Promise<boolean> {
+  const checks = await Promise.all(REQUIRED_BUILD_FILES.map(pathExists));
+  return checks.every(Boolean);
 }
 
 async function writeBuildSentinel(source: 'fresh-build' | 'preexisting-build'): Promise<void> {

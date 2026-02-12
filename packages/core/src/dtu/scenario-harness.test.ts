@@ -1,11 +1,12 @@
-import { describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+import { createReferenceTwinRuntime } from './reference-runtime.js';
 import {
+  inferScenarioClass,
   loadDtuScenarioFixtures,
   runDtuScenarioHarness,
   scenarioSuiteSchema,
 } from './scenario-harness.js';
-import { createReferenceTwinRuntime } from './reference-runtime.js';
 
 const SCENARIO_FIXTURES_ROOT = fileURLToPath(
   new URL('../../../../tests/fixtures/dtu/scenarios/', import.meta.url)
@@ -75,6 +76,90 @@ describe('DTU scenario harness', () => {
       timeout: true,
       malformed_payload: true,
       partial_outage: true,
+      not_found: false,
     });
+  });
+
+  it('emits scenario class distribution for success and failure classes (FI-002)', async () => {
+    const fixtures = await loadDtuScenarioFixtures(SCENARIO_FIXTURES_ROOT);
+    const runtime = createReferenceTwinRuntime();
+
+    const report = await runDtuScenarioHarness({
+      runtime,
+      fixtures,
+      fixtures_root: SCENARIO_FIXTURES_ROOT,
+    });
+
+    expect(report.scenario_class_distribution.success.total).toBeGreaterThan(0);
+    expect(report.scenario_class_distribution.retryable_failure.total).toBeGreaterThan(0);
+    expect(report.scenario_class_distribution.terminal_failure.total).toBeGreaterThan(0);
+  });
+
+  it('infers scenario classes from expected response deterministically (FI-002)', () => {
+    expect(
+      inferScenarioClass({
+        twin_id: 'jira.issue',
+        twin_version: '0.1.0',
+        operation: 'issues.create',
+        status: 'success',
+        output: {},
+        error: null,
+        timing: {
+          started_at_ms: 1700000000000,
+          completed_at_ms: 1700000000001,
+          latency_ms: 1,
+          deterministic: true,
+        },
+        metadata: {},
+      })
+    ).toBe('success');
+
+    expect(
+      inferScenarioClass({
+        twin_id: 'jira.issue',
+        twin_version: '0.1.0',
+        operation: 'issues.create',
+        status: 'error',
+        output: null,
+        error: {
+          code: 'timeout',
+          class: 'transient',
+          message: 'Timeout',
+          retryable: true,
+          details: {},
+        },
+        timing: {
+          started_at_ms: 1700000000000,
+          completed_at_ms: 1700000000001,
+          latency_ms: 1,
+          deterministic: true,
+        },
+        metadata: {},
+      })
+    ).toBe('retryable_failure');
+
+    expect(
+      inferScenarioClass({
+        twin_id: 'jira.issue',
+        twin_version: '0.1.0',
+        operation: 'issues.create',
+        status: 'error',
+        output: null,
+        error: {
+          code: 'auth_failed',
+          class: 'auth',
+          message: 'Auth failed',
+          retryable: false,
+          details: {},
+        },
+        timing: {
+          started_at_ms: 1700000000000,
+          completed_at_ms: 1700000000001,
+          latency_ms: 1,
+          deterministic: true,
+        },
+        metadata: {},
+      })
+    ).toBe('terminal_failure');
   });
 });

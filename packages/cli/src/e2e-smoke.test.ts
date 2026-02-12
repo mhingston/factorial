@@ -1,13 +1,13 @@
-import { beforeAll, describe, expect, it } from 'vitest';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   CLI_ENTRY,
   ROOT_DIR,
+  type SuiteIsolation,
   createSuiteIsolation,
   ensureDeterministicCliBuild,
   runCommand,
-  type SuiteIsolation,
 } from './test-harness';
 
 const FIXTURE_DOT = join(ROOT_DIR, 'tests', 'fixtures', 'e2e', 'cli_smoke.dot');
@@ -382,10 +382,18 @@ describe('CLI e2e smoke tests', () => {
     expect(metrics.review_artifacts_counted).toBe(0);
     expect(metrics.known_issue_recurrence_rate).toBe('N/A');
     expect(metrics.reopen_rate).toBe('N/A');
+    expect(typeof metrics.cost_per_merged_pr_proxy).toBe('string');
+    expect(typeof metrics.reverted_pr_count).toBe('string');
+    expect(typeof metrics.churned_pr_count).toBe('string');
+    expect(typeof metrics.total_churn_commits).toBe('string');
+    expect(typeof metrics.revert_rate).toBe('string');
+    expect(typeof metrics.churn_pr_rate).toBe('string');
+    expect(typeof metrics.average_churn_commits_per_merged_pr).toBe('string');
 
     const markdown = await readFile(outputPath, 'utf-8');
     expect(markdown).toContain('Week of 1990-01-01 to 1990-01-07');
     expect(markdown).toContain('review_artifacts_counted: 0');
+    expect(markdown).toContain('revert_rate:');
   });
 
   it('dtu-run command emits satisfaction report for scenario fixtures', async () => {

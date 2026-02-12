@@ -1,19 +1,24 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { z } from 'zod';
+import { twinInvocationResponseSchema } from './contracts.js';
 import { createReferenceTwinRuntime } from './reference-runtime.js';
 import {
   type DtuScenarioFixture,
   type FailureMode,
+  type ScenarioClass,
   type ScenarioSuite,
   dtuScenarioFixtureSchema,
   failureModeSchema,
+  inferScenarioClass,
+  scenarioClassSchema,
   scenarioSuiteSchema,
 } from './scenario-harness.js';
 
 export const scenarioTemplateSchema = z.object({
   scenario_id: z.string().min(1),
   suite: scenarioSuiteSchema,
+  scenario_class: scenarioClassSchema.optional(),
   description: z.string().min(1),
   twin_id: z.string().min(1),
   operation: z.string().min(1),
@@ -40,6 +45,7 @@ export interface ScenarioCurationOptions {
 export interface ScenarioListEntry {
   scenario_id: string;
   suite: ScenarioSuite;
+  scenario_class: ScenarioClass;
   twin_id: string;
   operation: string;
   description: string;
@@ -66,6 +72,10 @@ const TWIN_OPERATIONS: Record<string, string[]> = {
   'github.issue': ['issues.create', 'issues.add_comment', 'issues.close'],
   'aws.s3': ['buckets.create', 'objects.put', 'objects.get', 'objects.delete'],
   'database.records': ['records.insert', 'records.update', 'records.delete', 'records.query'],
+  'stripe': ['customers.create', 'customers.get', 'payments.create', 'refunds.create', 'webhooks.process'],
+  'postgres': ['sql.query', 'sql.transaction', 'connection.connect', 'prepared.prepare', 'prepared.execute'],
+  'redis': ['kv.get', 'kv.set', 'kv.delete', 'pubsub.publish', 'pubsub.subscribe', 'list.push', 'list.range', 'set.add', 'set.members'],
+  'sendgrid': ['email.send', 'templates.get', 'templates.create', 'stats.get', 'webhooks.process', 'email.validate'],
 };
 
 const FAILURE_MODE_SIMULATIONS: Record<FailureMode, string[]> = {
@@ -74,6 +84,7 @@ const FAILURE_MODE_SIMULATIONS: Record<FailureMode, string[]> = {
   timeout: ['timeout'],
   malformed_payload: ['invalid_input'],
   partial_outage: ['partial_outage'],
+  not_found: ['not_found'],
 };
 
 export async function listScenarios(options: ScenarioCurationOptions): Promise<ScenarioListEntry[]> {
@@ -89,9 +100,17 @@ export async function listScenarios(options: ScenarioCurationOptions): Promise<S
         const parsed = JSON.parse(content);
 
         if (parsed.scenario_id && parsed.suite && parsed.request?.twin_id) {
+          const parsedFixture = dtuScenarioFixtureSchema.safeParse(parsed);
+          const expectedParse = twinInvocationResponseSchema.safeParse(parsed.expected);
+          const scenarioClass = parsedFixture.success
+            ? parsedFixture.data.scenario_class ?? inferScenarioClass(parsedFixture.data.expected)
+            : expectedParse.success
+              ? inferScenarioClass(expectedParse.data)
+              : 'success';
           const entry: ScenarioListEntry = {
             scenario_id: parsed.scenario_id,
             suite: parsed.suite,
+            scenario_class: scenarioClass,
             twin_id: parsed.request.twin_id,
             operation: parsed.request.operation,
             description: parsed.description || 'No description',
@@ -156,6 +175,18 @@ export async function validateScenarioTemplate(
     errors.push('Cannot specify expected_output when expected_status is error');
   }
 
+  if (validTemplate.scenario_class) {
+    const allowedClasses =
+      validTemplate.expected_status === 'success'
+        ? ['success']
+        : ['retryable_failure', 'terminal_failure'];
+    if (!allowedClasses.includes(validTemplate.scenario_class)) {
+      errors.push(
+        `scenario_class ${validTemplate.scenario_class} does not align with expected_status ${validTemplate.expected_status}`
+      );
+    }
+  }
+
   if (errors.length > 0) {
     return { valid: false, errors };
   }
@@ -202,6 +233,7 @@ async function generateFixtureFromTemplate(template: ScenarioTemplate): Promise<
     return {
       scenario_id: template.scenario_id,
       suite: template.suite,
+      scenario_class: template.scenario_class ?? inferScenarioClass(response),
       description: template.description,
       request: baseRequest,
       expected: response,
@@ -213,6 +245,27 @@ async function generateFixtureFromTemplate(template: ScenarioTemplate): Promise<
     return {
       scenario_id: template.scenario_id,
       suite: template.suite,
+      scenario_class: template.scenario_class ?? inferScenarioClass({
+        twin_id: template.twin_id,
+        twin_version: 'unknown',
+        operation: template.operation,
+        status: 'error',
+        output: null,
+        error: {
+          code: 'internal_error',
+          class: 'transient',
+          message: error instanceof Error ? error.message : 'Unknown error',
+          retryable: true,
+          details: {},
+        },
+        timing: {
+          started_at_ms: timestamp,
+          completed_at_ms: timestamp,
+          latency_ms: 0,
+          deterministic: true,
+        },
+        metadata: {},
+      }),
       description: template.description,
       request: baseRequest,
       expected: {
@@ -358,4 +411,11 @@ export const AVAILABLE_FAILURE_MODES: FailureMode[] = [
   'timeout',
   'malformed_payload',
   'partial_outage',
+  'not_found',
+];
+
+export const AVAILABLE_SCENARIO_CLASSES: ScenarioClass[] = [
+  'success',
+  'retryable_failure',
+  'terminal_failure',
 ];

@@ -80,7 +80,7 @@ Promotion from `autonomous` to `full-autonomy` requires expanding operational bo
 | gate_id | level | objective requirement | evaluation hook |
 | --- | --- | --- | --- |
 | `FA-001` | `full-autonomy` | Published external-system integration report validates safe operation across third-party APIs (webhooks, databases, cloud services) with deterministic rollback and audit trails. | Presence and schema of `docs/metrics/reports/external-system-operations-latest.json` |
-| `FA-002` | `full-autonomy` | External operation circuit-breaker patterns are enforced with automatic degradation and human-escalation triggers for anomaly detection. | `npm run self-host:circuit-breaker-test` |
+| `FA-002` | `full-autonomy` | External operation circuit-breaker patterns are enforced with automatic degradation and human-escalation triggers for anomaly detection. | `npm run self-host:circuit-breaker-test` (publishes `circuit-breaker-tuning-latest.json`) |
 
 **Self-Modification Capabilities**
 | gate_id | level | objective requirement | evaluation hook |
@@ -92,7 +92,7 @@ Promotion from `autonomous` to `full-autonomy` requires expanding operational bo
 **Multi-Instance Coordination**
 | gate_id | level | objective requirement | evaluation hook |
 | --- | --- | --- | --- |
-| `FA-006` | `full-autonomy` | Distributed execution report proves cross-instance workflow orchestration with consensus protocols and split-brain detection. | Presence and schema of `docs/metrics/reports/distributed-execution-latest.json` |
+| `FA-006` | `full-autonomy` | Distributed execution report proves cross-instance workflow orchestration with consensus protocols and split-brain detection. | Presence and schema of `docs/metrics/reports/distributed-consensus-latest.json` |
 | `FA-007` | `full-autonomy` | Cross-repository workflow report validates multi-repo coordination with dependency tracking and transitive lock propagation. | `npm run self-host:cross-repo-test` |
 
 **Zero-Human-Intervention Execution**
@@ -108,7 +108,7 @@ Promotion from `autonomous` to `full-autonomy` requires expanding operational bo
 npm run self-host:external-systems -- --report ./docs/metrics/reports/external-system-operations-latest.json
 
 # FA-002: Circuit breaker test with automatic degradation
-npm run self-host:circuit-breaker-test -- --report ./docs/metrics/reports/circuit-breaker-test-latest.json
+npm run self-host:circuit-breaker-test -- --report ./docs/metrics/reports/circuit-breaker-tuning-latest.json
 
 # Self-modification capability demonstration
 npm run self-host:self-mod -- --report ./docs/metrics/reports/self-modification-latest.json
@@ -120,16 +120,19 @@ npm run self-host:optimize -- --report ./docs/metrics/reports/config-optimizatio
 npm run self-host:codegen-validation -- --report ./docs/metrics/reports/codegen-validation-latest.json
 
 # Distributed execution validation
-npm run self-host:distributed -- --report ./docs/metrics/reports/distributed-execution-latest.json
+npm run self-host:distributed -- --consensus-report ./docs/metrics/reports/distributed-consensus-latest.json
 
 # Cross-repo workflow validation
-npm run self-host:cross-repo-test -- --report ./docs/metrics/reports/cross-repo-workflow-latest.json
+npm run self-host:cross-repo-test -- --report ./docs/metrics/reports/cross-repo-coordination-latest.json
 
 # Full autonomy telemetry aggregation
 npm run self-host:full-autonomy-telemetry -- --report ./docs/metrics/reports/full-autonomy-telemetry-latest.json
 
 # Self-healing validation
 npm run self-host:self-healing -- --report ./docs/metrics/reports/self-healing-latest.json
+
+# Full autonomy readiness rollup
+npm run full-autonomy:readiness -- --report ./docs/metrics/reports/full-autonomy-readiness-latest.json
 ```
 
 ### Current Status
@@ -158,6 +161,7 @@ The `autonomous` level requires (currently satisfied):
 - Provider-backed live-canary lane (configured/secret-gated): `.github/workflows/provider-backed-live-canary.yml` (fail-closed with `--require-pass` when provider secrets are configured)
 - Recommended freshness expectation for live-canary provider-backed evidence: <= 168 hours
 - Recommended periodic publication target for next-level evidence:
+  - `docs/metrics/reports/full-autonomy-readiness-latest.json`
   - `docs/metrics/reports/self-host-flake-latest.json`
   - `docs/metrics/reports/self-host-provider-backed-latest.json`
   - `docs/metrics/reports/self-host-provider-backed-live-latest.json`

@@ -28,6 +28,24 @@ This document defines how to measure whether engineering learnings are compoundi
 - `cost_per_merged_pr_proxy`
   - Formula: proxy cost per merged PR from unattended telemetry report.
   - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
+- `reverted_pr_count`
+  - Formula: merged PRs reverted within maintenance window.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
+- `churned_pr_count`
+  - Formula: merged PRs with churn commits within maintenance window.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
+- `total_churn_commits`
+  - Formula: total post-merge churn commits within maintenance window.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
+- `revert_rate`
+  - Formula: reverted PRs / merged PRs within maintenance window.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
+- `churn_pr_rate`
+  - Formula: churned PRs / merged PRs within maintenance window.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
+- `average_churn_commits_per_merged_pr`
+  - Formula: total churn commits / merged PRs within maintenance window.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
 - `verifier_agreement_rate`
   - Formula: matching `pass|fail` outcomes across independent verification attempts / total compared outcomes.
   - Source: verification artifacts.
@@ -111,6 +129,12 @@ Week of YYYY-MM-DD
 - median_cycles_to_close:
 - reopen_rate:
 - cost_per_merged_pr_proxy:
+- reverted_pr_count:
+- churned_pr_count:
+- total_churn_commits:
+- revert_rate:
+- churn_pr_rate:
+- average_churn_commits_per_merged_pr:
 - verifier_agreement_rate:
 - review_artifacts_counted:
 - Notes / actions:
