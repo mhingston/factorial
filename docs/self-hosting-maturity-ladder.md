@@ -24,8 +24,8 @@ This document defines staged self-hosting maturity levels and objective promotio
 | `AU-002` | `autonomous` | Published agent-audit evidence artifact exists with required schema. | Presence and schema of `docs/metrics/reports/self-host-agent-audit-latest.json` |
 
 ## Current Declaration
-- Declared current level: `provider-backed`
-- Declared next level: `autonomous`
+- Declared current level: `autonomous`
+- Declared next level: `full-autonomy`
 - Objective assessment command:
 
 ```bash
@@ -65,10 +65,91 @@ npm run self-host:autonomous
 npm run self-host:agent-audit
 ```
 
-## Required Criteria for Next Level (`autonomous`)
-Promotion from `provider-backed` to `autonomous` requires:
-1. `AU-001` = `pass` (published autonomous stability/guardrail report)
-2. `AU-002` = `pass` (published agent-audit evidence report)
+## Required Criteria for Next Level (`full-autonomy`)
+
+Promotion from `autonomous` to `full-autonomy` requires expanding operational boundaries beyond current unattended constraints while maintaining zero-human-intervention guarantees for defined workflow categories.
+
+### Level Definition
+| level | declaration | promotion gate policy |
+| --- | --- | --- |
+| `full-autonomy` | Zero-human-intervention execution across external systems with self-modification, multi-instance coordination, and autonomous optimization capabilities. | All `DL-*`, `PB-*`, `AU-*`, and `FA-*` gates must be `pass`. |
+
+### Full-Autonomy Gate Catalog
+
+**Boundary Expansion (External Systems)**
+| gate_id | level | objective requirement | evaluation hook |
+| --- | --- | --- | --- |
+| `FA-001` | `full-autonomy` | Published external-system integration report validates safe operation across third-party APIs (webhooks, databases, cloud services) with deterministic rollback and audit trails. | Presence and schema of `docs/metrics/reports/external-system-operations-latest.json` |
+| `FA-002` | `full-autonomy` | External operation circuit-breaker patterns are enforced with automatic degradation and human-escalation triggers for anomaly detection. | `npm run self-host:circuit-breaker-test` |
+
+**Self-Modification Capabilities**
+| gate_id | level | objective requirement | evaluation hook |
+| --- | --- | --- | --- |
+| `FA-003` | `full-autonomy` | Self-modification report proves Factorial can generate, validate, and apply DOT graph modifications autonomously with pre-flight lint and deterministic outcome verification. | Presence and schema of `docs/metrics/reports/self-modification-latest.json` |
+| `FA-004` | `full-autonomy` | Configuration optimization report demonstrates autonomous parameter tuning (confidence thresholds, retry policies, budget limits) based on historical run analytics with bounded drift limits. | `npm run self-host:optimize -- --report ./docs/metrics/reports/config-optimization-latest.json` |
+| `FA-005` | `full-autonomy` | Code generation report validates autonomous handler/schema generation with golden test regression coverage. | `npm run self-host:codegen-validation` |
+
+**Multi-Instance Coordination**
+| gate_id | level | objective requirement | evaluation hook |
+| --- | --- | --- | --- |
+| `FA-006` | `full-autonomy` | Distributed execution report proves cross-instance workflow orchestration with consensus protocols and split-brain detection. | Presence and schema of `docs/metrics/reports/distributed-execution-latest.json` |
+| `FA-007` | `full-autonomy` | Cross-repository workflow report validates multi-repo coordination with dependency tracking and transitive lock propagation. | `npm run self-host:cross-repo-test` |
+
+**Zero-Human-Intervention Execution**
+| gate_id | level | objective requirement | evaluation hook |
+| --- | --- | --- | --- |
+| `FA-008` | `full-autonomy` | Unattended telemetry report shows 30-day zero-escalation operation for defined workflow categories with explicit categorization and out-of-distribution detection. | Presence and schema of `docs/metrics/reports/full-autonomy-telemetry-latest.json` |
+| `FA-009` | `full-autonomy` | Self-healing report demonstrates autonomous error recovery (not just retry) including state reconstruction, alternative path selection, and graceful degradation without human input. | `npm run self-host:self-healing` |
+
+### Evidence Publication Commands
+
+```bash
+# FA-001: External system operations validation
+npm run self-host:external-systems -- --report ./docs/metrics/reports/external-system-operations-latest.json
+
+# FA-002: Circuit breaker test with automatic degradation
+npm run self-host:circuit-breaker-test -- --report ./docs/metrics/reports/circuit-breaker-test-latest.json
+
+# Self-modification capability demonstration
+npm run self-host:self-mod -- --report ./docs/metrics/reports/self-modification-latest.json
+
+# Configuration optimization evidence
+npm run self-host:optimize -- --report ./docs/metrics/reports/config-optimization-latest.json
+
+# Codegen validation evidence
+npm run self-host:codegen-validation -- --report ./docs/metrics/reports/codegen-validation-latest.json
+
+# Distributed execution validation
+npm run self-host:distributed -- --report ./docs/metrics/reports/distributed-execution-latest.json
+
+# Cross-repo workflow validation
+npm run self-host:cross-repo-test -- --report ./docs/metrics/reports/cross-repo-workflow-latest.json
+
+# Full autonomy telemetry aggregation
+npm run self-host:full-autonomy-telemetry -- --report ./docs/metrics/reports/full-autonomy-telemetry-latest.json
+
+# Self-healing validation
+npm run self-host:self-healing -- --report ./docs/metrics/reports/self-healing-latest.json
+```
+
+### Current Status
+- Declared current level: `autonomous`  
+- Declared next level: `full-autonomy`
+- Required gates for promotion: `FA-001` through `FA-009`
+- Status: 
+  - ✅ `FA-001` implemented: External system operations with circuit breakers and deterministic rollback
+  - ✅ `FA-002` implemented: Circuit breaker automatic degradation and human escalation triggers
+  - ✅ `FA-003` implemented: DOT generation with pre-flight lint and rollback
+  - ✅ `FA-004` implemented: Configuration optimization with bounded drift
+  - ✅ `FA-005` implemented: Handler/schema codegen validation with golden fixtures
+  - ✅ `FA-006` implemented: Distributed execution consensus + split-brain detection
+  - ✅ `FA-007` implemented: Cross-repo lock propagation + cycle detection
+  - ✅ `FA-008` implemented: Full autonomy telemetry report with zero-escalation + OOD checks
+  - ✅ `FA-009` implemented: Self-healing report with root-cause + alternative path evidence
+
+The `autonomous` level requires (currently satisfied):
+- `AU-001` = `pass` (published autonomous stability/guardrail report)
+- `AU-002` = `pass` (published agent-audit evidence report)
 
 ## CI/Reporting Hooks
 - CI job: `.github/workflows/ci.yml` -> `self-host-maturity`

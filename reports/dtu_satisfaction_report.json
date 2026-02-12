@@ -1,0 +1,247 @@
+{
+  "schema_version": "dtu_satisfaction_report.v1",
+  "generated_at": "2026-02-12T08:19:02.318Z",
+  "fixtures_root": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu",
+  "totals": {
+    "total": 2,
+    "satisfied": 2,
+    "unsatisfied": 0,
+    "pass_rate": 1
+  },
+  "suites": {
+    "smoke": {
+      "total": 2,
+      "satisfied": 2,
+      "unsatisfied": 0,
+      "pass_rate": 1
+    },
+    "regression": {
+      "total": 0,
+      "satisfied": 0,
+      "unsatisfied": 0,
+      "pass_rate": 0
+    },
+    "holdout": {
+      "total": 0,
+      "satisfied": 0,
+      "unsatisfied": 0,
+      "pass_rate": 0
+    }
+  },
+  "holdout_rate": 0,
+  "drift_delta": {
+    "pass_rate": 0,
+    "holdout_rate": 0
+  },
+  "failure_mode_coverage": {
+    "rate_limit": false,
+    "auth_failure": false,
+    "timeout": false,
+    "malformed_payload": false,
+    "partial_outage": false
+  },
+  "satisfaction_distribution": {
+    "mean": 1,
+    "median": 1,
+    "min": 1,
+    "max": 1,
+    "std_dev": 0,
+    "quartiles": {
+      "q1": 1,
+      "q2": 1,
+      "q3": 1
+    },
+    "buckets": {
+      "excellent": 2,
+      "good": 0,
+      "acceptable": 0,
+      "poor": 0,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "scenario_id": "scn-jira-create-success",
+      "suite": "smoke",
+      "status": "satisfied",
+      "satisfaction_score": 1,
+      "satisfaction_details": {
+        "value": 1,
+        "components": {
+          "status_match": 1,
+          "structure_match": 1,
+          "content_match": 1
+        },
+        "details": [
+          "Full parity match"
+        ]
+      },
+      "reason": "response parity matched fixture expectation",
+      "request": {
+        "twin_id": "jira.issue",
+        "operation": "issues.create",
+        "scenario_id": "jira-create-success",
+        "seed": "phase-a-seed-001",
+        "input": {
+          "project_key": "FACT",
+          "summary": "Implement deterministic twin contract",
+          "description": "Add schema-backed DTU contracts and runtime boundary abstractions.",
+          "actor": "platform-bot",
+          "simulate": "none"
+        },
+        "timing": {
+          "requested_at_ms": 1739222400000,
+          "timeout_ms": 5000
+        },
+        "metadata": {
+          "suite": "dtu-complete",
+          "scenario": "jira-create-success"
+        }
+      },
+      "expected": {
+        "twin_id": "jira.issue",
+        "twin_version": "0.1.0",
+        "operation": "issues.create",
+        "timing": {
+          "started_at_ms": 1739222400000,
+          "completed_at_ms": 1739222400012,
+          "latency_ms": 12,
+          "deterministic": true
+        },
+        "metadata": {
+          "suite": "dtu-complete",
+          "scenario": "jira-create-success",
+          "provider": "jira",
+          "parity_profile": "phase-a"
+        },
+        "status": "success",
+        "output": {
+          "issue_key": "FACT-7055",
+          "summary": "Implement deterministic twin contract",
+          "description": "Add schema-backed DTU contracts and runtime boundary abstractions.",
+          "status": "OPEN",
+          "assignee": "platform-bot",
+          "link": "https://jira.twin.local/browse/FACT-7055"
+        },
+        "error": null
+      },
+      "actual": {
+        "twin_id": "jira.issue",
+        "twin_version": "0.1.0",
+        "operation": "issues.create",
+        "timing": {
+          "started_at_ms": 1739222400000,
+          "completed_at_ms": 1739222400012,
+          "latency_ms": 12,
+          "deterministic": true
+        },
+        "metadata": {
+          "suite": "dtu-complete",
+          "scenario": "jira-create-success",
+          "provider": "jira",
+          "parity_profile": "phase-a"
+        },
+        "status": "success",
+        "output": {
+          "issue_key": "FACT-7055",
+          "summary": "Implement deterministic twin contract",
+          "description": "Add schema-backed DTU contracts and runtime boundary abstractions.",
+          "status": "OPEN",
+          "assignee": "platform-bot",
+          "link": "https://jira.twin.local/browse/FACT-7055"
+        },
+        "error": null
+      }
+    },
+    {
+      "scenario_id": "scn-slack-post-success",
+      "suite": "smoke",
+      "status": "satisfied",
+      "satisfaction_score": 1,
+      "satisfaction_details": {
+        "value": 1,
+        "components": {
+          "status_match": 1,
+          "structure_match": 1,
+          "content_match": 1
+        },
+        "details": [
+          "Full parity match"
+        ]
+      },
+      "reason": "response parity matched fixture expectation",
+      "request": {
+        "twin_id": "slack.channel",
+        "operation": "messages.post",
+        "scenario_id": "slack-post-success",
+        "seed": "phase-a-seed-101",
+        "input": {
+          "channel_id": "C123456",
+          "text": "Ship DTU harness status report to channel",
+          "actor": "qa-bot",
+          "simulate": "none"
+        },
+        "timing": {
+          "requested_at_ms": 1739222410000,
+          "timeout_ms": 3000
+        },
+        "metadata": {
+          "suite": "dtu-complete",
+          "scenario": "slack-post-success"
+        }
+      },
+      "expected": {
+        "twin_id": "slack.channel",
+        "twin_version": "0.1.0",
+        "operation": "messages.post",
+        "timing": {
+          "started_at_ms": 1739222410000,
+          "completed_at_ms": 1739222410008,
+          "latency_ms": 8,
+          "deterministic": true
+        },
+        "metadata": {
+          "suite": "dtu-complete",
+          "scenario": "slack-post-success",
+          "provider": "slack",
+          "parity_profile": "dtu-complete"
+        },
+        "status": "success",
+        "output": {
+          "channel_id": "C123456",
+          "message_id": "msg-968391",
+          "actor": "qa-bot",
+          "text": "Ship DTU harness status report to channel",
+          "permalink": "https://slack.twin.local/archives/C123456/p968391"
+        },
+        "error": null
+      },
+      "actual": {
+        "twin_id": "slack.channel",
+        "twin_version": "0.1.0",
+        "operation": "messages.post",
+        "timing": {
+          "started_at_ms": 1739222410000,
+          "completed_at_ms": 1739222410008,
+          "latency_ms": 8,
+          "deterministic": true
+        },
+        "metadata": {
+          "suite": "dtu-complete",
+          "scenario": "slack-post-success",
+          "provider": "slack",
+          "parity_profile": "dtu-complete"
+        },
+        "status": "success",
+        "output": {
+          "channel_id": "C123456",
+          "message_id": "msg-968391",
+          "actor": "qa-bot",
+          "text": "Ship DTU harness status report to channel",
+          "permalink": "https://slack.twin.local/archives/C123456/p968391"
+        },
+        "error": null
+      }
+    }
+  ]
+}

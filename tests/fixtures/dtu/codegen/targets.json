@@ -1,0 +1,64 @@
+[
+  {
+    "node_type": "tool.http_request",
+    "handler_name": "HttpRequestHandler",
+    "description": "HTTP request tool node",
+    "examples": [
+      {
+        "url": "https://example.com",
+        "method": "GET",
+        "timeout_ms": 1000
+      },
+      {
+        "url": "https://example.com",
+        "method": "POST"
+      }
+    ]
+  },
+  {
+    "node_type": "quality.audit",
+    "handler_name": "QualityAuditHandler",
+    "description": "Quality audit result",
+    "examples": [
+      {
+        "score": 0.93,
+        "passed": true,
+        "notes": "ok"
+      }
+    ]
+  },
+  {
+    "node_type": "confidence.score",
+    "handler_name": "ConfidenceScoreHandler",
+    "description": "Confidence score payload",
+    "examples": [
+      {
+        "confidence": 0.75,
+        "signal_path": "confidence.score"
+      }
+    ]
+  },
+  {
+    "node_type": "parallel.merge",
+    "handler_name": "ParallelMergeHandler",
+    "description": "Parallel merge signal",
+    "examples": [
+      {
+        "merge_strategy": "best_score",
+        "branch_ids": ["a", "b"]
+      }
+    ]
+  },
+  {
+    "node_type": "manager.summary",
+    "handler_name": "ManagerSummaryHandler",
+    "description": "Manager loop summary",
+    "examples": [
+      {
+        "summary": "done",
+        "actions": ["observe", "steer"],
+        "cycle_count": 2
+      }
+    ]
+  }
+]

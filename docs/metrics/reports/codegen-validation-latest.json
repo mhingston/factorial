@@ -1,0 +1,67 @@
+{
+  "schema_version": "codegen_validation_report.v1",
+  "generated_at": "2026-02-12T05:49:01.135Z",
+  "summary": {
+    "total_handlers": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "handlers": [
+    {
+      "node_type": "tool.http_request",
+      "handler_name": "HttpRequestHandler",
+      "status": "pass",
+      "schema_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/tool-http_request.schema.json",
+      "handler_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/tool-http_request.handler.ts",
+      "golden_match": true,
+      "errors": []
+    },
+    {
+      "node_type": "quality.audit",
+      "handler_name": "QualityAuditHandler",
+      "status": "pass",
+      "schema_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/quality-audit.schema.json",
+      "handler_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/quality-audit.handler.ts",
+      "golden_match": true,
+      "errors": []
+    },
+    {
+      "node_type": "confidence.score",
+      "handler_name": "ConfidenceScoreHandler",
+      "status": "pass",
+      "schema_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/confidence-score.schema.json",
+      "handler_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/confidence-score.handler.ts",
+      "golden_match": true,
+      "errors": []
+    },
+    {
+      "node_type": "parallel.merge",
+      "handler_name": "ParallelMergeHandler",
+      "status": "pass",
+      "schema_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/parallel-merge.schema.json",
+      "handler_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/parallel-merge.handler.ts",
+      "golden_match": true,
+      "errors": []
+    },
+    {
+      "node_type": "manager.summary",
+      "handler_name": "ManagerSummaryHandler",
+      "status": "pass",
+      "schema_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/manager-summary.schema.json",
+      "handler_path": "/Users/markhingston/Downloads/strange-attractor/tests/fixtures/dtu/codegen/expected/manager-summary.handler.ts",
+      "golden_match": true,
+      "errors": []
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "golden_fixtures_match",
+        "passed": true,
+        "message": "All codegen artifacts match golden fixtures"
+      }
+    ]
+  },
+  "fa_005_status": "pass"
+}

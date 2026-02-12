@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cycle_count": {
+      "type": "number"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "actions",
+    "cycle_count",
+    "summary"
+  ],
+  "additionalProperties": false
+}

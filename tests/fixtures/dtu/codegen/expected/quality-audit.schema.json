@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "notes": {
+      "type": "string"
+    },
+    "passed": {
+      "type": "boolean"
+    },
+    "score": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "notes",
+    "passed",
+    "score"
+  ],
+  "additionalProperties": false
+}

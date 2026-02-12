@@ -1,0 +1,133 @@
+{
+  "schema_version": "self_modification_report.v1",
+  "generated_at": "2026-02-12T05:49:00.569Z",
+  "summary": {
+    "total_modifications": 10,
+    "applied": 10,
+    "rolled_back": 0,
+    "lint_errors": 0
+  },
+  "modifications": [
+    {
+      "modification_id": "mod-1",
+      "status": "applied",
+      "graph_id": "SelfModSimple",
+      "node_count": 3,
+      "edge_count": 2,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-2",
+      "status": "applied",
+      "graph_id": "SelfModQualityGate",
+      "node_count": 4,
+      "edge_count": 4,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-3",
+      "status": "applied",
+      "graph_id": "SelfModConditional",
+      "node_count": 5,
+      "edge_count": 5,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-4",
+      "status": "applied",
+      "graph_id": "SelfModConfidenceGate",
+      "node_count": 5,
+      "edge_count": 5,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-5",
+      "status": "applied",
+      "graph_id": "SelfModParallel",
+      "node_count": 6,
+      "edge_count": 6,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-6",
+      "status": "applied",
+      "graph_id": "SelfModManager",
+      "node_count": 3,
+      "edge_count": 2,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-7",
+      "status": "applied",
+      "graph_id": "SelfModToolChain",
+      "node_count": 4,
+      "edge_count": 3,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-8",
+      "status": "applied",
+      "graph_id": "SelfModCodergenContract",
+      "node_count": 3,
+      "edge_count": 2,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-9",
+      "status": "applied",
+      "graph_id": "SelfModWaitHuman",
+      "node_count": 4,
+      "edge_count": 3,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    },
+    {
+      "modification_id": "mod-10",
+      "status": "applied",
+      "graph_id": "SelfModParallelConsensus",
+      "node_count": 7,
+      "edge_count": 8,
+      "error_count": 0,
+      "warning_count": 0,
+      "errors": []
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "lint_clean",
+        "passed": true,
+        "message": "No lint errors in generated graphs"
+      },
+      {
+        "name": "rollback_unused",
+        "passed": true,
+        "message": "No rollbacks triggered"
+      },
+      {
+        "name": "workflow_coverage",
+        "passed": true,
+        "message": "Generated 10 workflow variants"
+      }
+    ]
+  },
+  "fa_003_status": "pass"
+}

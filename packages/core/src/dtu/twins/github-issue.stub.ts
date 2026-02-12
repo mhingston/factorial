@@ -137,7 +137,7 @@ export class GitHubIssueTwinStub implements TwinContract {
     }
 
     // Success case
-    const issueNumber = Math.floor(Math.random() * 10000) + 1;
+    const issueNumber = deterministicNumber(`${request.seed}:${input.repo}:${input.title}:${input.actor}`);
     return {
       status: 'success',
       output: {
@@ -148,7 +148,7 @@ export class GitHubIssueTwinStub implements TwinContract {
         labels: input.labels,
         state: 'open',
         created_by: input.actor,
-        created_at: new Date().toISOString(),
+        created_at: new Date(request.timing.requested_at_ms).toISOString(),
         url: `https://github.com/${input.repo}/issues/${issueNumber}`,
       },
       latency_ms: 5,
@@ -237,7 +237,7 @@ export class GitHubIssueTwinStub implements TwinContract {
     }
 
     // Success case
-    const commentId = Math.floor(Math.random() * 1000000) + 1;
+    const commentId = deterministicNumber(`${request.seed}:${input.repo}:${input.issue_number}:${input.body}`);
     return {
       status: 'success',
       output: {
@@ -246,7 +246,7 @@ export class GitHubIssueTwinStub implements TwinContract {
         issue_number: input.issue_number,
         body: input.body,
         created_by: input.actor,
-        created_at: new Date().toISOString(),
+        created_at: new Date(request.timing.requested_at_ms).toISOString(),
         url: `https://github.com/${input.repo}/issues/${input.issue_number}#issuecomment-${commentId}`,
       },
       latency_ms: 3,
@@ -342,7 +342,7 @@ export class GitHubIssueTwinStub implements TwinContract {
         issue_number: input.issue_number,
         state: 'closed',
         closed_by: input.actor,
-        closed_at: new Date().toISOString(),
+        closed_at: new Date(request.timing.requested_at_ms).toISOString(),
         url: `https://github.com/${input.repo}/issues/${input.issue_number}`,
       },
       latency_ms: 3,
@@ -353,4 +353,12 @@ export class GitHubIssueTwinStub implements TwinContract {
       },
     };
   }
+}
+
+function deterministicNumber(value: string): number {
+  let hash = 0;
+  for (const char of value) {
+    hash = (hash * 31 + char.charCodeAt(0)) % 1000000;
+  }
+  return Math.max(1, hash);
 }

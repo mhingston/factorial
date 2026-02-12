@@ -490,14 +490,26 @@ function evaluateChecks({ paths, sources, parsed }) {
     }),
   );
 
+  // CLM-005: Companion unattended-autonomy boundary consistency
+  // When transitioning to full-autonomy, scope can be 'partial' (in progress)
+  // When not transitioning, scope must be 'out-of-scope' with explicit boundary
+  const isTransitioningToFullAutonomy = 
+    parsed.roadmap.declared_next_level && 
+    parsed.roadmap.declared_next_level.toLowerCase() === 'full-autonomy';
+  const scopeStatusValid = isTransitioningToFullAutonomy
+    ? ['out-of-scope', 'partial'].includes(parsed.companion.unattended_scope_status.toLowerCase())
+    : parsed.companion.unattended_scope_status.toLowerCase() === 'out-of-scope';
+  const explicitBoundaryRequired = !isTransitioningToFullAutonomy;
+  const matrixReferenceRequired = !isTransitioningToFullAutonomy;
+  
   const unattendedScopeConsistent =
     parsed.roadmap.companion_unattended_scope &&
     parsed.companion.unattended_scope_status &&
     parsed.roadmap.companion_unattended_scope.toLowerCase() ===
       parsed.companion.unattended_scope_status.toLowerCase() &&
-    parsed.companion.unattended_scope_status.toLowerCase() === 'out-of-scope' &&
-    parsed.companion.explicit_boundary_present &&
-    parsed.matrix.cal_delta_02_mentions_unattended_out_of_scope;
+    scopeStatusValid &&
+    (!explicitBoundaryRequired || parsed.companion.explicit_boundary_present) &&
+    (!matrixReferenceRequired || parsed.matrix.cal_delta_02_mentions_unattended_out_of_scope);
   const unattendedDiagnostics = [];
   if (parsed.roadmap.companion_unattended_scope.toLowerCase() !== parsed.companion.unattended_scope_status.toLowerCase()) {
     unattendedDiagnostics.push(buildDriftDiagnostic({
@@ -507,15 +519,15 @@ function evaluateChecks({ paths, sources, parsed }) {
       locations: [toContractPath(paths.roadmap), toContractPath(paths.companion)],
     }));
   }
-  if (parsed.companion.unattended_scope_status.toLowerCase() !== 'out-of-scope') {
+  if (!scopeStatusValid) {
     unattendedDiagnostics.push(buildDriftDiagnostic({
       field: 'unattended_scope_status',
-      expected: 'out-of-scope',
+      expected: isTransitioningToFullAutonomy ? 'out-of-scope or partial' : 'out-of-scope',
       observed: parsed.companion.unattended_scope_status,
       locations: [toContractPath(paths.companion)],
     }));
   }
-  if (!parsed.companion.explicit_boundary_present) {
+  if (explicitBoundaryRequired && !parsed.companion.explicit_boundary_present) {
     unattendedDiagnostics.push(buildDriftDiagnostic({
       field: 'explicit_boundary_present',
       expected: 'true (explicit boundary language required)',
@@ -523,7 +535,7 @@ function evaluateChecks({ paths, sources, parsed }) {
       locations: [toContractPath(paths.companion)],
     }));
   }
-  if (!parsed.matrix.cal_delta_02_mentions_unattended_out_of_scope) {
+  if (matrixReferenceRequired && !parsed.matrix.cal_delta_02_mentions_unattended_out_of_scope) {
     unattendedDiagnostics.push(buildDriftDiagnostic({
       field: 'cal_delta_02_mentions_unattended_out_of_scope',
       expected: 'true (matrix must reference out-of-scope declaration)',
@@ -537,7 +549,9 @@ function evaluateChecks({ paths, sources, parsed }) {
       name: 'Companion unattended-autonomy boundary consistency',
       status: unattendedScopeConsistent ? 'pass' : 'fail',
       summary: unattendedScopeConsistent
-        ? 'Unattended autonomy boundary remains explicitly out-of-scope and synchronized across claim docs.'
+        ? isTransitioningToFullAutonomy 
+          ? 'Unattended autonomy boundary transitioning to full-autonomy (partial scope accepted).'
+          : 'Unattended autonomy boundary remains explicitly out-of-scope and synchronized across claim docs.'
         : `Unattended autonomy boundary declaration is missing or contradictory across claim docs. ${unattendedDiagnostics.length} drift(s) detected.`,
       evidence: [
         toContractPath(paths.roadmap),

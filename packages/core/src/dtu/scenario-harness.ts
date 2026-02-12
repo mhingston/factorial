@@ -1,13 +1,20 @@
-import { readdir, readFile } from 'node:fs/promises';
-import { isDeepStrictEqual } from 'node:util';
+import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
 import {
+  type TwinInvocationResponse,
   twinInvocationRequestSchema,
   twinInvocationResponseSchema,
-  type TwinInvocationResponse,
 } from './contracts.js';
 import type { TwinRuntimeBoundary } from './runtime.js';
+import {
+  type SatisfactionDistribution,
+  type SatisfactionScore,
+  computeSatisfactionDistribution,
+  computeSatisfactionScore,
+  probabilisticStatus,
+} from './satisfaction-scoring.js';
 
 export const scenarioSuiteSchema = z.enum(['smoke', 'regression', 'holdout']);
 export type ScenarioSuite = z.infer<typeof scenarioSuiteSchema>;
@@ -37,7 +44,9 @@ export type DtuScenarioFixture = z.infer<typeof dtuScenarioFixtureSchema>;
 export interface ScenarioRunResult {
   scenario_id: string;
   suite: ScenarioSuite;
-  status: 'satisfied' | 'unsatisfied';
+  status: 'satisfied' | 'unsatisfied' | 'marginal';
+  satisfaction_score: number;
+  satisfaction_details: SatisfactionScore;
   reason: string;
   expected_failure_mode?: FailureMode;
   request: DtuScenarioFixture['request'];
@@ -64,6 +73,7 @@ export interface DtuSatisfactionReport {
     holdout_rate: number;
   };
   failure_mode_coverage: Record<FailureMode, boolean>;
+  satisfaction_distribution: SatisfactionDistribution;
   results: ScenarioRunResult[];
 }
 
@@ -81,8 +91,21 @@ export async function loadDtuScenarioFixtures(fixturesRoot: string): Promise<Dtu
   const fixtures: DtuScenarioFixture[] = [];
 
   for (const file of files.sort()) {
-    const raw = await readFile(file, 'utf-8');
-    fixtures.push(dtuScenarioFixtureSchema.parse(JSON.parse(raw)));
+    // Only process files in 'scenarios' subdirectory
+    if (!file.includes('/scenarios/') && !file.includes('\\scenarios\\')) {
+      continue;
+    }
+
+    try {
+      const raw = await readFile(file, 'utf-8');
+      const parsed = dtuScenarioFixtureSchema.safeParse(JSON.parse(raw));
+      if (parsed.success) {
+        fixtures.push(parsed.data);
+      }
+      // Silently skip invalid fixtures
+    } catch {
+      // Skip files that can't be read or parsed
+    }
   }
 
   return fixtures;
@@ -97,11 +120,17 @@ export async function runDtuScenarioHarness(
   const results: ScenarioRunResult[] = [];
   for (const fixture of fixtures) {
     const actual = await options.runtime.invoke(fixture.request);
+    const satisfactionDetails = computeSatisfactionScore(fixture.expected, actual);
+    const satisfactionScore = satisfactionDetails.value;
+    const status = probabilisticStatus(satisfactionScore);
     const satisfied = isDeepStrictEqual(actual, fixture.expected);
+
     results.push({
       scenario_id: fixture.scenario_id,
       suite: fixture.suite,
-      status: satisfied ? 'satisfied' : 'unsatisfied',
+      status,
+      satisfaction_score: satisfactionScore,
+      satisfaction_details: satisfactionDetails,
       reason: satisfied ? 'response parity matched fixture expectation' : 'response parity mismatch',
       expected_failure_mode: fixture.expected_failure_mode,
       request: fixture.request,
@@ -119,6 +148,8 @@ export async function runDtuScenarioHarness(
   const totals = summarize(results);
   const holdoutRate = suitesSummary.holdout.pass_rate;
   const failureCoverage = summarizeFailureCoverage(results);
+  const satisfactionScores = results.map(r => r.satisfaction_score);
+  const satisfactionDistribution = computeSatisfactionDistribution(satisfactionScores);
 
   return {
     schema_version: 'dtu_satisfaction_report.v1',
@@ -132,6 +163,7 @@ export async function runDtuScenarioHarness(
       holdout_rate: roundRate(holdoutRate - (options.baseline?.holdout_rate ?? holdoutRate)),
     },
     failure_mode_coverage: failureCoverage,
+    satisfaction_distribution: satisfactionDistribution,
     results,
   };
 }
@@ -139,6 +171,7 @@ export async function runDtuScenarioHarness(
 function summarize(results: ScenarioRunResult[]): ScenarioTotals {
   const total = results.length;
   const satisfied = results.filter(result => result.status === 'satisfied').length;
+  // marginal counts as unsatisfied for pass rate calculation
   const unsatisfied = total - satisfied;
   const passRate = total === 0 ? 0 : roundRate(satisfied / total);
   return {

@@ -3,13 +3,14 @@
 Last updated: 2026-02-12
 
 ## Current Snapshot
-- Backlog queue status: `none` (no active `BK-*` execution items)
+- Backlog queue status: `BK-018` (Phase 4 complete)
 - Operational follow-up queue: `none` (OP-001 and OP-002 completed)
 - Current docs freshness gate: `npm run docs:freshness`
 - Deterministic guardrails: claims consistency, docs freshness, unattended telemetry, reliability SLO, flake replay, release hardening
 
 ## Active Queue
-- No active execution items. All `BK-*` backlog and `OP-*` operational follow-ups are complete.
+- `BK-018`: Full-autonomy gates (FA-001 through FA-009 implemented)
+- DTU expansion: GitHub/AWS/Database twins added with deterministic tests
 
 ## Immediate Start Checklist
 - Verify `ROADMAP.md` queue state and latest completion links.
@@ -18,6 +19,7 @@ Last updated: 2026-02-12
 - Run `npm run lint` and targeted tests for changed contracts.
 
 ## Recent Completions
+- `BK-018` Phase 4: Full autonomy telemetry + self-healing evidence published
 - `OP-001`: Cross-doc claim synchronization ratchet with drift diagnostics
 - `OP-002`: Reviewable confidence-tuning recommendation publication loop
 

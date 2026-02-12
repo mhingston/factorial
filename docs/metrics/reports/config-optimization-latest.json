@@ -1,0 +1,98 @@
+{
+  "schema_version": "config_optimization_report.v1",
+  "generated_at": "2026-02-12T05:49:00.884Z",
+  "logs_root": "/Users/markhingston/Downloads/strange-attractor/logs",
+  "drift_limit": 0.1,
+  "summary": {
+    "total_runs": 10,
+    "success_rate_before": 0.55,
+    "success_rate_after": 0.55,
+    "improved_success_rate": true,
+    "drift_violations": 0,
+    "optimization_status": "pass"
+  },
+  "baseline": {
+    "confidence_threshold": 0.8,
+    "retry_policy": {
+      "max_restarts": 50
+    },
+    "budget_limits": {
+      "max_tokens": 1662
+    }
+  },
+  "optimized": {
+    "confidence_threshold": 0.8,
+    "retry_policy": {
+      "max_restarts": 55
+    },
+    "budget_limits": {
+      "max_tokens": 1828
+    }
+  },
+  "checks": [
+    {
+      "id": "FA-004-DRIFT",
+      "status": "pass",
+      "summary": "All optimized parameters stayed within the drift limit."
+    },
+    {
+      "id": "FA-004-IMPROVEMENT",
+      "status": "pass",
+      "summary": "Optimized configuration maintained or improved projected success rates."
+    }
+  ],
+  "changes": [
+    {
+      "key": "confidence_threshold",
+      "before": 0.8,
+      "after": 0.8,
+      "drift_ratio": 0,
+      "within_drift": true
+    },
+    {
+      "key": "retry_policy.max_restarts",
+      "before": 50,
+      "after": 55,
+      "drift_ratio": 0.1,
+      "within_drift": true
+    },
+    {
+      "key": "budget_limits.max_tokens",
+      "before": 1662,
+      "after": 1828,
+      "drift_ratio": 0.09988,
+      "within_drift": true
+    }
+  ],
+  "evidence": {
+    "run_manifests": [
+      "/Users/markhingston/Downloads/strange-attractor/logs/e2e-github-branching/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/e2e-github-parallel/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/e2e-github-quality-gate/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/e2e-github-simple/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/e2e-github-test/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/engineering-loop-demo/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/self_host_dogfood/reopen/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/self_host_dogfood/resolved/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/self_host_maturity/dogfood/reopen/run_manifest.json",
+      "/Users/markhingston/Downloads/strange-attractor/logs/self_host_maturity/dogfood/resolved/run_manifest.json"
+    ],
+    "confidence_results": []
+  },
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "id": "FA-004-DRIFT",
+        "status": "pass",
+        "summary": "All optimized parameters stayed within the drift limit."
+      },
+      {
+        "id": "FA-004-IMPROVEMENT",
+        "status": "pass",
+        "summary": "Optimized configuration maintained or improved projected success rates."
+      }
+    ]
+  },
+  "fa_004_status": "pass"
+}

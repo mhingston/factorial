@@ -418,6 +418,18 @@ export class ExecutionEngine extends EventEmitter {
         break;
       }
 
+      this.emit('event', {
+        type: 'EDGE_SELECT',
+        timestamp: new Date(),
+        data: {
+          from: node.id,
+          to: nextEdge.to,
+          label: nextEdge.label,
+          condition: nextEdge.condition,
+          weight: nextEdge.weight,
+        },
+      } as ExecutionEvent);
+
       // Handle loop restart
       if (nextEdge.loop_restart) {
         await this.beginLoopRestart(node.id, nextEdge);
@@ -585,6 +597,16 @@ export class ExecutionEngine extends EventEmitter {
         if (outcome.status === 'RETRY') {
           if (attempt < policy.max_attempts) {
             this.nodeRetries.set(node.id, retryCount + 1);
+            this.emit('event', {
+              type: 'NODE_RETRY',
+              timestamp: new Date(),
+              data: {
+                node: node.id,
+                attempt,
+                max_attempts: policy.max_attempts,
+                reason: 'retry_requested',
+              },
+            } as ExecutionEvent);
             await this.delay(this.calculateBackoff(attempt, policy.backoff));
             continue;
           }
@@ -637,6 +659,16 @@ export class ExecutionEngine extends EventEmitter {
 
         if (attempt < policy.max_attempts && policy.should_retry(error as Error)) {
           this.nodeRetries.set(node.id, retryCount + 1);
+          this.emit('event', {
+            type: 'NODE_RETRY',
+            timestamp: new Date(),
+            data: {
+              node: node.id,
+              attempt,
+              max_attempts: policy.max_attempts,
+              reason: errorMessage,
+            },
+          } as ExecutionEvent);
           await this.delay(this.calculateBackoff(attempt, policy.backoff));
           continue;
         }

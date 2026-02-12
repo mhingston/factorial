@@ -1,0 +1,75 @@
+{
+  "schema_version": "full_autonomy_telemetry_source.v1",
+  "generated_at": "2026-02-12T00:00:00.000Z",
+  "window": {
+    "start": "2026-01-13T00:00:00.000Z",
+    "end": "2026-02-12T00:00:00.000Z"
+  },
+  "maintenance_window_days": 30,
+  "categories": [
+    {
+      "id": "ci-lint",
+      "description": "Lint-only CI workflows"
+    },
+    {
+      "id": "codereview",
+      "description": "Code review pipelines"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run-001",
+      "category": "ci-lint",
+      "status": "success",
+      "escalations_count": 0,
+      "ood_detected": false,
+      "started_at": "2026-01-15T02:00:00.000Z",
+      "ended_at": "2026-01-15T02:12:00.000Z"
+    },
+    {
+      "run_id": "run-002",
+      "category": "codereview",
+      "status": "success",
+      "escalations_count": 0,
+      "ood_detected": false,
+      "started_at": "2026-01-20T03:00:00.000Z",
+      "ended_at": "2026-01-20T03:18:00.000Z"
+    },
+    {
+      "run_id": "run-003",
+      "category": "ci-lint",
+      "status": "success",
+      "escalations_count": 0,
+      "ood_detected": false,
+      "started_at": "2026-01-25T04:00:00.000Z",
+      "ended_at": "2026-01-25T04:09:00.000Z"
+    },
+    {
+      "run_id": "run-004",
+      "category": "codereview",
+      "status": "success",
+      "escalations_count": 0,
+      "ood_detected": false,
+      "started_at": "2026-02-01T01:00:00.000Z",
+      "ended_at": "2026-02-01T01:20:00.000Z"
+    },
+    {
+      "run_id": "run-005",
+      "category": "ci-lint",
+      "status": "success",
+      "escalations_count": 0,
+      "ood_detected": false,
+      "started_at": "2026-02-05T05:00:00.000Z",
+      "ended_at": "2026-02-05T05:10:00.000Z"
+    },
+    {
+      "run_id": "run-006",
+      "category": "codereview",
+      "status": "success",
+      "escalations_count": 0,
+      "ood_detected": false,
+      "started_at": "2026-02-10T06:00:00.000Z",
+      "ended_at": "2026-02-10T06:15:00.000Z"
+    }
+  ]
+}

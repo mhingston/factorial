@@ -1,0 +1,81 @@
+{
+  "schema_version": "full_autonomy_telemetry_report.v1",
+  "generated_at": "2026-02-12T07:25:38.964Z",
+  "source": {
+    "path": "./docs/metrics/reports/full-autonomy-telemetry-source-latest.json",
+    "schema_version": "full_autonomy_telemetry_source.v1",
+    "generated_at": "2026-02-12T00:00:00.000Z",
+    "window": {
+      "start": "2026-01-13T00:00:00.000Z",
+      "end": "2026-02-12T00:00:00.000Z"
+    },
+    "maintenance_window_days": 30,
+    "age_days": 0
+  },
+  "summary": {
+    "total_runs": 6,
+    "zero_escalation_rate": 1,
+    "ood_rate": 0,
+    "categories_covered": 2,
+    "window_days": 30,
+    "maintenance_window_days": 30
+  },
+  "checks": [
+    {
+      "id": "FA-008-WINDOW",
+      "status": "pass",
+      "summary": "Telemetry window spans 30 days."
+    },
+    {
+      "id": "FA-008-MAINTENANCE",
+      "status": "pass",
+      "summary": "Maintenance window spans 30 days."
+    },
+    {
+      "id": "FA-008-CATEGORIES",
+      "status": "pass",
+      "summary": "All runs mapped to defined workflow categories."
+    },
+    {
+      "id": "FA-008-ZERO-ESCALATION",
+      "status": "pass",
+      "summary": "All runs completed without escalation."
+    },
+    {
+      "id": "FA-008-OOD",
+      "status": "pass",
+      "summary": "No out-of-distribution detections in window."
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "id": "FA-008-WINDOW",
+        "status": "pass",
+        "summary": "Telemetry window spans 30 days."
+      },
+      {
+        "id": "FA-008-MAINTENANCE",
+        "status": "pass",
+        "summary": "Maintenance window spans 30 days."
+      },
+      {
+        "id": "FA-008-CATEGORIES",
+        "status": "pass",
+        "summary": "All runs mapped to defined workflow categories."
+      },
+      {
+        "id": "FA-008-ZERO-ESCALATION",
+        "status": "pass",
+        "summary": "All runs completed without escalation."
+      },
+      {
+        "id": "FA-008-OOD",
+        "status": "pass",
+        "summary": "No out-of-distribution detections in window."
+      }
+    ]
+  },
+  "fa_008_status": "pass"
+}

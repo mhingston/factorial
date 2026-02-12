@@ -1,0 +1,95 @@
+{
+  "schema_version": "self_healing_report.v1",
+  "generated_at": "2026-02-12T07:25:39.148Z",
+  "summary": {
+    "total_scenarios": 3,
+    "total_attempts": 3,
+    "successful_attempts": 3,
+    "failed_attempts": 0,
+    "classifications": {
+      "transient": 1,
+      "quality_gap": 1,
+      "tool_error": 1,
+      "spec_mismatch": 0,
+      "unknown": 0
+    },
+    "actions": {
+      "retry": 1,
+      "alternate_path": 1,
+      "reconstruct_state": 1,
+      "degrade": 0,
+      "escalate": 0
+    }
+  },
+  "scenarios": [
+    {
+      "scenario_id": "transient-retry",
+      "status": "pass",
+      "attempts": [
+        {
+          "attempt_id": "a1",
+          "failure_class": "transient",
+          "root_cause": "network timeout",
+          "action": "retry",
+          "status": "success",
+          "notes": [
+            "retry succeeded"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario_id": "reconstruct",
+      "status": "pass",
+      "attempts": [
+        {
+          "attempt_id": "b1",
+          "failure_class": "tool_error",
+          "root_cause": "tool output missing fields",
+          "action": "reconstruct_state",
+          "status": "success",
+          "notes": [
+            "reconstructed state from checkpoints"
+          ]
+        }
+      ]
+    },
+    {
+      "scenario_id": "alternate-path",
+      "status": "pass",
+      "attempts": [
+        {
+          "attempt_id": "c1",
+          "failure_class": "quality_gap",
+          "root_cause": "lint failures after patch",
+          "action": "alternate_path",
+          "status": "success",
+          "notes": [
+            "routed to quality-fix path"
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "id": "FA-009-ROOT-CAUSE",
+        "status": "pass",
+        "summary": "All attempts include root-cause annotations."
+      },
+      {
+        "id": "FA-009-ACTIONS",
+        "status": "pass",
+        "summary": "State reconstruction actions exercised."
+      },
+      {
+        "id": "FA-009-ALTERNATE",
+        "status": "pass",
+        "summary": "Alternate path selection exercised."
+      }
+    ]
+  },
+  "fa_009_status": "pass"
+}

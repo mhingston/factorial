@@ -10,6 +10,8 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.create',
+        scenario_id: 'scenario-1',
+        seed: 'seed-1',
         input: {
           repo: 'owner/repo',
           title: 'Test Issue',
@@ -17,6 +19,8 @@ describe('GitHubIssueTwinStub', () => {
           labels: ['bug', 'help wanted'],
           actor: 'testuser',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -40,10 +44,14 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.create',
+        scenario_id: 'scenario-2',
+        seed: 'seed-2',
         input: {
           repo: '', // Invalid: empty string
           title: 'Test',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -57,12 +65,16 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.create',
+        scenario_id: 'scenario-3',
+        seed: 'seed-3',
         input: {
           repo: 'owner/repo',
           title: 'Test',
           actor: 'testuser',
           simulate: 'auth_failed',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -77,12 +89,16 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.create',
+        scenario_id: 'scenario-4',
+        seed: 'seed-4',
         input: {
           repo: 'owner/repo',
           title: 'Test',
           actor: 'testuser',
           simulate: 'rate_limited',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -98,12 +114,16 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.create',
+        scenario_id: 'scenario-5',
+        seed: 'seed-5',
         input: {
           repo: 'owner/nonexistent',
           title: 'Test',
           actor: 'testuser',
           simulate: 'repo_not_found',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -119,12 +139,16 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.add_comment',
+        scenario_id: 'scenario-6',
+        seed: 'seed-6',
         input: {
           repo: 'owner/repo',
           issue_number: 42,
           body: 'This is a comment',
           actor: 'testuser',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -144,6 +168,8 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.add_comment',
+        scenario_id: 'scenario-7',
+        seed: 'seed-7',
         input: {
           repo: 'owner/repo',
           issue_number: 999,
@@ -151,6 +177,8 @@ describe('GitHubIssueTwinStub', () => {
           actor: 'testuser',
           simulate: 'issue_not_found',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -165,11 +193,15 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.close',
+        scenario_id: 'scenario-8',
+        seed: 'seed-8',
         input: {
           repo: 'owner/repo',
           issue_number: 42,
           actor: 'testuser',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -188,12 +220,16 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.close',
+        scenario_id: 'scenario-9',
+        seed: 'seed-9',
         input: {
           repo: 'owner/repo',
           issue_number: 999,
           actor: 'testuser',
           simulate: 'issue_not_found',
         },
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);
@@ -208,7 +244,11 @@ describe('GitHubIssueTwinStub', () => {
       const request: TwinInvocationRequest = {
         twin_id: 'github.issue',
         operation: 'issues.delete',
+        scenario_id: 'scenario-10',
+        seed: 'seed-10',
         input: {},
+        timing: { requested_at_ms: 1700000000000, timeout_ms: 1000 },
+        metadata: {},
       };
 
       const result = await twin.invoke(request);

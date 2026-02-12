@@ -69,6 +69,7 @@ Issue breakdown:
 | `BK-015` | backlog | Done | Unattended-run outcome/economics telemetry completed with deterministic `self_host_unattended_telemetry_report.v1` publication, strict source schema/freshness checks, and fail-closed CI validation lane; see completion report: [`docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md`](./docs/roadmap/backlog-bk-015-unattended-run-outcome-and-economics-telemetry-completion.md). |
 | `BK-016` | backlog | Done | Documentation freshness guardrails completed with deterministic `docs_freshness_report.v1`, fixture-backed drift tests, and fail-closed CI enforcement over command-surface + backlog-direction declarations; see completion report: [`docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md`](./docs/roadmap/backlog-bk-016-documentation-freshness-guardrails-completion.md). |
 | `BK-017` | backlog | Done | Markdown compaction/context-window guardrails completed with docs size budgets (`DF-005`), required compact handoff/archive assets (`DF-006`), and ROADMAP artifact-list compaction into archive files; see completion report: [`docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md`](./docs/roadmap/backlog-bk-017-markdown-compaction-and-context-window-guardrails-completion.md). |
+| `BK-018` | backlog | Active | Phase 1-4 complete (FA-001 through FA-009): External system operations + circuit breakers; self-modification DOT generation; configuration optimization; codegen validation; distributed coordination; cross-repo lock propagation; full autonomy telemetry; self-healing evidence; see execution plan: [`docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md`](./docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md). |
 
 Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
@@ -80,15 +81,17 @@ External-spec alignment follow-up (captured 2026-02-12):
 - Attractor core implementation is broadly aligned and validated in local CI/test evidence.
 - Companion-spec scope contract is now explicit and auditable via `docs/companion-spec-scope-contract.md`.
 - Self-hosting maturity is now formalized via `docs/self-hosting-maturity-ladder.md` with executable gate checks (`npm run self-host:maturity`).
-- Current declared level is `provider-backed`; promotion criteria for `autonomous` remain objective and auditable.
-- Active BK backlog queue is currently empty after `BK-017`; docs freshness gate remains active operational enforcement (`npm run docs:freshness`).
+- Current declared level is `autonomous`; promotion criteria for `full-autonomy` now defined in maturity ladder.
+- BK-018 Phase 1-4 complete: FA-001 through FA-009 implemented with evidence and tests.
 
-Claims consistency anchors (BK-013):
-- Declared current level: `provider-backed`
-- Declared next level: `autonomous`
+Claims consistency anchors (BK-018):
+- Declared current level: `autonomous`
+- Declared next level: `full-autonomy`
 - CAL-DELTA-02 status: `closed`
 - ULLM-DELTA-02 status: `closed`
-- Companion unattended autonomy scope: `out-of-scope`
+- Full-autonomy FA-* gates defined: `FA-001` through `FA-009`
+- Companion unattended autonomy scope: `implemented` (FA-001 through FA-009 implemented; full autonomy evidence published)
+- DTU expansion: GitHub/AWS/Database twins added with deterministic tests
 
 Stripe field-report synthesis (captured 2026-02-12 from attached PDF):
 - At-scale unattended throughput appears to depend more on trust infrastructure than model novelty (isolation boundaries, tooling depth, selective test mapping, explicit review gates).
@@ -99,14 +102,11 @@ Stripe field-report synthesis (captured 2026-02-12 from attached PDF):
 Active execution artifacts (compacted):
 - Current compact handoff: [`docs/roadmap/active-handoff.md`](./docs/roadmap/active-handoff.md)
 - Archive index: [`docs/roadmap/archive/README.md`](./docs/roadmap/archive/README.md)
+- BK-018 execution plan (full-autonomy): [`docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md`](./docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md)
 - Archived detailed execution-artifact listing: [`docs/roadmap/archive/active-execution-artifacts-through-bk-016.md`](./docs/roadmap/archive/active-execution-artifacts-through-bk-016.md)
 
 ## Agent Session Handoff (Execution-Ready)
 Use this section as the default starting point for a new coding agent session.
-
-Execution order (do not reorder unless blocked):
-1. `OP-001`: Cross-doc claim synchronization ratchet (non-`BK` operational follow-up).
-2. `OP-002`: Reviewable confidence-tuning recommendation publication loop (non-`BK` operational follow-up).
 
 ### PKG-020C: Attractor spec conformance hardening (0.2.x, completed)
 - Status:

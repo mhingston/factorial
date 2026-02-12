@@ -25,6 +25,9 @@ This document defines how to measure whether engineering learnings are compoundi
 - `reopen_rate`
   - Formula: reopened batches / total batches that reached lock decision.
   - Source: consensus lock records.
+- `cost_per_merged_pr_proxy`
+  - Formula: proxy cost per merged PR from unattended telemetry report.
+  - Source: `docs/metrics/reports/self-host-unattended-telemetry-latest.json`.
 - `verifier_agreement_rate`
   - Formula: matching `pass|fail` outcomes across independent verification attempts / total compared outcomes.
   - Source: verification artifacts.
@@ -107,6 +110,7 @@ Week of YYYY-MM-DD
 - known_issue_recurrence_rate:
 - median_cycles_to_close:
 - reopen_rate:
+- cost_per_merged_pr_proxy:
 - verifier_agreement_rate:
 - review_artifacts_counted:
 - Notes / actions:

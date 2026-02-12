@@ -1,0 +1,65 @@
+{
+  "schema_version": "cross_repo_workflow_report.v1",
+  "generated_at": "2026-02-12T06:23:24.421Z",
+  "summary": {
+    "total_scenarios": 2,
+    "passed": 1,
+    "failed": 1
+  },
+  "scenarios": [
+    {
+      "scenario_id": "propagation",
+      "status": "pass",
+      "propagated_locks": [
+        {
+          "repo": "repo-a",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "repo-b",
+          "lock_decision": "reopen"
+        },
+        {
+          "repo": "repo-c",
+          "lock_decision": "reopen"
+        }
+      ],
+      "notes": [
+        "Lock propagation resulted in reopen decisions."
+      ]
+    },
+    {
+      "scenario_id": "cycle",
+      "status": "fail",
+      "propagated_locks": [
+        {
+          "repo": "repo-a",
+          "lock_decision": "resolved"
+        },
+        {
+          "repo": "repo-b",
+          "lock_decision": "resolved"
+        }
+      ],
+      "notes": [
+        "Dependency cycles detected: repo-a -> repo-b -> repo-a"
+      ]
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "cycle_detection",
+        "passed": true,
+        "message": "Cycle detection exercised."
+      },
+      {
+        "name": "lock_propagation",
+        "passed": true,
+        "message": "Lock propagation exercised."
+      }
+    ]
+  },
+  "fa_007_status": "pass"
+}

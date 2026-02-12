@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "confidence": {
+      "type": "number"
+    },
+    "signal_path": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "confidence",
+    "signal_path"
+  ],
+  "additionalProperties": false
+}

@@ -9,6 +9,7 @@ function parseArgs(argv) {
     start: '',
     end: '',
     output: '',
+    telemetry: 'docs/metrics/reports/self-host-unattended-telemetry-latest.json',
   };
 
   for (let index = 2; index < argv.length; index += 1) {
@@ -26,6 +27,11 @@ function parseArgs(argv) {
     }
     if ((arg === '--output' || arg === '-o') && next) {
       args.output = next;
+      index += 1;
+      continue;
+    }
+    if ((arg === '--telemetry' || arg === '-t') && next) {
+      args.telemetry = next;
       index += 1;
     }
   }
@@ -81,6 +87,31 @@ function formatRate(numerator, denominator) {
   return `${percent}% (${numerator}/${denominator})`;
 }
 
+function readJsonIfPresent(path) {
+  try {
+    return {
+      exists: true,
+      parsed: JSON.parse(readFileSync(resolve(path), 'utf8')),
+    };
+  } catch {
+    return {
+      exists: false,
+      parsed: null,
+    };
+  }
+}
+
+function extractCostPerPrProxy(telemetry) {
+  if (!telemetry || typeof telemetry !== 'object') {
+    return null;
+  }
+  if (telemetry.schema_version !== 'self_host_unattended_telemetry_report.v1') {
+    return null;
+  }
+  const value = telemetry.metrics?.cost_per_merged_pr_proxy;
+  return typeof value === 'number' ? value : null;
+}
+
 function resolveReportOutput(start, end, explicitOutput) {
   if (explicitOutput) {
     return resolve(explicitOutput);
@@ -111,7 +142,17 @@ function parseLockDecision(content) {
   return match ? match[1].toLowerCase() : '';
 }
 
-function buildReport({ start, end, solutions, contextUpdates, reviewFiles, recurrenceRate, reopenRate }) {
+function buildReport({
+  start,
+  end,
+  solutions,
+  contextUpdates,
+  reviewFiles,
+  recurrenceRate,
+  reopenRate,
+  costPerMergedPrProxy,
+  telemetryPath,
+}) {
   return [
     `Week of ${start} to ${end}`,
     `- solutions_created_weekly: ${solutions}`,
@@ -119,6 +160,9 @@ function buildReport({ start, end, solutions, contextUpdates, reviewFiles, recur
     `- known_issue_recurrence_rate: ${recurrenceRate}`,
     `- median_cycles_to_close: N/A (single-pass batch data only in this week range)`,
     `- reopen_rate: ${reopenRate}`,
+    `- cost_per_merged_pr_proxy: ${
+      costPerMergedPrProxy === null ? 'N/A' : costPerMergedPrProxy
+    } (source: ${telemetryPath})`,
     `- verifier_agreement_rate: N/A (no independent duplicate verifier runs recorded)`,
     `- review_artifacts_counted: ${reviewFiles.length}`,
     `- Notes / actions: Generated from git history and review artifacts via scripts/compound-weekly-report.js.`,
@@ -137,6 +181,7 @@ function main() {
   const start = formatDate(startDate);
   const end = formatDate(endDate);
   const outputPath = resolveReportOutput(start, end, args.output);
+  const telemetryPath = args.telemetry;
 
   const since = `${start} 00:00`;
   const until = `${end} 23:59`;
@@ -188,6 +233,9 @@ function main() {
   const reopenCount = lockDecisions.filter(decision => decision === 'reopen').length;
   const reopenRate = formatRate(reopenCount, lockDecisions.length);
 
+  const telemetryState = readJsonIfPresent(telemetryPath);
+  const costPerMergedPrProxy = extractCostPerPrProxy(telemetryState.parsed);
+
   const report = buildReport({
     start,
     end,
@@ -196,6 +244,8 @@ function main() {
     reviewFiles,
     recurrenceRate,
     reopenRate,
+    costPerMergedPrProxy,
+    telemetryPath,
   });
 
   mkdirSync(dirname(outputPath), { recursive: true });

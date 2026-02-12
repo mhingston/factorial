@@ -1,42 +1,48 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
 import { execSync } from 'node:child_process';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
+import { createInterface } from 'node:readline';
+import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
 import { config as loadDotEnv } from 'dotenv';
-import { parseDOT } from '../../dot-parser/src/index.js';
+import { 
+  CodergenHandler,
+  ConditionalHandler,
+  ConfidenceGateHandler,
+  ExitHandler, 
+  FailureAnalyzeHandler,
+  FanInHandler,
+  JudgeRubricHandler,
+  ManagerLoopHandler,
+  ParallelHandler,
+  QualityGateHandler,
+  StartHandler, 
+  ToolHandler, 
+  WaitForHumanHandler,
+} from '../../core/src/handlers/builtin.js';
+import type { HumanChoice, HumanInterviewer } from '../../core/src/handlers/builtin.js';
 import {
+  AVAILABLE_FAILURE_MODES,
+  AVAILABLE_SUITES,
   ExecutionEngine,
   HandlerRegistry,
-  createDefaultLintEngine,
+  type ScenarioTemplate,
   applyModelStylesheet,
+  createDefaultLintEngine,
   createReferenceTwinRuntime,
+  getAvailableTwins,
+  getSupportedOperations,
   loadDtuScenarioFixtures,
+  runCuration,
   runDtuScenarioHarness,
   scenarioSuiteSchema,
 } from '../../core/src/index.js';
-import { 
-  StartHandler, 
-  ExitHandler, 
-  ToolHandler, 
-  CodergenHandler,
-  FailureAnalyzeHandler,
-  JudgeRubricHandler,
-  ConditionalHandler,
-  ConfidenceGateHandler,
-  WaitForHumanHandler,
-  ParallelHandler,
-  FanInHandler,
-  ManagerLoopHandler,
-  QualityGateHandler,
-} from '../../core/src/handlers/builtin.js';
-import type { RunConfig, ExecutionEvent, Graph, Outcome } from '../../core/src/types/index.js';
 import type { Diagnostic } from '../../core/src/lint/index.js';
-import type { HumanChoice, HumanInterviewer } from '../../core/src/handlers/builtin.js';
-import { createInterface } from 'node:readline';
-import { fileURLToPath } from 'node:url';
+import type { ExecutionEvent, Graph, Outcome, RunConfig } from '../../core/src/types/index.js';
+import { parseDOT } from '../../dot-parser/src/index.js';
 
 const program = new Command();
 
@@ -77,6 +83,20 @@ interface DtuRunCommandOptions {
   baselineReport?: string;
   suite?: string[];
   allowUnsatisfied?: boolean;
+}
+
+interface DtuCurateCommandOptions {
+  fixtures: string;
+  list?: boolean;
+  validate?: boolean;
+  create?: boolean;
+  twin?: string;
+  suite?: string;
+  scenarioId?: string;
+  description?: string;
+  operation?: string;
+  simulate?: string;
+  json?: boolean;
 }
 
 interface ManifestCommandOptions {
@@ -682,6 +702,157 @@ program
       }
     } catch (error) {
       console.error('Failed to run DTU scenarios:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('dtu-curate')
+  .description('Curate DTU scenario fixtures (list, validate, or create scenarios)')
+  .requiredOption('--fixtures <path>', 'Path to DTU fixtures root directory')
+  .option('--list', 'List all scenarios', false)
+  .option('--validate', 'Validate a scenario template (requires --scenario-id, --twin, --suite, --operation)', false)
+  .option('--create', 'Create a new scenario (requires --scenario-id, --twin, --suite, --operation, --description)', false)
+  .option('--twin <id>', 'Twin ID (e.g., jira.issue, slack.channel, github.issue, aws.s3, database.records)')
+  .option('--suite <suite>', 'Scenario suite (smoke, regression, holdout)')
+  .option('--scenario-id <id>', 'Unique scenario identifier')
+  .option('--description <text>', 'Scenario description')
+  .option('--operation <op>', 'Twin operation (e.g., issues.create, messages.post)')
+  .option('--simulate <mode>', 'Failure mode simulation (auth_failed, rate_limited, timeout, partial_outage)')
+  .option('--json', 'Output JSON format', false)
+  .action(async (options: DtuCurateCommandOptions) => {
+    try {
+      const fixturesRoot = resolve(options.fixtures);
+
+      if (options.list) {
+        const report = await runCuration({
+          fixturesRoot,
+          listOnly: true,
+          twinFilter: options.twin,
+          suiteFilter: options.suite as 'smoke' | 'regression' | 'holdout' | undefined,
+        });
+
+        if (options.json) {
+          console.log(JSON.stringify(report, null, 2));
+        } else {
+          console.log(`Scenarios in ${fixturesRoot}:`);
+          console.log('-'.repeat(80));
+          for (const entry of report.entries) {
+            console.log(`${entry.scenario_id} [${entry.suite}]`);
+            console.log(`  Twin: ${entry.twin_id}`);
+            console.log(`  Operation: ${entry.operation}`);
+            console.log(`  Description: ${entry.description}`);
+            console.log(`  Path: ${entry.path}`);
+            console.log();
+          }
+          console.log(`Total: ${report.entries.length} scenarios`);
+        }
+        return;
+      }
+
+      if (options.validate || options.create) {
+        if (!options.scenarioId || !options.twin || !options.suite || !options.operation) {
+          console.error('Error: --scenario-id, --twin, --suite, and --operation are required');
+          process.exit(1);
+        }
+
+        const template: ScenarioTemplate = {
+          scenario_id: options.scenarioId,
+          suite: options.suite as 'smoke' | 'regression' | 'holdout',
+          description: options.description || `${options.twin} ${options.operation} scenario`,
+          twin_id: options.twin,
+          operation: options.operation,
+          input: {},
+          expected_status: options.simulate ? 'error' : 'success',
+          simulate: options.simulate,
+          tags: [options.suite],
+        };
+
+        if (options.validate) {
+          const report = await runCuration({
+            fixturesRoot,
+            validateOnly: true,
+            template,
+          });
+
+          if (options.json) {
+            console.log(JSON.stringify(report, null, 2));
+          } else {
+            const result = report.validation_results![0];
+            if (result.valid) {
+              console.log('✓ Template is valid');
+              console.log(`  Generated fixture for: ${template.scenario_id}`);
+            } else {
+              console.log('✗ Template validation failed:');
+              for (const error of result.errors) {
+                console.log(`  - ${error}`);
+              }
+              process.exit(1);
+            }
+          }
+          return;
+        }
+
+        if (options.create) {
+          const report = await runCuration({
+            fixturesRoot,
+            template,
+          });
+
+          if (options.json) {
+            console.log(JSON.stringify(report, null, 2));
+          } else {
+            console.log('✓ Created scenario:');
+            console.log(`  ID: ${report.created_fixture!.scenario_id}`);
+            console.log(`  Suite: ${report.created_fixture!.suite}`);
+            console.log(`  Twin: ${report.created_fixture!.request.twin_id}`);
+            console.log(`  Operation: ${report.created_fixture!.request.operation}`);
+            console.log(`  Total scenarios: ${report.entries.length}`);
+          }
+          return;
+        }
+      }
+
+      // Default: show help for available twins and operations
+      console.log('DTU Scenario Curation');
+      console.log('='.repeat(50));
+      console.log('\nAvailable twins and operations:');
+      console.log('-'.repeat(50));
+      for (const twinId of getAvailableTwins()) {
+        const ops = getSupportedOperations(twinId);
+        console.log(`${twinId}:`);
+        for (const op of ops) {
+          console.log(`  - ${op}`);
+        }
+      }
+      console.log('\nAvailable suites:');
+      console.log('-'.repeat(50));
+      for (const suite of AVAILABLE_SUITES) {
+        console.log(`  - ${suite}`);
+      }
+      console.log('\nAvailable failure modes for simulation:');
+      console.log('-'.repeat(50));
+      for (const mode of AVAILABLE_FAILURE_MODES) {
+        console.log(`  - ${mode}`);
+      }
+      console.log('\nUsage examples:');
+      console.log('-'.repeat(50));
+      console.log('List scenarios:');
+      console.log('  factorial dtu-curate --fixtures ./fixtures/dtu --list');
+      console.log('\nValidate scenario template:');
+      console.log('  factorial dtu-curate --fixtures ./fixtures/dtu --validate');
+      console.log('    --scenario-id my-test --twin jira.issue --suite smoke --operation issues.create');
+      console.log('\nCreate scenario:');
+      console.log('  factorial dtu-curate --fixtures ./fixtures/dtu --create');
+      console.log('    --scenario-id my-test --twin jira.issue --suite smoke --operation issues.create');
+      console.log('    --description "My test scenario"');
+      console.log('\nCreate failure scenario:');
+      console.log('  factorial dtu-curate --fixtures ./fixtures/dtu --create');
+      console.log('    --scenario-id rate-limit-test --twin slack.channel --suite regression');
+      console.log('    --operation messages.post --simulate rate_limited');
+      console.log('    --description "Test rate limiting"');
+    } catch (error) {
+      console.error('Failed to curate DTU scenarios:', error);
       process.exit(1);
     }
   });
