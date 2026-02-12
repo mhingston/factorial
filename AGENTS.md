@@ -48,7 +48,7 @@ Ratchet rule: no new critique is added until the active batch reaches `resolved`
 - Publish one weekly compound metrics report under `docs/metrics/reports/` using `npm run metrics:compound-weekly`.
 - For reliability SLO claims, require `npm run reliability:slo` to publish `compound_reliability_slo_report.v1` and enforce fail-closed `consensus_lock_decision` (`resolved|reopen`) from explicit thresholds.
 - For self-hosting maturity claims, keep `docs/self-hosting-maturity-ladder.md` current and require `npm run self-host:maturity -- --require-level deterministic-local` to stay green in CI.
-- Current declared self-hosting level is `provider-backed`; keep `deterministic-local` as the CI floor and publish provider-backed evidence with `npm run self-host:provider-backed`.
+- Current declared self-hosting level is `full-autonomy`; keep `deterministic-local` as the CI floor and publish provider-backed evidence with `npm run self-host:provider-backed`.
 - For deterministic verification hardening claims, require `npm run self-host:flake` to publish `self_host_flake_report.v1` and fail CI when required-suite replay pass-rate falls below threshold.
 - For command-surface or backlog-direction documentation changes, require `npm run docs:freshness` to publish `docs_freshness_report.v1` and fail closed on drift.
 - Keep `ROADMAP.md` compact by moving historical detail into `docs/roadmap/archive/` and updating `docs/roadmap/active-handoff.md` for active-session context.
@@ -57,6 +57,7 @@ Ratchet rule: no new critique is added until the active batch reaches `resolved`
 - Current backlog direction is `none` (the active `BK-*` queue is empty in the current roadmap snapshot).
 - Treat active `BK-*` items in `ROADMAP.md` as the execution scope; historical PRDs are reference context unless explicitly reactivated in the roadmap.
 - For conformance/maturity claim changes, update `ROADMAP.md`, `docs/spec-conformance-matrix.md`, `docs/companion-spec-scope-contract.md`, and `docs/self-hosting-maturity-ladder.md` in the same batch.
+- For full-autonomy promotions, synchronize claim-bearing docs first and re-run `npm run claims:audit` before updating evidence freshness or handoff queues.
 - For new runtime adapters (including DTU work), define contract schema + in-memory boundary + fixture parity checks before adding external integration layers.
 - For codergen/provider work, keep handler orchestration backend-agnostic by routing provider execution through `packages/core/src/llm/` adapter contracts (`complete`/`stream`).
 - Use file and line references for review findings.

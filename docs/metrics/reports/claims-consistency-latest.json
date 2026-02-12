@@ -1,6 +1,6 @@
 {
   "schema_version": "claims_consistency_report.v1",
-  "generated_at": "2026-02-12T02:24:33.082Z",
+  "generated_at": "2026-02-12T16:46:05.851Z",
   "report_path": "docs/metrics/reports/claims-consistency-latest.json",
   "publication": {
     "command": "npm run claims:audit",
@@ -8,17 +8,22 @@
       "ROADMAP.md",
       "docs/spec-conformance-matrix.md",
       "docs/companion-spec-scope-contract.md",
-      "docs/self-hosting-maturity-ladder.md"
+      "docs/self-hosting-maturity-ladder.md",
+      "docs/roadmap/active-handoff.md"
     ]
   },
   "summary": {
     "overall_status": "pass",
     "failed_check_ids": [],
-    "declared_current_level": "provider-backed",
-    "declared_next_level": "autonomous",
+    "declared_current_level": "full-autonomy",
+    "declared_next_level": "none",
     "cal_delta_02_status": "closed",
     "ullm_delta_02_status": "closed",
-    "companion_unattended_scope": "out-of-scope"
+    "companion_unattended_scope": "out-of-scope",
+    "operational_followup_ids": [
+      "OP-001",
+      "OP-002"
+    ]
   },
   "checks": [
     {
@@ -42,7 +47,32 @@
         "companion_read_error": "",
         "maturity_exists": true,
         "maturity_read_error": ""
-      }
+      },
+      "diagnostics": []
+    },
+    {
+      "id": "CLM-006",
+      "level": "claims-consistency",
+      "name": "Operational follow-up queue declarations are synchronized",
+      "status": "pass",
+      "summary": "No operational follow-up IDs declared in roadmap queue surfaces (check not applicable).",
+      "evidence": [
+        "ROADMAP.md",
+        "docs/roadmap/active-handoff.md"
+      ],
+      "details": {
+        "roadmap_declares_operational_queue": false,
+        "handoff_exists": true,
+        "handoff_read_error": "",
+        "roadmap_next_operational_ids": [],
+        "roadmap_execution_order_operational_ids": [],
+        "roadmap_outstanding_operational_ids": [],
+        "handoff_operational_queue_ids": [
+          "OP-001",
+          "OP-002"
+        ]
+      },
+      "diagnostics": []
     },
     {
       "id": "CLM-002",
@@ -57,11 +87,12 @@
         "docs/spec-conformance-matrix.md"
       ],
       "details": {
-        "roadmap_declared_current_level": "provider-backed",
-        "maturity_declared_current_level": "provider-backed",
-        "companion_declared_current_level": "provider-backed",
-        "matrix_cal_delta_02_current_level": "provider-backed"
-      }
+        "roadmap_declared_current_level": "full-autonomy",
+        "maturity_declared_current_level": "full-autonomy",
+        "companion_declared_current_level": "full-autonomy",
+        "matrix_cal_delta_02_current_level": "full-autonomy"
+      },
+      "diagnostics": []
     },
     {
       "id": "CLM-003",
@@ -74,9 +105,10 @@
         "docs/self-hosting-maturity-ladder.md"
       ],
       "details": {
-        "roadmap_declared_next_level": "autonomous",
-        "maturity_declared_next_level": "autonomous"
-      }
+        "roadmap_declared_next_level": "none",
+        "maturity_declared_next_level": "none"
+      },
+      "diagnostics": []
     },
     {
       "id": "CLM-004",
@@ -93,7 +125,8 @@
         "matrix_cal_delta_02_status": "closed",
         "roadmap_ullm_delta_02_status": "closed",
         "matrix_ullm_delta_02_status": "closed"
-      }
+      },
+      "diagnostics": []
     },
     {
       "id": "CLM-005",
@@ -111,7 +144,8 @@
         "companion_unattended_scope_status": "out-of-scope",
         "companion_explicit_boundary_present": true,
         "matrix_mentions_unattended_out_of_scope": true
-      }
+      },
+      "diagnostics": []
     }
   ]
 }

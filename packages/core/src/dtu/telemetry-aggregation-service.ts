@@ -156,6 +156,7 @@ export class TelemetryAggregationService {
   private thresholds: AnomalyThresholds;
   private retryQueue: Array<{ attempt: number; maxAttempts: number; operation: () => Promise<void> }> = [];
   private isProcessingQueue = false;
+  private isProcessingItem = false;
 
   constructor(storagePath: string, thresholds?: Partial<AnomalyThresholds>) {
     this.storagePath = storagePath;
@@ -178,11 +179,13 @@ export class TelemetryAggregationService {
   }
 
   private async processQueue(): Promise<void> {
+    if (this.isProcessingItem) return;
     if (this.retryQueue.length === 0) return;
-    
+
     const item = this.retryQueue.shift();
     if (!item) return;
-    
+
+    this.isProcessingItem = true;
     try {
       await item.operation();
     } catch (error) {
@@ -195,6 +198,8 @@ export class TelemetryAggregationService {
           });
         }, delay);
       }
+    } finally {
+      this.isProcessingItem = false;
     }
   }
 

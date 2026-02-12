@@ -1,10 +1,14 @@
+<p align="center">
+  <img src="logo.png" alt="Factorial Logo" width="200" />
+</p>
+
 # Factorial
 
 **Define AI workflows as code. Execute with deterministic reliability.**
 
 Factorial is a DOT-based workflow orchestrator for multi-stage AI pipelines. Write your workflow as a Graphviz graph, run it with built-in quality gates, human approvals, and parallel execution.
 
-> **Reference Implementation**: Factorial is a production implementation of the [StrongDM Factory specification](https://factory.strongdm.ai/products/attractor) (also known as the Attractor execution model), with additional enhancements for self-hosting maturity, DTU validation, and deterministic governance.
+> **Reference Implementation**: Factorial is base off of [StrongDM AI attractor](https://factory.strongdm.ai/products/attractor) (a non-interactive coding agent), with additional enhancements for self-hosting maturity, DTU validation, and deterministic governance.
 
 ```dot
 digraph CodeReview {
@@ -130,6 +134,10 @@ Subagents and delegation:
 Automation:
 - `examples/pr-automation.dot` - PR review + merge pipeline
 
+Engineering loop:
+- `examples/engineering-loop-parent.dot` - Plan/Work/Review/Compound parent loop
+- `examples/engineering-loop-child.dot` - Child loop with bounded tasks
+
 See all examples in `examples/`.
 
 ## AI Workflow Builder
@@ -182,8 +190,19 @@ Useful for:
 | `manifest` | Inspect run metadata |
 | `confidence-tune` | Tune escalation thresholds from history |
 | `compound-weekly` | Generate metrics reports (includes cost-per-PR proxy) |
+| `metrics:economics` | Summarize token economics from logs |
+| `metrics:satisfaction` | Score DTU scenario satisfaction |
+| `check:freshness` | Validate artifact freshness |
 | `dtu-run` | Run Digital Twin Universe scenarios |
 | `dtu-curate` | Create and manage DTU scenario fixtures |
+| `dtu:list-twins` | List DTU twins and operations |
+| `scenarios:curate` | Scenario catalog TUI + promotion |
+| `scenarios:check-freshness` | Holdout scenario freshness gate |
+| `telemetry:aggregate` | Aggregate full-autonomy telemetry |
+| `workflow:self-modify` | Validate self-mod proposals + PRs |
+| `cross-repo:validate` | Cross-repo coordination validation |
+| `distributed:consensus-test` | Distributed consensus testing |
+| `circuit-breaker:tune` | Circuit breaker tuning report |
 
 Event consumers can subscribe to the execution stream documented in
 [Execution Event Stream](docs/execution-event-stream.md).
@@ -581,11 +600,14 @@ Core preserves the [Attractor execution model](https://factory.strongdm.ai/produ
 
 ### Evidence Reports
 
-- [Provider Profile Parity](docs/metrics/reports/provider-profile-parity-latest.json) - Cross-provider tool alignment
 - [Reasoning Token Coverage](docs/metrics/reports/reasoning-token-coverage-latest.json) - Reasoning tracking by provider
 - [Anthropic Caching Effectiveness](docs/metrics/reports/anthropic-caching-effectiveness-latest.json) - 79% cost reduction
 - [Subagent Performance](docs/metrics/reports/subagent-performance-latest.json) - Lightweight vs ManagerLoop comparison
-- [Multi-Modal Compatibility](docs/metrics/reports/multimodal-compatibility-latest.json) - Content type support matrix
+- [Self-host Provider-Backed](docs/metrics/reports/self-host-provider-backed-latest.json) - Provider-backed maturity evidence
+- [Self-host Provider-Backed Live](docs/metrics/reports/self-host-provider-backed-live-latest.json) - Bounded live-canary evidence
+- [Self-host Autonomous](docs/metrics/reports/self-host-autonomous-latest.json) - Autonomous guardrail evidence
+- [Reliability SLO](docs/metrics/reports/compound-reliability-slo-latest.json) - Reliability lock decision gate
+- [Full Autonomy Readiness](docs/metrics/reports/full-autonomy-readiness-latest.json) - FA gate rollup
 
 ## License
 
@@ -595,6 +617,6 @@ MIT
 
 **Companion specs adopted**: `coding-agent-loop`, `unified-llm` (bounded scope)
 
-**Current maturity level**: `autonomous` with BK-018 Phase 1-4 complete (FA-001–FA-009)
+**Current maturity level**: `full-autonomy` with FA-001–FA-009 evidence published
 
-See [maturity ladder](docs/self-hosting-maturity-ladder.md) for full-autonomy roadmap
+See [maturity ladder](docs/self-hosting-maturity-ladder.md) for ongoing maintenance criteria

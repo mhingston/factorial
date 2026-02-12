@@ -457,16 +457,16 @@ GITHUB_TOKEN=ghp_...
 
 ## Examples Directory
 
-See [assets/workflow-templates/](assets/workflow-templates/) for complete examples:
+See [examples/](../../examples/) for complete examples:
 - `simple.dot` - Basic linear flow
-- `code-review.dot` - AI + human review
-- `ci-pipeline.dot` - Quality gates
-- `parallel-generation.dot` - Worktree isolation
+- `code-review-complete.dot` - AI + human review
+- `quality-pipeline.dot` - Quality gates
+- `parallel.dot` - Worktree isolation
 - `retry-loop.dot` - Failure analysis
 
 ## Resources
 
 - [Node Types Reference](references/node-types.md)
 - [Attributes Reference](references/attributes.md)
-- Examples: [assets/workflow-templates/](assets/workflow-templates/)
+- Examples: [examples/](../../examples/)
 - Factorial README: https://github.com/mhingston/factorial

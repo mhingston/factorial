@@ -86,16 +86,16 @@ External-spec alignment follow-up (captured 2026-02-12):
 - Attractor core implementation is broadly aligned and validated in local CI/test evidence.
 - Companion-spec scope contract is now explicit and auditable via `docs/companion-spec-scope-contract.md`.
 - Self-hosting maturity is now formalized via `docs/self-hosting-maturity-ladder.md` with executable gate checks (`npm run self-host:maturity`).
-- Current declared level is `autonomous`; promotion criteria for `full-autonomy` now defined in maturity ladder.
+- Current declared level is `full-autonomy`; promotion completed with published maturity evidence.
 - BK-018 Phase 1-4 complete: FA-001 through FA-009 implemented with evidence and tests.
 
 Claims consistency anchors (BK-018):
-- Declared current level: `autonomous`
-- Declared next level: `full-autonomy`
+- Declared current level: `full-autonomy`
+- Declared next level: `none`
 - CAL-DELTA-02 status: `closed`
 - ULLM-DELTA-02 status: `closed`
-- Full-autonomy FA-* gates defined: `FA-001` through `FA-009`
-- Companion unattended autonomy scope: `implemented` (FA-001 through FA-009 implemented; full autonomy evidence published)
+- Full-autonomy FA-* gates satisfied: `FA-001` through `FA-009`
+- Companion unattended autonomy scope: `out-of-scope` (full-autonomy readiness declared with explicit boundary language)
 - DTU expansion: GitHub/AWS/Database twins added with deterministic tests
 
 Stripe field-report synthesis (captured 2026-02-12 from attached PDF):

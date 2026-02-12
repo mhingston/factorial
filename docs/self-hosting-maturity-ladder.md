@@ -24,8 +24,8 @@ This document defines staged self-hosting maturity levels and objective promotio
 | `AU-002` | `autonomous` | Published agent-audit evidence artifact exists with required schema. | Presence and schema of `docs/metrics/reports/self-host-agent-audit-latest.json` |
 
 ## Current Declaration
-- Declared current level: `autonomous`
-- Declared next level: `full-autonomy`
+- Declared current level: `full-autonomy`
+- Declared next level: `none`
 - Objective assessment command:
 
 ```bash
@@ -67,7 +67,7 @@ npm run self-host:agent-audit
 
 ## Required Criteria for Next Level (`full-autonomy`)
 
-Promotion from `autonomous` to `full-autonomy` requires expanding operational boundaries beyond current unattended constraints while maintaining zero-human-intervention guarantees for defined workflow categories.
+Promotion from `autonomous` to `full-autonomy` expanded operational boundaries beyond unattended constraints while maintaining zero-human-intervention guarantees for defined workflow categories.
 
 ### Level Definition
 | level | declaration | promotion gate policy |
@@ -136,9 +136,9 @@ npm run full-autonomy:readiness -- --report ./docs/metrics/reports/full-autonomy
 ```
 
 ### Current Status
-- Declared current level: `autonomous`  
-- Declared next level: `full-autonomy`
-- Required gates for promotion: `FA-001` through `FA-009`
+- Declared current level: `full-autonomy`  
+- Declared next level: `none`
+- Promotion gates satisfied: `FA-001` through `FA-009`
 - Status: 
   - ✅ `FA-001` implemented: External system operations with circuit breakers and deterministic rollback
   - ✅ `FA-002` implemented: Circuit breaker automatic degradation and human escalation triggers
