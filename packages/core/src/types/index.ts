@@ -200,6 +200,12 @@ export interface Handler {
 }
 
 // Forward reference - defined in context module
+export interface SteeringMessage {
+  content: string;
+  timestamp: string;
+  source: 'user' | 'system' | 'loop_detection';
+}
+
 export interface Context {
   set(key: string, value: unknown): Promise<void>;
   get<T>(key: string, defaultValue?: T): Promise<T | undefined>;
@@ -208,6 +214,9 @@ export interface Context {
   snapshot(): Record<string, unknown>;
   clone(): Context;
   apply_updates(updates: Record<string, unknown>): Promise<void>;
+  steer(content: string, source?: 'user' | 'system' | 'loop_detection'): Promise<void>;
+  drainSteeringQueue(): Promise<SteeringMessage[]>;
+  peekSteeringQueue(): Promise<SteeringMessage[]>;
 }
 
 export interface ExecutionEvent {
@@ -220,6 +229,7 @@ export interface ExecutionEvent {
     | 'EDGE_SELECT'
     | 'CHECKPOINT_SAVE'
     | 'RUN_COMPLETE'
+    | 'LOOP_DETECTED'
     | 'ERROR';
   timestamp: Date;
   data: unknown;

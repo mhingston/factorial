@@ -1,16 +1,27 @@
 import AsyncLock from 'async-lock';
 
 /**
+ * Steering message for mid-task intervention
+ */
+export interface SteeringMessage {
+  content: string;
+  timestamp: string;
+  source: 'user' | 'system' | 'loop_detection';
+}
+
+/**
  * Thread-safe key-value context store for pipeline execution
  */
 export class Context {
   private values: Map<string, unknown>;
   private logs: string[];
+  private steeringQueue: SteeringMessage[];
   private lock: AsyncLock;
 
   constructor() {
     this.values = new Map();
     this.logs = [];
+    this.steeringQueue = [];
     this.lock = new AsyncLock();
   }
 
@@ -90,6 +101,9 @@ export class Context {
     // Copy logs
     newContext.logs = [...this.logs];
     
+    // Copy steering queue
+    newContext.steeringQueue = [...this.steeringQueue];
+    
     return newContext;
   }
 
@@ -101,6 +115,41 @@ export class Context {
       for (const [key, value] of Object.entries(updates)) {
         this.values.set(key, value);
       }
+    });
+  }
+
+  /**
+   * Queue a steering message for mid-task intervention.
+   * The message will be injected before the next LLM call in codergen nodes.
+   */
+  async steer(content: string, source: 'user' | 'system' | 'loop_detection' = 'user'): Promise<void> {
+    await this.lock.acquire('steering', () => {
+      this.steeringQueue.push({
+        content,
+        timestamp: new Date().toISOString(),
+        source,
+      });
+    });
+  }
+
+  /**
+   * Drain all steering messages from the queue.
+   * Returns and clears the queue atomically.
+   */
+  async drainSteeringQueue(): Promise<SteeringMessage[]> {
+    return await this.lock.acquire('steering', () => {
+      const messages = [...this.steeringQueue];
+      this.steeringQueue = [];
+      return messages;
+    });
+  }
+
+  /**
+   * Peek at steering queue without clearing (for inspection)
+   */
+  async peekSteeringQueue(): Promise<SteeringMessage[]> {
+    return await this.lock.acquire('steering', () => {
+      return [...this.steeringQueue];
     });
   }
 

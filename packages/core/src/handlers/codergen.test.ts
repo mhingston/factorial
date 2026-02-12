@@ -1,7 +1,7 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { chmod, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Context } from '../context/index.js';
 import type { Graph, LlmAdapter, Node } from '../types/index.js';
 
@@ -535,6 +535,86 @@ describe('CodergenHandler artifacts', () => {
     ]);
     expect(validation.result).toBe('fail');
     expect(validation.checked).toBe(true);
+  });
+
+  it('injects steering messages into prompt', async () => {
+    generateTextMock.mockResolvedValue({
+      text: 'steered output',
+      request: { id: 'req-steer' },
+      response: { id: 'resp-steer' },
+      usage: { inputTokens: 15, outputTokens: 3, totalTokens: 18 },
+      finishReason: 'stop',
+      warnings: [],
+      providerMetadata: { provider: 'openai' },
+    });
+
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-codergen-steer-'));
+    const handler = new CodergenHandler();
+    const context = new Context();
+    
+    // Queue steering messages
+    await context.steer('Please use TypeScript', 'user');
+    await context.steer('Avoid any types', 'system');
+    
+    const node = makeNode('steer_node', { auto_status: true });
+
+    const outcome = await handler.execute(node, context, makeGraph(), logsRoot);
+    expect(outcome.status).toBe('SUCCESS');
+
+    const stageDir = join(logsRoot, node.id);
+    const prompt = await readFile(join(stageDir, 'prompt.md'), 'utf-8');
+    const steering = await readJson(join(stageDir, 'steering.json'));
+
+    // Verify steering content is in prompt
+    expect(prompt).toContain('[Steering 1/2] Please use TypeScript');
+    expect(prompt).toContain('[Steering 2/2] Avoid any types');
+    expect(prompt).toContain('---');
+    
+    // Verify steering artifact
+    expect(steering).toMatchObject({
+      count: 2,
+      node_id: 'steer_node',
+    });
+    expect(steering.messages).toHaveLength(2);
+    expect(steering.messages[0].content).toBe('Please use TypeScript');
+    expect(steering.messages[0].source).toBe('user');
+    expect(steering.messages[1].content).toBe('Avoid any types');
+    expect(steering.messages[1].source).toBe('system');
+    
+    // Verify queue was drained
+    await expect(context.peekSteeringQueue()).resolves.toEqual([]);
+  });
+
+  it('handles empty steering queue gracefully', async () => {
+    generateTextMock.mockResolvedValue({
+      text: 'normal output',
+      request: { id: 'req-normal' },
+      response: { id: 'resp-normal' },
+      usage: { inputTokens: 10, outputTokens: 2, totalTokens: 12 },
+      finishReason: 'stop',
+      warnings: [],
+      providerMetadata: { provider: 'openai' },
+    });
+
+    const logsRoot = await mkdtemp(join(tmpdir(), 'attractor-codergen-no-steer-'));
+    const handler = new CodergenHandler();
+    const context = new Context();
+    // No steering messages queued
+    
+    const node = makeNode('no_steer_node', { auto_status: true });
+
+    const outcome = await handler.execute(node, context, makeGraph(), logsRoot);
+    expect(outcome.status).toBe('SUCCESS');
+
+    const stageDir = join(logsRoot, node.id);
+    const prompt = await readFile(join(stageDir, 'prompt.md'), 'utf-8');
+    
+    // Verify no steering section in prompt
+    expect(prompt).not.toContain('Steering Messages');
+    expect(prompt).not.toContain('[Steering');
+    
+    // Verify no steering artifact
+    await expect(readFile(join(stageDir, 'steering.json'), 'utf-8')).rejects.toThrow();
   });
 
   it.each([

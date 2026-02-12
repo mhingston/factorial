@@ -1,21 +1,22 @@
 import { EventEmitter } from 'node:events';
-import type { 
-  Context,
-  Graph, 
-  Node, 
-  Edge, 
-  Outcome, 
-  RunConfig, 
-  RetryPolicy,
-  ExecutionEvent,
-} from '../types/index.js';
-import { DEFAULT_BACKOFF_CONFIG } from '../types/index.js';
-import { Context as ContextImpl } from '../context/index.js';
-import { CheckpointManager } from '../checkpoint/index.js';
-import { HandlerRegistry } from '../handlers/registry.js';
-import { evaluateCondition } from '../conditions/index.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { CheckpointManager } from '../checkpoint/index.js';
+import { evaluateCondition } from '../conditions/index.js';
+import { Context as ContextImpl } from '../context/index.js';
+import { HandlerRegistry } from '../handlers/registry.js';
+import type { 
+  Context,
+  Edge, 
+  ExecutionEvent,
+  Graph, 
+  Node, 
+  Outcome, 
+  RetryPolicy,
+  RunConfig, 
+} from '../types/index.js';
+import { DEFAULT_BACKOFF_CONFIG } from '../types/index.js';
+import { type LoopDetectionConfig, LoopDetector } from './loop-detector.js';
 
 const CANCEL_MESSAGE = 'Execution cancelled';
 type RetryPolicyType = 'none' | 'standard' | 'targeted';
@@ -67,6 +68,7 @@ export class ExecutionEngine extends EventEmitter {
   private context: Context;
   private checkpointManager: CheckpointManager;
   private handlerRegistry: HandlerRegistry;
+  private loopDetector: LoopDetector;
   private completedNodes: string[] = [];
   private nodeOutcomes: Map<string, Outcome> = new Map();
   private nodeRetries: Map<string, number> = new Map();
@@ -88,7 +90,11 @@ export class ExecutionEngine extends EventEmitter {
   constructor(
     graph: Graph,
     config: RunConfig,
-    options: { context?: Context; handlerRegistry?: HandlerRegistry } = {}
+    options: { 
+      context?: Context; 
+      handlerRegistry?: HandlerRegistry;
+      loopDetectionConfig?: Partial<LoopDetectionConfig>;
+    } = {}
   ) {
     super();
     this.graph = graph;
@@ -97,6 +103,7 @@ export class ExecutionEngine extends EventEmitter {
     this.context = options.context ?? new ContextImpl();
     this.checkpointManager = new CheckpointManager(config.logs_root);
     this.handlerRegistry = options.handlerRegistry ?? new HandlerRegistry();
+    this.loopDetector = new LoopDetector(options.loopDetectionConfig);
   }
 
   /**
@@ -536,6 +543,28 @@ export class ExecutionEngine extends EventEmitter {
           data: { node: node.id, outcome },
         } as ExecutionEvent);
 
+        // Record execution for loop detection and check for patterns
+        this.loopDetector.record(
+          node.id,
+          node.type,
+          node.prompt || '',
+          outcome.status
+        );
+        const loopCheck = this.loopDetector.check();
+        if (loopCheck.detected) {
+          // Inject steering message to warn about loop
+          await this.context.steer(loopCheck.message, 'loop_detection');
+          this.emit('event', {
+            type: 'LOOP_DETECTED',
+            timestamp: new Date(),
+            data: { 
+              node: node.id, 
+              pattern: loopCheck.pattern,
+              message: loopCheck.message,
+            },
+          } as ExecutionEvent);
+        }
+
         if (outcome.status === 'SUCCESS' || outcome.status === 'PARTIAL_SUCCESS') {
           this.nodeRetries.set(node.id, 0);
           return outcome;
@@ -572,6 +601,27 @@ export class ExecutionEngine extends EventEmitter {
           timestamp: new Date(),
           data: { node: node.id, error: errorMessage },
         } as ExecutionEvent);
+
+        // Record failure for loop detection
+        this.loopDetector.record(
+          node.id,
+          node.type,
+          node.prompt || '',
+          'FAIL'
+        );
+        const loopCheck = this.loopDetector.check();
+        if (loopCheck.detected) {
+          await this.context.steer(loopCheck.message, 'loop_detection');
+          this.emit('event', {
+            type: 'LOOP_DETECTED',
+            timestamp: new Date(),
+            data: { 
+              node: node.id, 
+              pattern: loopCheck.pattern,
+              message: loopCheck.message,
+            },
+          } as ExecutionEvent);
+        }
 
         if (attempt < policy.max_attempts && policy.should_retry(error as Error)) {
           this.nodeRetries.set(node.id, retryCount + 1);

@@ -1,7 +1,7 @@
-import type { Graph, Node } from '../types/index.js';
-import type { HandlerRegistry } from '../handlers/registry.js';
 import { isConditionSyntaxValid } from '../conditions/index.js';
-import { parseModelStylesheet, StylesheetError } from '../stylesheet/index.js';
+import type { HandlerRegistry } from '../handlers/registry.js';
+import { StylesheetError, parseModelStylesheet } from '../stylesheet/index.js';
+import type { Graph, Node } from '../types/index.js';
 import { SHAPE_TO_TYPE } from '../types/index.js';
 
 export type DiagnosticLevel = 'error' | 'warning' | 'info';
@@ -63,7 +63,14 @@ export function createDefaultLintEngine(): LintEngine {
   return engine;
 }
 
-const VALID_FIDELITY = new Set(['full', 'compact', 'summary', 'truncate']);
+const VALID_FIDELITY = new Set([
+  'full',
+  'compact',
+  'summary',
+  'summary:high',
+  'summary:low',
+  'truncate',
+]);
 
 function isStartNode(node: Node): boolean {
   return (

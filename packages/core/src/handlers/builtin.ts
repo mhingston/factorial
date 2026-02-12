@@ -5,7 +5,7 @@ import { evaluateCondition } from '../conditions/index.js';
 import { ExecutionCancelledError } from '../engine/index.js';
 import type { ExecutionEngine } from '../engine/index.js';
 import { createDefaultLlmAdapter } from '../llm/index.js';
-import type { Node, Graph, Outcome, Context, Handler, LlmAdapter } from '../types/index.js';
+import type { Context, Graph, Handler, LlmAdapter, Node, Outcome } from '../types/index.js';
 
 /**
  * Start handler - no-op entry point
@@ -201,7 +201,29 @@ export class CodergenHandler implements Handler {
       await mkdir(stageDir, { recursive: true });
 
       const preamble = buildFidelityPreamble(fidelity, context, node);
-      const fullPrompt = preamble ? `${preamble}\n\n${prompt}` : prompt;
+      
+      // Check for and drain steering messages (mid-task intervention)
+      const steeringMessages = await context.drainSteeringQueue();
+      let steeringSection = '';
+      if (steeringMessages.length > 0) {
+        const steeringContent = steeringMessages
+          .map((msg, idx) => `[Steering ${idx + 1}/${steeringMessages.length}] ${msg.content}`)
+          .join('\n');
+        steeringSection = `\n\n---\n**Steering Messages:**\n${steeringContent}\n---`;
+        
+        // Write steering artifacts for audit trail
+        const steeringPath = join(stageDir, 'steering.json');
+        await writeJsonFile(steeringPath, {
+          messages: steeringMessages,
+          count: steeringMessages.length,
+          node_id: node.id,
+          timestamp: new Date().toISOString(),
+        });
+      }
+      
+      const fullPrompt = preamble 
+        ? `${preamble}\n\n${prompt}${steeringSection}` 
+        : `${prompt}${steeringSection}`;
       const promptPath = join(stageDir, 'prompt.md');
       await writeFile(promptPath, fullPrompt);
 
@@ -606,11 +628,111 @@ function buildFidelityPreamble(fidelity: string, context: Context, node: Node): 
     return headerLines.join('\n');
   }
 
-  const keys = Object.keys(snapshot).sort();
-  const limit = fidelity === 'summary' ? 60 : fidelity === 'full' ? keys.length : 25;
-  const entries = keys.slice(0, limit).map(key => `${key}: ${JSON.stringify(snapshot[key])}`);
+  // Normalize fidelity: 'summary' maps to 'summary:high' for backward compatibility
+  const normalizedFidelity = fidelity === 'summary' ? 'summary:high' : fidelity;
+  
+  // Get all keys and prioritize them based on semantic importance
+  const allKeys = Object.keys(snapshot);
+  const prioritizedKeys = prioritizeContextKeys(allKeys);
+  
+  // Determine limit based on fidelity mode per Attractor spec Section 5.4
+  let limit: number;
+  switch (normalizedFidelity) {
+    case 'full':
+      limit = prioritizedKeys.length; // All keys
+      break;
+    case 'summary:high':
+      limit = Math.min(60, prioritizedKeys.length); // High-level summaries
+      break;
+    case 'summary:low':
+      limit = Math.min(10, prioritizedKeys.length); // Minimal critical context
+      break;
+    case 'compact':
+    default:
+      limit = Math.min(25, prioritizedKeys.length); // Balanced selection
+  }
+  
+  const selectedKeys = prioritizedKeys.slice(0, limit);
+  const entries = selectedKeys.map(key => `${key}: ${JSON.stringify(snapshot[key])}`);
 
   return `${headerLines.join('\n')}\n\nContext:\n${entries.join('\n')}`;
+}
+
+/**
+ * Prioritize context keys by semantic importance for fidelity modes.
+ * Critical system keys come first, followed by node outputs, then general context.
+ */
+function prioritizeContextKeys(keys: string[]): string[] {
+  // Define key categories in priority order
+  const criticalPrefixes = [
+    'graph.', // Graph-level configuration
+    'outcome', // Last outcome
+    'preferred_label', // Routing decisions
+    'last_', // Recent outputs
+    'codergen.', // LLM generation results
+    'budget.', // Budget tracking
+    'internal.retry_count', // Retry state
+  ];
+  
+  const highPrefixes = [
+    'parallel.', // Parallel execution results
+    'stack.', // Subagent/supervisor state
+    'human.gate.', // Human interaction state
+    'work.', // Work item context
+    'context.', // Semantic context
+  ];
+  
+  const lowPrefixes = [
+    'config.', // Configuration (usually static)
+    'internal.', // Internal bookkeeping
+    'logs', // Log entries (verbose)
+  ];
+  
+  // Score each key
+  const scored = keys.map(key => {
+    let score = 0;
+    
+    // Check critical prefixes (highest priority)
+    for (const prefix of criticalPrefixes) {
+      if (key.startsWith(prefix) || key === prefix) {
+        score += 100;
+        break;
+      }
+    }
+    
+    // Check high prefixes
+    for (const prefix of highPrefixes) {
+      if (key.startsWith(prefix)) {
+        score += 50;
+        break;
+      }
+    }
+    
+    // Check low prefixes (deprioritize)
+    for (const prefix of lowPrefixes) {
+      if (key.startsWith(prefix)) {
+        score -= 30;
+        break;
+      }
+    }
+    
+    // Recent activity indicators get slight boost
+    if (key.includes('last_') || key.includes('current_') || key.includes('recent_')) {
+      score += 10;
+    }
+    
+    return { key, score };
+  });
+  
+  // Sort by score descending, then alphabetically for stable ordering
+  scored.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    return a.key.localeCompare(b.key);
+  });
+  
+  return scored.map(s => s.key);
 }
 
 async function resolveCodergenOutcome(

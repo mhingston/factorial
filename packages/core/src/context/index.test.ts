@@ -69,4 +69,55 @@ describe('Context', () => {
     await expect(context.get<number>('one')).resolves.toBe(1);
     await expect(context.getString('two')).resolves.toBe('2');
   });
+
+  it('supports steering queue operations', async () => {
+    const context = new Context();
+    
+    // Initially empty
+    await expect(context.peekSteeringQueue()).resolves.toEqual([]);
+    await expect(context.drainSteeringQueue()).resolves.toEqual([]);
+    
+    // Queue messages
+    await context.steer('Please fix the error', 'user');
+    await context.steer('Consider using a different approach', 'system');
+    
+    // Peek without clearing
+    const peeked = await context.peekSteeringQueue();
+    expect(peeked).toHaveLength(2);
+    expect(peeked[0].content).toBe('Please fix the error');
+    expect(peeked[0].source).toBe('user');
+    expect(peeked[1].content).toBe('Consider using a different approach');
+    expect(peeked[1].source).toBe('system');
+    expect(peeked[0].timestamp).toBeDefined();
+    
+    // Still there after peek
+    await expect(context.peekSteeringQueue()).resolves.toHaveLength(2);
+    
+    // Drain clears the queue
+    const drained = await context.drainSteeringQueue();
+    expect(drained).toHaveLength(2);
+    expect(drained[0].content).toBe('Please fix the error');
+    expect(drained[1].content).toBe('Consider using a different approach');
+    
+    // Empty after drain
+    await expect(context.peekSteeringQueue()).resolves.toEqual([]);
+    await expect(context.drainSteeringQueue()).resolves.toEqual([]);
+  });
+
+  it('clones steering queue correctly', async () => {
+    const context = new Context();
+    await context.steer('Original message', 'user');
+    
+    const cloned = context.clone();
+    
+    // Cloned queue has the same message
+    const clonedQueue = await cloned.peekSteeringQueue();
+    expect(clonedQueue).toHaveLength(1);
+    expect(clonedQueue[0].content).toBe('Original message');
+    
+    // Draining cloned doesn't affect original
+    await cloned.drainSteeringQueue();
+    await expect(cloned.peekSteeringQueue()).resolves.toEqual([]);
+    await expect(context.peekSteeringQueue()).resolves.toHaveLength(1);
+  });
 });

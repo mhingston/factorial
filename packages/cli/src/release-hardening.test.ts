@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { spawn } from 'node:child_process'
 import { mkdtemp, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { spawn } from 'node:child_process'
+import { describe, expect, it } from 'vitest'
 
 interface CommandResult { code: number; stdout: string; stderr: string }
 
