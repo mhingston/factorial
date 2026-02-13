@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
+
+// Mock test harness for fixture demonstration
+const createSuiteIsolation = async (suiteName: string) => ({
+  createTempDir: async (name: string) => `/tmp/${suiteName}/${name}`,
+  cleanup: async () => {},
+});
+const ensureDeterministicCliBuild = async () => {};
 
 describe('Compliant test using shared harness', () => {
   let isolation: Awaited<ReturnType<typeof createSuiteIsolation>>;
