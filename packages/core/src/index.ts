@@ -14,6 +14,7 @@ export * from './interviewers/index.js';
 export * from './dtu/index.js';
 export * from './satisfaction/index.js';
 export * from './subagents/index.js';
+export * from './observability/index.js';
 
 // Re-export commonly used types
 export type { 

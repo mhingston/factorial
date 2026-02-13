@@ -5,6 +5,7 @@
 - Author:
 - Related issue/PR:
 - Risk level: `low|medium|high`
+- CI tier: `fast|standard|emergency`
 
 ## Requirement / Behavior Delta
 - Current behavior:

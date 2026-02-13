@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Current Direction
 - Keep the core graph execution model stable.
@@ -75,6 +75,10 @@ Issue breakdown:
 | `SS-001` | improvement | Done | Satisfaction Scoring completed with LLM-as-judge rubric-based evaluation system; see compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md). |
 | `EF-001` | improvement | Done | Evidence Freshness completed with automated tracking and CI gate for stale detection; see compound report: [`docs/compound/factory-improvements-batch-2026-02-12.md`](./docs/compound/factory-improvements-batch-2026-02-12.md). |
 | `BK-018` | backlog | Active | Phase 1-4 complete (FA-001 through FA-009): External system operations + circuit breakers; self-modification DOT generation; configuration optimization; codegen validation; distributed coordination; cross-repo lock propagation; full autonomy telemetry; self-healing evidence; see execution plan: [`docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md`](./docs/roadmap/backlog-bk-018-full-autonomy-maturity-criteria.md). |
+| `BK-019` | backlog | Active | Golden principles infrastructure complete—215 violations detected retroactively (138 GP-001, 75 GP-002, 2 GP-003); cleanup batch needed. See plan: [`docs/plans/bk-019-golden-principles-plan.md`](./docs/plans/bk-019-golden-principles-plan.md), review: [`docs/reviews/bk-019-batch-1-review.md`](./docs/reviews/bk-019-batch-1-review.md). |
+| `BK-020` | backlog | Active | Tiered CI gates implemented—Fast-track (~8-12min), Standard (~90-100min), Emergency (~5-8min) lanes with security invariants enforced. See plan: [`docs/plans/bk-020-tiered-throughput-plan.md`](./docs/plans/bk-020-tiered-throughput-plan.md), review: [`docs/reviews/bk-020-batch-1-review.md`](./docs/reviews/bk-020-batch-1-review.md). |
+| `BK-021` | backlog | Active | Agent tooling loop functional—Template at `docs/templates/tool.md`, 3 seed tools generated (date-linter, cross-doc-validator, drift-detector), all security invariants satisfied. See plan: [`docs/plans/bk-021-agent-generated-tooling-plan.md`](./docs/plans/bk-021-agent-generated-tooling-plan.md), review: [`docs/reviews/bk-021-batch-1-review.md`](./docs/reviews/bk-021-batch-1-review.md). |
+| `BK-022` | backlog | Active | Agent-legible observability Phase 1-2 complete—Docker stack (Vector + Victoria), CLI commands, 17/17 tests passing, all 6 high-risk invariants enforced. Phase 3 (DTU integration) deferred. See plan: [`docs/plans/bk-022-agent-legible-observability-plan.md`](./docs/plans/bk-022-agent-legible-observability-plan.md), review: [`docs/reviews/bk-022-phase-1-2-review.md`](./docs/reviews/bk-022-phase-1-2-review.md). |
 
 Design-review follow-up mapping (to avoid duplicate roadmap items):
 - Finish adapter convergence + restore green `build/typecheck/test:run`: tracked under `RMD-031` (`PKG-031A`), no new item.
@@ -581,7 +585,10 @@ Use this section as the default starting point for a new coding agent session.
 ### Next
 | ID | Item | Status | Exit criteria |
 | --- | --- | --- | --- |
-| None | Active operational queue is empty after OP-001/OP-002 completion | N/A | All planned operational follow-ups completed. |
+| `BK-019` | Golden principles and automated pattern enforcement | Planned | Human-curated `docs/golden-principles.md` with machine-readable principle definitions (severity, auto-fix eligibility, detection patterns); `scripts/golden-cleanup.js` that scans codebase for violations and opens automated PRs for auto-fixable issues; weekly scheduled cleanup job in CI with quality grade updates; solution doc in `docs/solutions/golden-principles-pattern-enforcement.md` |
+| `BK-020` | Tiered throughput philosophy and fast-track CI gates | Planned | Tiered CI strategy with fast-track (low-risk, <50 lines, 100% coverage), standard-track (medium/high-risk), and emergency-fix lanes; documentation of trade-offs and revert windows in AGENTS.md; CI workflow updates to `.github/workflows/ci.yml` with conditional gate skipping; metrics tracking for velocity vs. reliability balance |
+| `BK-021` | Agent-generated tooling loop | Planned | `docs/templates/tool.md` template for tool generation requests; pattern recognition trigger from recurring review comments; agent workflow to generate scripts/CI jobs/skills from templates; human review workflow for generated tools (not violations); seed examples: linter for deterministic dates, cross-doc validation helpers, drift detection utilities; solution doc capturing tooling generation pattern |
+| `BK-022` | Agent-legible observability | Planned | Local ephemeral observability stack per worktree (Vector + Victoria Logs/Metrics/Traces); agent query interfaces via LogQL/PromQL/TraceQL APIs; worktree-scoped isolation with teardown after task completion; prompts for self-diagnosis (e.g., "verify workflow completed within duration bounds"); correlation across logs/metrics/traces for root cause analysis; CI integration for agent-driven SLO validation; solution doc for observability-driven agent autonomy |
 
 ### Later
 | ID | Item | Status | Notes |

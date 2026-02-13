@@ -1101,10 +1101,288 @@ program
             console.log('  (no operations registered)');
           }
         }
-        console.log(`\nTotal: ${twins.length} twins`);
       }
+      console.log(`\nTotal: ${twins.length} twins`);
     } catch (error) {
       console.error('Failed to list DTU twins:', error);
+      process.exit(1);
+    }
+  });
+
+// Observability Commands
+program
+  .command('observability:start')
+  .description('Start the observability stack for the current worktree')
+  .option('--worktree-id <id>', 'Worktree ID (defaults to git worktree name or "default")')
+  .option('--base-port <port>', 'Base port for observability services', '9428')
+  .action(async (options: { worktreeId?: string; basePort?: string }) => {
+    try {
+      const { ObservabilityStackManager } = await import('../../core/src/observability/index.js');
+      
+      // Determine worktree ID
+      let worktreeId = options.worktreeId;
+      if (!worktreeId) {
+        // Try to get from git
+        try {
+          const result = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' });
+          worktreeId = result.trim().replace(/[^a-zA-Z0-9-]/g, '-');
+        } catch {
+          worktreeId = 'default';
+        }
+      }
+
+      const repoRoot = process.cwd();
+      const manager = new ObservabilityStackManager({ repoRoot });
+      
+      // Check if Docker is available
+      const dockerAvailable = await manager.isDockerAvailable();
+      if (!dockerAvailable) {
+        console.error('Error: Docker is not available. Observability stack requires Docker.');
+        console.error('Please install Docker and try again.');
+        process.exit(1);
+      }
+
+      // Check if stack already exists
+      const existingStatus = await manager.getStackStatus(worktreeId);
+      if (existingStatus.running) {
+        console.log(`Observability stack already running for worktree: ${worktreeId}`);
+        console.log(`  Victoria Logs: http://localhost:${existingStatus.ports.victoriaLogs}`);
+        console.log(`  Victoria Metrics: http://localhost:${existingStatus.ports.victoriaMetrics}`);
+        console.log(`  Victoria Traces: http://localhost:${existingStatus.ports.victoriaTraces}`);
+        return;
+      }
+
+      console.log(`Starting observability stack for worktree: ${worktreeId}...`);
+      
+      const config = await manager.getStackConfig(worktreeId, {
+        basePort: parseInt(options.basePort ?? '9428', 10),
+      });
+
+      const info = await manager.createStack(config);
+
+      console.log('\nObservability stack started successfully!');
+      console.log(`  Worktree ID: ${worktreeId}`);
+      console.log(`  Victoria Logs: http://localhost:${info.status.ports.victoriaLogs}`);
+      console.log(`  Victoria Metrics: http://localhost:${info.status.ports.victoriaMetrics}`);
+      console.log(`  Victoria Traces: http://localhost:${info.status.ports.victoriaTraces}`);
+      console.log(`  Data path: ${info.dataPath}`);
+      console.log('\nServices are starting up. Allow 10-15 seconds for full initialization.');
+    } catch (error) {
+      console.error('Failed to start observability stack:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('observability:stop')
+  .description('Stop and clean up the observability stack for the current worktree')
+  .option('--worktree-id <id>', 'Worktree ID (defaults to git worktree name or "default")')
+  .option('--cleanup', 'Remove all data after stopping', false)
+  .action(async (options: { worktreeId?: string; cleanup?: boolean }) => {
+    try {
+      const { ObservabilityStackManager } = await import('../../core/src/observability/index.js');
+      
+      // Determine worktree ID
+      let worktreeId = options.worktreeId;
+      if (!worktreeId) {
+        try {
+          const result = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' });
+          worktreeId = result.trim().replace(/[^a-zA-Z0-9-]/g, '-');
+        } catch {
+          worktreeId = 'default';
+        }
+      }
+
+      const repoRoot = process.cwd();
+      const manager = new ObservabilityStackManager({ repoRoot });
+
+      console.log(`Stopping observability stack for worktree: ${worktreeId}...`);
+
+      if (options.cleanup) {
+        await manager.cleanupStack(worktreeId);
+        console.log('Observability stack stopped and data cleaned up.');
+      } else {
+        await manager.stopStack(worktreeId);
+        console.log('Observability stack stopped (data preserved).');
+      }
+    } catch (error) {
+      console.error('Failed to stop observability stack:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('observability:query')
+  .description('Query observability data (logs, metrics, or traces)')
+  .requiredOption('--type <type>', 'Query type: logs, metrics, or traces')
+  .requiredOption('--query <query>', 'Query string (LogQL, PromQL, or TraceQL)')
+  .option('--worktree-id <id>', 'Worktree ID (defaults to git worktree name or "default")')
+  .option('--start <iso-date>', 'Start time (ISO 8601)')
+  .option('--end <iso-date>', 'End time (ISO 8601)')
+  .option('--limit <n>', 'Maximum results to return', '100')
+  .option('--json', 'Output JSON format', false)
+  .action(async (options: { 
+    type: string; 
+    query: string; 
+    worktreeId?: string; 
+    start?: string; 
+    end?: string; 
+    limit?: string;
+    json?: boolean;
+  }) => {
+    try {
+      const { ObservabilityQueryClient } = await import('../../core/src/observability/index.js');
+      
+      // Determine worktree ID
+      let worktreeId = options.worktreeId;
+      if (!worktreeId) {
+        try {
+          const result = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' });
+          worktreeId = result.trim().replace(/[^a-zA-Z0-9-]/g, '-');
+        } catch {
+          worktreeId = 'default';
+        }
+      }
+
+      const repoRoot = process.cwd();
+      const client = new ObservabilityQueryClient({ 
+        basePath: repoRoot + '/.factorial/observability' 
+      });
+
+      // Check availability
+      const available = await client.isAvailable(worktreeId);
+      if (!available) {
+        console.error('Error: Observability stack is not running for this worktree.');
+        console.error('Run: factorial observability:start');
+        process.exit(1);
+      }
+
+      const queryOptions = {
+        start: options.start ? new Date(options.start) : undefined,
+        end: options.end ? new Date(options.end) : undefined,
+        limit: parseInt(options.limit ?? '100', 10),
+      };
+
+      let result;
+      switch (options.type.toLowerCase()) {
+        case 'logs':
+          result = await client.queryLogs(worktreeId, options.query, queryOptions);
+          break;
+        case 'metrics':
+          result = await client.queryMetrics(worktreeId, options.query, queryOptions);
+          break;
+        case 'traces':
+          result = await client.queryTraces(worktreeId, options.query, queryOptions);
+          break;
+        default:
+          console.error(`Error: Unknown query type: ${options.type}`);
+          console.error('Valid types: logs, metrics, traces');
+          process.exit(1);
+      }
+
+      if ('error' in result) {
+        console.error(`Query failed: ${result.error}`);
+        process.exit(1);
+      }
+
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(`\nQuery: ${result.query}`);
+        console.log(`Results: ${result.count} (took ${result.took_ms}ms)`);
+        console.log('='.repeat(60));
+        
+        if ('logs' in result) {
+          for (const log of result.logs.slice(0, 20)) {
+            console.log(`[${log.timestamp}] ${log.level?.toUpperCase() ?? 'INFO'}: ${log.message}`);
+          }
+          if (result.logs.length > 20) {
+            console.log(`\n... and ${result.logs.length - 20} more entries`);
+          }
+        } else if ('series' in result) {
+          for (const series of result.series) {
+            console.log(`\nMetric: ${JSON.stringify(series.metric)}`);
+            for (const [timestamp, value] of series.values.slice(-10)) {
+              console.log(`  ${new Date(timestamp * 1000).toISOString()}: ${value}`);
+            }
+            if (series.values.length > 10) {
+              console.log(`  ... and ${series.values.length - 10} more samples`);
+            }
+          }
+        } else if ('traces' in result) {
+          for (const trace of result.traces.slice(0, 20)) {
+            console.log(`\nTrace: ${trace.trace_id}`);
+            console.log(`  Span: ${trace.name} (${trace.duration_ms}ms)`);
+            console.log(`  Start: ${trace.start_time}`);
+          }
+          if (result.traces.length > 20) {
+            console.log(`\n... and ${result.traces.length - 20} more traces`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to execute query:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('observability:status')
+  .description('Check the status of the observability stack')
+  .option('--worktree-id <id>', 'Worktree ID (defaults to git worktree name or "default")')
+  .option('--json', 'Output JSON format', false)
+  .action(async (options: { worktreeId?: string; json?: boolean }) => {
+    try {
+      const { ObservabilityStackManager, ObservabilityQueryClient } = await import('../../core/src/observability/index.js');
+      
+      // Determine worktree ID
+      let worktreeId = options.worktreeId;
+      if (!worktreeId) {
+        try {
+          const result = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' });
+          worktreeId = result.trim().replace(/[^a-zA-Z0-9-]/g, '-');
+        } catch {
+          worktreeId = 'default';
+        }
+      }
+
+      const repoRoot = process.cwd();
+      const manager = new ObservabilityStackManager({ repoRoot });
+      const status = await manager.getStackStatus(worktreeId);
+
+      if (options.json) {
+        console.log(JSON.stringify({ worktreeId, ...status }, null, 2));
+      } else {
+        console.log(`Observability Stack Status: ${worktreeId}`);
+        console.log('='.repeat(50));
+        console.log(`Running: ${status.running ? 'Yes' : 'No'}`);
+        
+        if (status.running) {
+          console.log('\nServices:');
+          console.log(`  Vector: ${status.services.vector ? 'Running' : 'Stopped'}`);
+          console.log(`  Victoria Logs: ${status.services.victoriaLogs ? 'Running' : 'Stopped'}`);
+          console.log(`  Victoria Metrics: ${status.services.victoriaMetrics ? 'Running' : 'Stopped'}`);
+          console.log(`  Victoria Traces: ${status.services.victoriaTraces ? 'Running' : 'Stopped'}`);
+          
+          console.log('\nPorts:');
+          console.log(`  Vector: ${status.ports.vector}`);
+          console.log(`  Victoria Logs: ${status.ports.victoriaLogs}`);
+          console.log(`  Victoria Metrics: ${status.ports.victoriaMetrics}`);
+          console.log(`  Victoria Traces: ${status.ports.victoriaTraces}`);
+
+          // Check service health
+          const client = new ObservabilityQueryClient({ 
+            basePath: repoRoot + '/.factorial/observability' 
+          });
+          const health = await client.getHealth(worktreeId);
+          console.log('\nHealth:');
+          console.log(`  Victoria Logs: ${health.victoriaLogs ? 'Healthy' : 'Unhealthy'}`);
+          console.log(`  Victoria Metrics: ${health.victoriaMetrics ? 'Healthy' : 'Unhealthy'}`);
+          console.log(`  Victoria Traces: ${health.victoriaTraces ? 'Healthy' : 'Unhealthy'}`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check status:', error);
       process.exit(1);
     }
   });

@@ -2,11 +2,150 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+      - master
+      - 'hotfix/**'
+      - 'emergency/**'
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+env:
+  NODE_VERSION_DEFAULT: '20'
 
 jobs:
+  # ============================================================================
+  # TIER 1: CLASSIFICATION
+  # Determine which CI tier to run based on change characteristics
+  # ============================================================================
+  tier-classification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tier: ${{ steps.classifier.outputs.tier }}
+      json: ${{ steps.classifier.outputs.json }}
+      is_fast_track: ${{ steps.classifier.outputs.tier == 'fast' }}
+      is_standard: ${{ steps.classifier.outputs.tier == 'standard' }}
+      is_emergency: ${{ steps.classifier.outputs.tier == 'emergency' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
+
+      - name: Determine CI Tier
+        id: classifier
+        env:
+          GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          GITHUB_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          PR_LABELS: ${{ toJson(github.event.pull_request.labels) }}
+          PLAN_PATH: docs/plans/plan.md
+        run: node scripts/ci-tier-classifier.js
+
+      - name: Comment Tier Decision
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tier = '${{ steps.classifier.outputs.tier }}';
+            const json = JSON.parse(${{ steps.classifier.outputs.json }});
+            const reasons = json.reasons.join('\n- ');
+            
+            const body = `## CI Tier Classification
+            
+            **Selected Tier:** \`${tier}\`
+            
+            **Reasoning:**
+            - ${reasons}
+            
+            <details>
+            <summary>Classification Details</summary>
+            
+            \`\`\`json
+            ${JSON.stringify(json.metadata, null, 2)}
+            \`\`\`
+            </details>
+            
+            ---
+            *This classification was automatically determined. To override, add a label or update plan.md.*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  # ============================================================================
+  # TIER 2: FAST-TRACK LANE (~8-12 minutes)
+  # For: Small changes (<50 lines), low-risk, 100% coverage on changed lines
+  # Skips: DTU harness, golden regression, maturity gates, flake replay, 
+  #        coverage gate (keeps upload), heavy validation
+  # ============================================================================
+  fast-track-verify:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_fast_track == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test (Fast-Track)
+        run: npm run test:run
+
+      - name: Coverage (Fast-Track - Changed Lines Only)
+        run: npm run test:coverage
+
+      - name: Verify Changed Line Coverage
+        env:
+          GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          GITHUB_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          COVERAGE_PATH: ./coverage/coverage-final.json
+        run: node scripts/fast-track-coverage.js
+
+      - name: Worktree Parity
+        env:
+          WORKTREE_PARITY_REQUIRE_HEAD: "1"
+        run: npm run test:worktree
+
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fast-track-coverage-report
+          path: coverage
+
+  # ============================================================================
+  # TIER 2: STANDARD-TRACK LANE (~90-100 minutes)
+  # For: Medium/high-risk changes, >50 lines, security-critical files
+  # Full gate matrix: all 12+ jobs
+  # ============================================================================
   pr-compound-compliance:
-    if: ${{ github.event_name == 'pull_request' }}
+    needs: tier-classification
+    if: |
+      github.event_name == 'pull_request' && 
+      needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -16,7 +155,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
 
       - name: Validate PR compound artifacts
         env:
@@ -24,6 +163,8 @@ jobs:
         run: npm run check:pr-compound
 
   verify:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -68,6 +209,8 @@ jobs:
           path: coverage
 
   golden-regression:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -77,7 +220,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -87,6 +230,8 @@ jobs:
         run: npm run test:golden
 
   self-host-maturity:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -96,7 +241,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -119,6 +264,8 @@ jobs:
             logs/self_host_maturity_ci/report.md
 
   claims-consistency:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -128,7 +275,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -146,6 +293,8 @@ jobs:
           path: logs/claims_consistency_ci/report.json
 
   docs-freshness:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -155,7 +304,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -173,6 +322,8 @@ jobs:
           path: logs/docs_freshness_ci/report.json
 
   self-host-flake:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -182,7 +333,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -202,6 +353,8 @@ jobs:
           path: logs/self_host_flake_ci/report.json
 
   release-hardening:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -211,7 +364,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -239,6 +392,8 @@ jobs:
             logs/release_hardening_ci/signature.json
 
   reliability-slo:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -248,7 +403,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -266,6 +421,8 @@ jobs:
           path: logs/reliability_slo_ci/report.json
 
   self-host-unattended-telemetry:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -275,7 +432,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -294,6 +451,8 @@ jobs:
           path: logs/self_host_unattended_telemetry_ci/report.json
 
   worktree-parity:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -303,7 +462,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -315,6 +474,8 @@ jobs:
         run: npm run test:worktree
 
   evidence-freshness:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -324,7 +485,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
           cache: npm
 
       - name: Install dependencies
@@ -341,3 +502,232 @@ jobs:
         with:
           name: evidence-freshness-report
           path: logs/evidence_freshness_ci/report.json
+
+  # ============================================================================
+  # AGENT-GENERATED TOOLS
+  # Run generated tools for code quality enforcement
+  # ============================================================================
+  generated-tools:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_standard == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Date Linter
+        run: |
+          npm run tool:date-lint -- \
+            --report ./logs/tools/date_linter_ci/report.json
+        continue-on-error: true
+
+      - name: Run Cross-Doc Validator
+        run: |
+          npm run tool:cross-doc-validate -- \
+            --report ./logs/tools/cross_doc_validator_ci/report.json
+        continue-on-error: true
+
+      - name: Run Drift Detector
+        run: |
+          npm run tool:drift-check -- \
+            --report ./logs/tools/drift_detector_ci/report.json
+        continue-on-error: true
+
+      - name: Upload Generated Tools Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-tools-reports
+          path: |
+            logs/tools/*/report.json
+
+  # ============================================================================
+  # TIER 3: EMERGENCY-FIX LANE (~5-8 minutes)
+  # For: hotfix/* or emergency/* branches, production issues
+  # Minimal gates: lint, typecheck, unit tests only
+  # Auto-merge capability with tracking issue
+  # ============================================================================
+  emergency-verify:
+    needs: tier-classification
+    if: needs.tier-classification.outputs.is_emergency == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      tracking_issue_url: ${{ steps.tracking.outputs.issue_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION_DEFAULT }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test:run
+
+      - name: Create Tracking Issue
+        id: tracking
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/emergency-tracker.js
+
+      - name: Update PR with Tracking Issue
+        if: steps.tracking.outputs.issue_url && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueUrl = '${{ steps.tracking.outputs.issue_url }}';
+            const body = context.payload.pull_request.body || '';
+            
+            if (!body.includes(issueUrl)) {
+              const updatedBody = body + '\n\n---\n\n**Emergency Fix Tracking:** ' + issueUrl;
+              
+              github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                body: updatedBody
+              });
+            }
+
+  # ============================================================================
+  # CI COMPLETION AGGREGATOR
+  # Ensures all required jobs pass based on tier
+  # ============================================================================
+  ci-complete:
+    needs: 
+      - tier-classification
+      - fast-track-verify
+      - emergency-verify
+      - pr-compound-compliance
+      - verify
+      - golden-regression
+      - self-host-maturity
+      - claims-consistency
+      - docs-freshness
+      - self-host-flake
+      - release-hardening
+      - reliability-slo
+      - self-host-unattended-telemetry
+      - worktree-parity
+      - evidence-freshness
+      - generated-tools
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI Results
+        run: |
+          TIER="${{ needs.tier-classification.outputs.tier }}"
+          echo "CI Tier: $TIER"
+          
+          # Check tier-specific requirements
+          case "$TIER" in
+            fast)
+              echo "Fast-track lane - checking required jobs..."
+              FAST_TRACK_RESULT="${{ needs.fast-track-verify.result }}"
+              if [ "$FAST_TRACK_RESULT" != "success" ]; then
+                echo "✗ Fast-track verification failed"
+                exit 1
+              fi
+              ;;
+            
+            emergency)
+              echo "Emergency lane - checking required jobs..."
+              EMERGENCY_RESULT="${{ needs.emergency-verify.result }}"
+              if [ "$EMERGENCY_RESULT" != "success" ]; then
+                echo "✗ Emergency verification failed"
+                exit 1
+              fi
+              ;;
+            
+            standard|*)
+              echo "Standard lane - checking all jobs..."
+              
+              # List of required standard-track jobs
+              JOBS="pr-compound-compliance verify golden-regression self-host-maturity claims-consistency docs-freshness self-host-flake release-hardening reliability-slo self-host-unattended-telemetry worktree-parity evidence-freshness generated-tools"
+              
+              FAILED=0
+              for job in $JOBS; do
+                RESULT=$(eval echo "\${{ needs.$job.result }}")
+                if [ "$RESULT" != "success" ] && [ "$RESULT" != "skipped" ]; then
+                  echo "✗ Job $job failed with result: $RESULT"
+                  FAILED=1
+                fi
+              done
+              
+              if [ $FAILED -eq 1 ]; then
+                exit 1
+              fi
+              ;;
+          esac
+          
+          echo "✓ All required CI checks passed for tier: $TIER"
+
+  # ============================================================================
+  # METRICS COLLECTION
+  # Track velocity vs reliability metrics
+  # ============================================================================
+  metrics-collection:
+    needs: ci-complete
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect CI Metrics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tier = '${{ needs.tier-classification.outputs.tier }}';
+            const startTime = '${{ github.event.pull_request.created_at }}';
+            const endTime = new Date().toISOString();
+            
+            const metrics = {
+              tier: tier,
+              pr_number: context.issue.number,
+              pr_title: context.payload.pull_request.title,
+              author: context.payload.pull_request.user.login,
+              start_time: startTime,
+              end_time: endTime,
+              duration_minutes: Math.round((new Date(endTime) - new Date(startTime)) / 60000),
+              conclusion: '${{ needs.ci-complete.result }}',
+              timestamp: endTime
+            };
+            
+            console.log('CI Metrics:', metrics);
+            
+            // In a production environment, you would send this to your metrics system
+            // For now, we just log it
+            
+            // Create metrics artifact
+            const fs = require('fs');
+            fs.writeFileSync('ci-metrics.json', JSON.stringify(metrics, null, 2));
+      
+      - name: Upload Metrics Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-metrics-${{ github.run_id }}
+          path: ci-metrics.json

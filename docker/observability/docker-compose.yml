@@ -1,0 +1,101 @@
+# Observability Stack for Factorial
+# Vector (collection) -> Victoria Logs/Metrics/Traces (storage)
+# Worktree-scoped: each worktree gets isolated stack instance
+
+version: '3.8'
+
+services:
+  vector:
+    image: timberio/vector:0.44.0-distroless-libc
+    container_name: factorial-vector-${WORKTREE_ID}
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+      - ${LOGS_ROOT:-./logs}:/logs:ro
+    ports:
+      - "${VECTOR_PORT:-9428}:8686"
+      - "${VECTOR_API_PORT:-9429}:8687"
+    environment:
+      - VECTOR_CONFIG=/etc/vector/vector.toml
+      - WORKTREE_ID=${WORKTREE_ID}
+      - VICTORIA_LOGS_URL=http://victoria-logs:${VLOGS_PORT:-9428}
+      - VICTORIA_METRICS_URL=http://victoria-metrics:${VMETRICS_PORT:-8428}
+      - VICTORIA_TRACES_URL=http://victoria-traces:${VTRACES_PORT:-9429}
+    depends_on:
+      - victoria-logs
+      - victoria-metrics
+      - victoria-traces
+    networks:
+      - factorial-observability-${WORKTREE_ID}
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    restart: unless-stopped
+
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v1.7.0-victorialogs
+    container_name: factorial-vlogs-${WORKTREE_ID}
+    volumes:
+      - ${DATA_ROOT:-./data}/victoria-logs:/victoria-logs-data
+    ports:
+      - "${VLOGS_PORT:-9428}:9428"
+    command:
+      - --storageDataPath=/victoria-logs-data
+      - --httpListenAddr=:9428
+      - --retentionPeriod=${LOG_RETENTION:-7d}
+      - --maxDiskUsage=${MAX_LOG_STORAGE:-1GB}
+      - --loggerFormat=json
+    networks:
+      - factorial-observability-${WORKTREE_ID}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    restart: unless-stopped
+
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.110.0
+    container_name: factorial-vmetrics-${WORKTREE_ID}
+    volumes:
+      - ${DATA_ROOT:-./data}/victoria-metrics:/victoria-metrics-data
+    ports:
+      - "${VMETRICS_PORT:-8428}:8428"
+    command:
+      - --storageDataPath=/victoria-metrics-data
+      - --httpListenAddr=:8428
+      - --retentionPeriod=${METRICS_RETENTION:-7d}
+      - --maxDiskUsage=${MAX_METRICS_STORAGE:-512MB}
+      - --loggerFormat=json
+    networks:
+      - factorial-observability-${WORKTREE_ID}
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: unless-stopped
+
+  victoria-traces:
+    image: victoriametrics/victoria-logs:v1.7.0-victorialogs
+    container_name: factorial-vtraces-${WORKTREE_ID}
+    volumes:
+      - ${DATA_ROOT:-./data}/victoria-traces:/victoria-traces-data
+    ports:
+      - "${VTRACES_PORT:-9429}:9428"
+    command:
+      - --storageDataPath=/victoria-traces-data
+      - --httpListenAddr=:9428
+      - --retentionPeriod=${TRACES_RETENTION:-7d}
+      - --maxDiskUsage=${MAX_TRACES_STORAGE:-1GB}
+      - --loggerFormat=json
+    networks:
+      - factorial-observability-${WORKTREE_ID}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    restart: unless-stopped
+
+networks:
+  factorial-observability-${WORKTREE_ID}:
+    driver: bridge
+    name: factorial-observability-${WORKTREE_ID}

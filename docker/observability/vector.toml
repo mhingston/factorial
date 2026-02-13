@@ -1,0 +1,114 @@
+# Vector Configuration for Factorial Observability
+# Routes logs, metrics, and traces to Victoria components
+
+# Data directory for Vector
+# Note: Vector runs in container, paths are container-relative
+
+# ============================================
+# Sources
+# ============================================
+
+# File source for Factorial logs
+[sources.factorial_logs]
+type = "file"
+include = ["/logs/**/*.log"]
+ignore_older = 86400  # 24 hours
+read_from = "beginning"
+
+# Socket source for structured JSON logs (from app)
+[sources.json_logs]
+type = "socket"
+address = "0.0.0.0:8686"
+mode = "tcp"
+encoding.codec = "json"
+
+# Socket source for metrics
+[sources.metrics]
+type = "socket"
+address = "0.0.0.0:8687"
+mode = "tcp"
+encoding.codec = "json"
+
+# ============================================
+# Transforms
+# ============================================
+
+# Add worktree metadata to all events
+[transforms.add_worktree_metadata]
+type = "remap"
+inputs = ["factorial_logs", "json_logs"]
+source = '''
+  # Add worktree_id from environment
+  .worktree_id = get_env_var("WORKTREE_ID") ?? "unknown"
+  
+  # Parse timestamp if present
+  if exists(.timestamp) {
+    .ts = parse_timestamp!(.timestamp, format: "%+")
+  } else {
+    .ts = now()
+  }
+  
+  # Redact sensitive patterns (OBS-005: No sensitive data in exports)
+  if exists(.message) && is_string(.message) {
+    # Redact API keys, tokens, passwords
+    .message = replace(.message, r'api[_-]?key["\']?\s*[:=]\s*["\']?[^"\'\s&]+', "api_key=[REDACTED]")
+    .message = replace(.message, r'token["\']?\s*[:=]\s*["\']?[^"\'\s&]+', "token=[REDACTED]")
+    .message = replace(.message, r'password["\']?\s*[:=]\s*["\']?[^"\'\s&]+', "password=[REDACTED]")
+    .message = replace(.message, r'secret["\']?\s*[:=]\s*["\']?[^"\'\s&]+', "secret=[REDACTED]")
+  }
+'''
+
+# Route logs by type
+[transforms.log_router]
+type = "route"
+inputs = ["add_worktree_metadata"]
+
+[transforms.log_router.route]
+logs = '.source_type == "file" || .source_type == "socket"'
+metrics = 'exists(.metric_name)'
+traces = 'exists(.trace_id)'
+
+# ============================================
+# Sinks
+# ============================================
+
+# Victoria Logs sink
+[sinks.victoria_logs]
+type = "http"
+inputs = ["log_router.logs"]
+uri = "${VICTORIA_LOGS_URL:-http://victoria-logs:9428}/insert/jsonline"
+method = "post"
+encoding.codec = "json"
+request.headers = ["Content-Type: application/json"]
+request.concurrency = "adaptive"
+request.timeout_secs = 30
+
+# Format for Victoria Logs
+[sinks.victoria_logs.encoding]
+codec = "json"
+
+# Victoria Metrics sink
+[sinks.victoria_metrics]
+type = "prometheus_remote_write"
+inputs = ["log_router.metrics"]
+endpoint = "${VICTORIA_METRICS_URL:-http://victoria-metrics:8428}/api/v1/write"
+request.concurrency = "adaptive"
+request.timeout_secs = 30
+
+# Victoria Traces sink (uses same API as logs)
+[sinks.victoria_traces]
+type = "http"
+inputs = ["log_router.traces"]
+uri = "${VICTORIA_TRACES_URL:-http://victoria-traces:9428}/insert/jsonline"
+method = "post"
+encoding.codec = "json"
+request.headers = ["Content-Type: application/json"]
+request.concurrency = "adaptive"
+request.timeout_secs = 30
+
+# Console sink for debugging (optional)
+[sinks.console]
+type = "console"
+inputs = ["add_worktree_metadata"]
+encoding.codec = "json"
+target = "stdout"
