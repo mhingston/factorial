@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { optimizeConfiguration } from './config-optimizer.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 async function writeRunManifest(
   root: string,

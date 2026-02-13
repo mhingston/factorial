@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('Non-compliant test with manual setup', () => {
   let tmpDir: string;

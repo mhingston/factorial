@@ -6,6 +6,7 @@ import { Context as ContextImpl } from '../context/index.js';
 import type { Context, Edge, Graph, Handler, Node, Outcome, RunConfig } from '../types/index.js';
 import { ExecutionEngine } from './index.js';
 import { ConfidenceGateHandler, ExitHandler, StartHandler, WaitForHumanHandler } from '../handlers/builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 class SimpleSuccessHandler implements Handler {
   private executed: string[];

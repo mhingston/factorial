@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 interface CommandResult { code: number; stdout: string; stderr: string }
 

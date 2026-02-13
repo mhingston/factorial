@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { WorktreeManager } from './manager.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('WorktreeManager', () => {
   it('detects non-git repository', async () => {

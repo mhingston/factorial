@@ -14,6 +14,7 @@ import {
   ParallelHandler,
   QualityGateHandler,
 } from './builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 class MockHandler implements Handler {
   private executed: string[];

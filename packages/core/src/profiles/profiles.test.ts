@@ -10,6 +10,7 @@ import { getProfile, getProfileForProvider, isValidProvider, listProfiles, listP
 import { openaiProfile } from './openai.js';
 import { globTool, grepTool, readFileTool, shellTool, writeFileTool } from './tools-common.js';
 import { isValidProviderId } from './types.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('profiles', () => {
   let tempDir: string;

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 const ROOT_DIR = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))));
 

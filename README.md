@@ -1,5 +1,6 @@
-<p align="center">
+<p style="text-align: center">
   <img src="logo.png" alt="Factorial Logo" width="200" />
+  <img src="factory.png" alt="Software Factory" />
 </p>
 
 # Factorial

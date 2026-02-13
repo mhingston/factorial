@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execa } from 'execa';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('metrics:economics e2e', () => {
   let tempDir: string;

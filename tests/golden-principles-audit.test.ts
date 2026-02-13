@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execa } from 'execa';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = resolve(join(__filename, '..'));

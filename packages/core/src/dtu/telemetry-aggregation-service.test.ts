@@ -11,6 +11,7 @@ import {
   recordRunOutcomeFireAndForget,
   validateBurnInReport,
 } from './telemetry-aggregation-service.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('telemetry-aggregation-service', () => {
   let tempDir: string;

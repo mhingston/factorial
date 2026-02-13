@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import type { Context, Edge, ExecutionEvent, Graph, Handler, Node, Outcome, RunConfig } from '../types/index.js';
 import { ExecutionEngine } from './index.js';
 import { ExitHandler, StartHandler } from '../handlers/builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 class RestartMarkerHandler implements Handler {
   private callCount = 0;

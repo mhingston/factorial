@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { CheckpointManager } from './index.js';
 import { Context } from '../context/index.js';
 import type { Checkpoint, Outcome } from '../types/index.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('CheckpointManager', () => {
   it('saves and loads checkpoint files', async () => {

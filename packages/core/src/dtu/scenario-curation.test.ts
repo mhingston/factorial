@@ -13,6 +13,7 @@ import {
   runCuration,
   validateScenarioTemplate,
 } from './scenario-curation.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('scenario-curation', () => {
   let tempDir: string;

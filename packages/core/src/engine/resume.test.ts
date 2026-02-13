@@ -6,6 +6,7 @@ import type { Context, Graph, Node, Edge, Outcome, RunConfig } from '../types/in
 import { ExecutionEngine } from './index.js';
 import { CheckpointManager } from '../checkpoint/index.js';
 import { StartHandler, ExitHandler } from '../handlers/builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('ExecutionEngine resume', () => {
   it('continues execution from a saved checkpoint', async () => {

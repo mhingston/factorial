@@ -27,6 +27,7 @@ import {
   ToolHandler,
   WaitForHumanHandler,
 } from '../../packages/core/src/handlers/builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 const ROOT_DIR = new URL('../../', import.meta.url);
 const WORKFLOWS_DIR = new URL('./workflows/', import.meta.url);

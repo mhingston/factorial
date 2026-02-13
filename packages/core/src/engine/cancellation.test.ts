@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { ExecutionCancelledError, ExecutionEngine } from './index.js';
 import { CheckpointManager } from '../checkpoint/index.js';
 import type { Context, Edge, Graph, Handler, Node, Outcome, RunConfig } from '../types/index.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 class SlowCancellableHandler implements Handler {
   async execute(

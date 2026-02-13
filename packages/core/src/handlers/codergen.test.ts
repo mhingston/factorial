@@ -33,6 +33,7 @@ vi.mock('@ai-sdk/google', () => ({
 }));
 
 import { CodergenHandler } from './builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 describe('CodergenHandler artifacts', () => {
   beforeEach(() => {

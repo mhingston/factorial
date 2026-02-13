@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { Context, Edge, Graph, Handler, Node, Outcome, RunConfig } from '../types/index.js';
 import { ExecutionEngine } from './index.js';
 import { ExitHandler, StartHandler } from '../handlers/builtin.js';
+import { createSuiteIsolation, ensureDeterministicCliBuild } from '../test-harness.js';
 
 class RoutingMockHandler implements Handler {
   private outcomesByNode: Record<string, Outcome>;

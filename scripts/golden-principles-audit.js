@@ -381,11 +381,17 @@ async function applyFixes(violations, principles, verbose) {
         );
 
         if (!hasImport) {
-          // Find the last import statement
+          // Find the last complete import statement (not part of multi-line import)
           let lastImportIndex = -1;
+          let inMultiLineImport = false;
           for (let i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith('import ')) {
+            const line = lines[i];
+            if (line.startsWith('import ')) {
               lastImportIndex = i;
+              inMultiLineImport = line.includes('{') && !line.includes('}');
+            } else if (inMultiLineImport && line.includes('}')) {
+              lastImportIndex = i;
+              inMultiLineImport = false;
             }
           }
 
