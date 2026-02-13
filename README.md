@@ -1,5 +1,7 @@
 <p align="center">
   <img src="logo.png" alt="Factorial Logo" width="200" />
+</p>
+<p align="center">
   <img src="factory.png" alt="Software Factory" />
 </p>
 
